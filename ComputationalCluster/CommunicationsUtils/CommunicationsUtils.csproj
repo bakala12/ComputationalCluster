@@ -40,6 +40,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messages\Constructors.cs" />
+    <Compile Include="Messages\DivideProblemMessage.cs" />
+    <Compile Include="Messages\Message.cs" />
+    <Compile Include="Messages\NoOperationMessage.cs" />
+    <Compile Include="Messages\SolvePartialProblemsMessage.cs" />
+    <Compile Include="Messages\RegisterMessage.cs" />
+    <Compile Include="Messages\RegisterResponseMessage.cs" />
+    <Compile Include="Messages\SolutionMessage.cs" />
+    <Compile Include="Messages\SolutionRequestMessage.cs" />
+    <Compile Include="Messages\SolveRequestMessage.cs" />
+    <Compile Include="Messages\SolveRequestResponseMessage.cs" />
+    <Compile Include="Messages\StatusMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

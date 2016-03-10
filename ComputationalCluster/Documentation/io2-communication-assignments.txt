@@ -1,10 +1,10 @@
 Wstêpna wersja przydzia³u zadañ na przysz³y sprint. Koñcowa wersja zostanie ustalona na spotkaniu 10.03.2016r.
 
 Communication Utils
-	1. Stworzenie generycznych interfejsów pozwalaj¹cych komponentom na komunikacjê po protokole TCP (8h) : Duszak, Augustyniak, Bondyra
-	2. Stworzenie wiadomoœci wszystkich typów na podstawie schemy (4h) : B¹ka³a
+	1. Stworzenie generycznych interfejsów pozwalaj¹cych komponentom na komunikacjê po protokole TCP (10h) : Duszak, Augustyniak, Bondyra
+	2. Stworzenie wiadomoœci wszystkich typów na podstawie schemy (3h) : B¹ka³a
 	3. Skonstruowanie ogólnej klasy Message, bed¹c¹ klas¹ bazow¹ dla wszystkich wiadomoœci 
-	o strukturze danej ze schemy. (4h) : B¹ka³a
+	o strukturze danej ze schemy. (3h) : B¹ka³a
 
 Algorithm Solvers : Augustyniak
 	1. Stworzenie szkieletowej implementacji TaskSolvera dla DVRP - na potrzeby etapu komunikacji 

@@ -12,7 +12,7 @@ namespace Tests
     [TestClass]
     public class MessageSerializationTests
     {
-        private MessagesSerializer _serializer = new MessagesSerializer();
+        private readonly MessagesSerializer _serializer = new MessagesSerializer();
 
         [TestMethod]
         public void MessageSerializationTest1()

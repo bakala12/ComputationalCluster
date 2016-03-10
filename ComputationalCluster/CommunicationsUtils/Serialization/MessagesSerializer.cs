@@ -25,11 +25,11 @@ namespace CommunicationsUtils.Serialization
             XmlReader reader = XmlReader.Create(stream);
             var node = reader.MoveToContent();
             string s = reader.LocalName;
-            var messageType = Assembly.GetExecutingAssembly().GetType("CommunicationUtils.Messages."+s);
+            var messageType = typeof (Message).Assembly.GetType("CommunicationsUtils.Messages." + s);
             var type = typeof(XmlStringSerializer<>).MakeGenericType(messageType);
             var serializer = Activator.CreateInstance(type);
             var method = type.GetMethod("FromXmlString");
-            return (Message)method.Invoke(serializer, new[] { xml });
+            return (Message)method.Invoke(serializer, new object[] { xml });
         }
 
         public string ToXmlString(Message message)
@@ -37,7 +37,7 @@ namespace CommunicationsUtils.Serialization
             var serializer = typeof(XmlStringSerializer<>).MakeGenericType(message.GetType());
             var method = serializer.GetMethod("ToXmlString");
             var ser = Activator.CreateInstance(serializer);
-            return (string)method.Invoke(ser, new[] { message });
+            return (string)method.Invoke(ser, new object[] { message });
         }
     }
 }

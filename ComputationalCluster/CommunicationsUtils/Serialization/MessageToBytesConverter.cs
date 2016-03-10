@@ -9,7 +9,7 @@ namespace CommunicationsUtils.Serialization
 {
     public class MessageToBytesConverter
     {
-        private MessagesSerializer _serializer = new MessagesSerializer();
+        private readonly MessagesSerializer _serializer = new MessagesSerializer();
 
         public byte[] ToByteArray(Message message)
         {

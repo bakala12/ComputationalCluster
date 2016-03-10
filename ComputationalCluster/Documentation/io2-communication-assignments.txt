@@ -1,10 +1,9 @@
 Wstêpna wersja przydzia³u zadañ na przysz³y sprint. Koñcowa wersja zostanie ustalona na spotkaniu 10.03.2016r.
 
 Communication Utils
-	1. Stworzenie generycznego interfejsu pozwalaj¹cego komponentom na komunikacjê po protokole TCP (4h) : Duszak, Augustyniak
-	2. Prace nad dostosowaniem w. w. interfejsu w celu poprawnego dzia³ania systemu (4h) : Bondyra
-	3. Stworzenie wiadomoœci wszystkich typów na podstawie schemy (4h) : B¹ka³a
-	4. Skonstruowanie ogólnej klasy Message, bed¹c¹ klas¹ bazow¹ dla wszystkich wiadomoœci 
+	1. Stworzenie generycznych interfejsów pozwalaj¹cych komponentom na komunikacjê po protokole TCP (8h) : Duszak, Augustyniak, Bondyra
+	2. Stworzenie wiadomoœci wszystkich typów na podstawie schemy (4h) : B¹ka³a
+	3. Skonstruowanie ogólnej klasy Message, bed¹c¹ klas¹ bazow¹ dla wszystkich wiadomoœci 
 	o strukturze danej ze schemy. (4h) : B¹ka³a
 
 Algorithm Solvers : Augustyniak
@@ -18,7 +17,7 @@ Computational Client : Bondyra
 
 Communication Server : B¹ka³a, Duszak
 	1. Skonstruowanie szkieletu klas dla projektu (5h)
-	2. Konfiguracja serwera i systemu przez parametry (5h)
+	2. Konfiguracja systemu przez parametry wywo³ania (3h)
 	3. Implementacja sposobu komunikacji serwer - backupy (4h)
 	4. Implementacja komunikacji serwer - klient (5h)
 	5. Implementacja komunikacji z Task Managerami i wêz³ami obliczeniowymi (5h)
@@ -38,3 +37,6 @@ Computational Node : Augustyniak
 	3. Zastosowanie zaœlepek w kodzie (mocków) maj¹cych na celu imitacjê obliczeñ przez komponent w celu 
 	przetestowania poprawnoœci implementacji komunikacji w systemie (4h) 
 	4. Uwzglêdnienie awaryjnoœci (3h)
+
+Inne : Bondyra
+	1. Globalna konfiguracja systemu (3h)

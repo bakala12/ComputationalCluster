@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace CommunicationsUtils.Messages
 {
+    [System.Xml.Serialization.XmlInclude(typeof(Status))]
     public abstract class Message
     {
         protected Message(MessageType type)
@@ -15,6 +16,11 @@ namespace CommunicationsUtils.Messages
 
         [System.Xml.Serialization.XmlIgnore]
         public MessageType Type { get; } 
+
+        public T Cast<T> () where T : Message
+        {
+            return (T)this;
+        }
     }
 
     public enum MessageType

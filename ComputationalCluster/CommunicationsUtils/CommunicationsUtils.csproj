@@ -48,7 +48,7 @@
     <Compile Include="Messages\SolvePartialProblemsMessage.cs" />
     <Compile Include="Messages\RegisterMessage.cs" />
     <Compile Include="Messages\RegisterResponseMessage.cs" />
-    <Compile Include="Messages\SolutionMessage.cs" />
+    <Compile Include="Messages\SolutionsMessage.cs" />
     <Compile Include="Messages\SolutionRequestMessage.cs" />
     <Compile Include="Messages\SolveRequestMessage.cs" />
     <Compile Include="Messages\SolveRequestResponseMessage.cs" />

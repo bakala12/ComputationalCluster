@@ -34,5 +34,17 @@ namespace CommunicationsUtils.Properties {
                 this["MaxResponseSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public int MaxRequestSize {
+            get {
+                return ((int)(this["MaxRequestSize"]));
+            }
+            set {
+                this["MaxRequestSize"] = value;
+            }
+        }
     }
 }

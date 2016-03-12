@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Sockets;
 
-namespace CommunicationsUtils.NetworkInterfaces
+namespace CommunicationsUtils.NetworkInterfaces.Adapters
 {
     public class TcpClientAdapter : ITcpClient
     {
@@ -30,12 +24,5 @@ namespace CommunicationsUtils.NetworkInterfaces
         {
             return new NetworkStreamAdapter(wrappedClient.GetStream());
         }
-    }
-
-    public interface ITcpClient
-    {
-        INetworkStream GetStream();
-        void Connect(string hostname, int port);
-        void Close();
     }
 }

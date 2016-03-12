@@ -1,12 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Net.Sockets;
-using CommunicationsUtils.Messages;
+﻿using CommunicationsUtils.Messages;
 using CommunicationsUtils.Serialization;
-using CommunicationsUtils.Misc;
-using System.Collections.Generic;
+using CommunicationsUtils.NetworkInterfaces.Adapters;
 
 namespace CommunicationsUtils.NetworkInterfaces
 {

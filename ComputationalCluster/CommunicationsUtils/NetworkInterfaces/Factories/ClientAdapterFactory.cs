@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Sockets;
+using CommunicationsUtils.NetworkInterfaces.Adapters;
 
-namespace CommunicationsUtils.NetworkInterfaces
+namespace CommunicationsUtils.NetworkInterfaces.Factories
 {
-    public interface IAdapterFactory
+    public interface IClientAdapterFactory
     {
         ITcpClient Create();
     }
 
-    public class TcpClientAdapterFactory : IAdapterFactory
+    public class TcpClientAdapterFactory : IClientAdapterFactory
     {
         private static TcpClientAdapterFactory instance = new TcpClientAdapterFactory();
 
@@ -30,7 +26,7 @@ namespace CommunicationsUtils.NetworkInterfaces
         }
     }
 
-    public class MockClientAdapterFactory : IAdapterFactory
+    public class MockClientAdapterFactory : IClientAdapterFactory
     {
         private static MockClientAdapterFactory instance = new MockClientAdapterFactory();
 

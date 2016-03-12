@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommunicationsUtils.NetworkInterfaces
+namespace CommunicationsUtils.NetworkInterfaces.Adapters
 {
     public class MockNetworkStream : INetworkStream
     {

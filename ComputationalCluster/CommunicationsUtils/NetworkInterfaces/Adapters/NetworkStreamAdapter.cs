@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommunicationsUtils.NetworkInterfaces
+namespace CommunicationsUtils.NetworkInterfaces.Adapters
 {
     public class NetworkStreamAdapter : INetworkStream
     {
@@ -30,11 +30,5 @@ namespace CommunicationsUtils.NetworkInterfaces
         {
             wrappedStream.Write (buf, offset, count);
         }
-    }
-
-    public interface INetworkStream : IDisposable
-    {
-        void Write(byte[] buf, int offset, int length);
-        void Read(byte[] buf, int offset, int length);
     }
 }

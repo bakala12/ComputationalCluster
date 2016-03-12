@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.Serialization;
+using CommunicationsUtils.NetworkInterfaces.Adapters;
 
 namespace CommunicationsUtils.NetworkInterfaces
 {
@@ -13,18 +14,13 @@ namespace CommunicationsUtils.NetworkInterfaces
     /// </summary>
     public class ClusterListener
     {
-        private TcpListener tcpListener;
-        private int port;
-        private string address;
+        private ITcpListener tcpListener;
         private MessageToBytesConverter converter = new MessageToBytesConverter();
-        private Socket currentSocket = null;
+        private ISocket currentSocket = null;
 
-        public ClusterListener(string _address, int _port)
+        public ClusterListener(ITcpListener listener)
         {
-            address = _address;
-            port = _port;
-            IPAddress ip = IPAddress.Parse(_address);
-            tcpListener = new TcpListener(ip, port);
+            tcpListener = listener;
         }
 
         public void StartListening ()
@@ -64,6 +60,11 @@ namespace CommunicationsUtils.NetworkInterfaces
 
             currentSocket.Close();
             currentSocket = null;
+        }
+
+        public void Stop ()
+        {
+            tcpListener.Stop();
         }
     }
 }

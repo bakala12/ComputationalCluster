@@ -53,8 +53,13 @@
     <Compile Include="Messages\SolveRequestMessage.cs" />
     <Compile Include="Messages\SolveRequestResponseMessage.cs" />
     <Compile Include="Messages\StatusMessage.cs" />
-    <Compile Include="Miscellaneous\ArrEx.cs" />
+    <Compile Include="Miscellaneous\ArrayEx.cs" />
+    <Compile Include="Miscellaneous\IPAddressEx.cs" />
     <Compile Include="NetworkInterfaces\Adapters\Interfaces.cs" />
+    <Compile Include="NetworkInterfaces\Adapters\MockListenerAdapter.cs" />
+    <Compile Include="NetworkInterfaces\Adapters\MockSocketAdapter.cs" />
+    <Compile Include="NetworkInterfaces\Adapters\SocketAdapter.cs" />
+    <Compile Include="NetworkInterfaces\Adapters\TcpListenerAdapter.cs" />
     <Compile Include="NetworkInterfaces\Factories\ClientAdapterFactory.cs" />
     <Compile Include="NetworkInterfaces\ClusterClient.cs" />
     <Compile Include="NetworkInterfaces\ClusterListener.cs" />
@@ -62,6 +67,7 @@
     <Compile Include="NetworkInterfaces\Adapters\MockNetworkStream.cs" />
     <Compile Include="NetworkInterfaces\Adapters\NetworkStreamAdapter.cs" />
     <Compile Include="NetworkInterfaces\Adapters\TcpClientAdapter.cs" />
+    <Compile Include="NetworkInterfaces\Factories\ListenerAdapterFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

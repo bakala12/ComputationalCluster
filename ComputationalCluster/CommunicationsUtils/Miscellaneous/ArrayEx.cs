@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CommunicationsUtils.Misc
 {
-    public static class ArrEx
+    public static class ArrayEx
     {
         /// <summary>
         /// generic extension method for array type

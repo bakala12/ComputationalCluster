@@ -3,6 +3,10 @@ using CommunicationsUtils.NetworkInterfaces.Adapters;
 
 namespace CommunicationsUtils.NetworkInterfaces.Factories
 {
+    /// <summary>
+    /// factory creating mocked and real client for communication
+    /// </summary>
+
     public interface IClientAdapterFactory
     {
         ITcpClient Create();

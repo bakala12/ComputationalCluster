@@ -55,6 +55,7 @@
     <Compile Include="MessageSerializationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NetworkInterfacesTests.cs" />
+    <Compile Include="MessageToBytesConverterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AlgorithmSolvers\AlgorithmSolvers.csproj">

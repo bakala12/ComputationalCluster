@@ -82,6 +82,13 @@
       <Project>{98ef1577-9744-4f77-b71d-908992448145}</Project>
       <Name>TaskManager</Name>
     </ProjectReference>
+    <Compile Include="ArgumentParserTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommunicationsUtils\CommunicationsUtils.csproj">
+      <Project>{7AECEF6E-5161-4182-9727-A947D1BEA7CA}</Project>
+      <Name>CommunicationsUtils</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

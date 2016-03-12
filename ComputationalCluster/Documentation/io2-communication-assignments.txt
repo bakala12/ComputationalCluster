@@ -19,9 +19,9 @@ Communication Server : B¹ka³a, Duszak
 	1. Skonstruowanie szkieletu klas dla projektu (5h)
 	2. Konfiguracja systemu przez parametry wywo³ania (3h)
 	3. Implementacja sposobu komunikacji serwer - backupy (4h)
-	4. Implementacja komunikacji serwer - klient (5h)
+	4. Implementacja komunikacji serwer - klient (3h)
 	5. Implementacja komunikacji z Task Managerami i wêz³ami obliczeniowymi (5h)
-	6. Poprawne kolejkowanie wiadomoœci (4h)
+	6. Poprawne kolejkowanie wiadomoœci (3h)
 	7. Uwzglêdnienie awaryjnoœci (6h)
 
 Task Manager : Bondyra

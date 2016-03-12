@@ -16,19 +16,19 @@ namespace CommunicationsUtils.NetworkInterfaces
     /// </summary>
     public class ClusterClient
     {
-        private MessageToBytesConverter converter = new MessageToBytesConverter();
-        private string address;
-        private int port;
+        private readonly MessageToBytesConverter _converter = new MessageToBytesConverter();
+        private string _address;
+        private int _port;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="_address">Address of the server</param>
-        /// <param name="_port">Port of the server</param>
-        public ClusterClient(string _address, int _port)
+        /// <param name="address">Address of the server</param>
+        /// <param name="port">Port of the server</param>
+        public ClusterClient(string address, int port)
         {
-            address = _address;
-            port = _port;
+            _address = address;
+            _port = port;
         }
 
         /// <summary>
@@ -38,23 +38,25 @@ namespace CommunicationsUtils.NetworkInterfaces
         /// <returns>Responses from the server</returns>
         public Message[] SendRequests (Message[] requests)
         {
-            TcpClient tcpClient = new TcpClient();
-            tcpClient.Connect(address, port);
-            Stream networkStream = tcpClient.GetStream();
-
-            byte[][] bytes = converter.MessagesToBytes(requests);
-
-            for (int i=0; i< bytes.GetLength(0); i++)
+            using (var tcpClient = new TcpClient())
             {
-                networkStream.Write(bytes[i], 0, bytes[i].Length);
-                networkStream.Write(new byte[] { 23 }, 0, 1);
+                tcpClient.Connect(_address, _port);
+                using (Stream networkStream = tcpClient.GetStream())
+                {
+                    byte[][] bytes = _converter.MessagesToBytes(requests);
+
+                    for (int i = 0; i < bytes.GetLength(0); i++)
+                    {
+                        networkStream.Write(bytes[i], 0, bytes[i].Length);
+                        networkStream.Write(new byte[] { 23 }, 0, 1);
+                    }
+
+                    byte[] responseBytes = new byte[Properties.Settings.Default.MaxResponseSize];
+                    networkStream.Read(responseBytes, 0, Properties.Settings.Default.MaxResponseSize);
+
+                    return _converter.BytesToMessages(responseBytes);
+                }
             }
-
-            byte[] responseBytes = new byte[Properties.Settings.Default.MaxResponseSize];
-            networkStream.Read(responseBytes, 0, Properties.Settings.Default.MaxResponseSize);
-            tcpClient.Close();
-
-            return converter.BytesToMessages(responseBytes);
         }
     }
 }

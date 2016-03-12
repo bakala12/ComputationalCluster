@@ -8,6 +8,11 @@ namespace CommunicationsUtils.NetworkInterfaces
 {
     public class MockNetworkStream : INetworkStream
     {
+        public void Dispose()
+        {
+            return;
+        }
+
         public void Read(byte[] buf, int offset, int length)
         {
             return;

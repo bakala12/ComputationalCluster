@@ -15,6 +15,11 @@ namespace CommunicationsUtils.NetworkInterfaces
         {
             wrappedStream = _stream;
         }
+        //TO DO
+        public void Dispose()
+        {
+            return;
+        }
 
         public void Read(byte[] buf, int offset, int count)
         {
@@ -27,7 +32,7 @@ namespace CommunicationsUtils.NetworkInterfaces
         }
     }
 
-    public interface INetworkStream
+    public interface INetworkStream : IDisposable
     {
         void Write(byte[] buf, int offset, int length);
         void Read(byte[] buf, int offset, int length);

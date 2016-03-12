@@ -19,16 +19,18 @@ namespace CommunicationsUtils.NetworkInterfaces
         private MessageToBytesConverter converter = new MessageToBytesConverter();
         private string address;
         private int port;
+        ITcpClient tcpClient;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="_address">Address of the server</param>
         /// <param name="_port">Port of the server</param>
-        public ClusterClient(string _address, int _port)
+        public ClusterClient(string _address, int _port, ITcpClient _tcpClient)
         {
             address = _address;
             port = _port;
+            tcpClient = _tcpClient;
         }
 
         /// <summary>
@@ -38,9 +40,8 @@ namespace CommunicationsUtils.NetworkInterfaces
         /// <returns>Responses from the server</returns>
         public Message[] SendRequests (Message[] requests)
         {
-            TcpClient tcpClient = new TcpClient();
             tcpClient.Connect(address, port);
-            Stream networkStream = tcpClient.GetStream();
+            INetworkStream networkStream = tcpClient.GetStream();
 
             byte[][] bytes = converter.MessagesToBytes(requests);
 

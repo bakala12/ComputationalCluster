@@ -21,14 +21,14 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
             wrappedSocket.Close();
         }
 
-        public void Receive(byte[] requestBytes)
+        public int Receive(byte[] requestBytes, int count)
         {
-            wrappedSocket.Receive(requestBytes);
+            return wrappedSocket.Receive(requestBytes, 0, count, SocketFlags.None);
         }
 
-        public void Send(byte[] v)
+        public void Send(byte[] v, int count)
         {
-            wrappedSocket.Send(v);
+            wrappedSocket.Send(v, count, SocketFlags.None);
         }
     }
 }

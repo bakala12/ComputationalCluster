@@ -27,11 +27,11 @@ namespace CommunicationsUtils.Serialization
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
-        public Message[] BytesToMessages(byte[] bytes)
+        public Message[] BytesToMessages(byte[] bytes, int len)
         {
             List<Message> messages = new List<Message>();
             int msgStart = 0;
-            for (int i = 0; i < bytes.Length; i++)
+            for (int i = 0; i < len; i++)
             {
                 if (bytes[i] == 23)
                 {
@@ -43,7 +43,13 @@ namespace CommunicationsUtils.Serialization
             return messages.ToArray();
         }
 
-        public byte[][] MessagesToBytes (Message[] messages)
+        /// <summary>
+        /// Writes messages to one dimensional buffer
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="messages"></param>
+        /// <returns>total count of buffer's relevant bytes</returns>
+        public int MessagesToBytes (out byte[] buffer, Message[] messages)
         {
             byte[][] bytesChunks = new byte[messages.Length][];
             for (int i = 0; i < messages.Length; i++)
@@ -51,7 +57,27 @@ namespace CommunicationsUtils.Serialization
                 byte[] requestBytes = this.ToByteArray(messages[i]);
                 bytesChunks[i] = requestBytes;
             }
-            return bytesChunks;
+            return copyToBuffer(out buffer, bytesChunks);
+        }
+
+        /// <summary>
+        /// Writing/reading via TCP must be called once to not make any errors.
+        /// That's why we need to copy bytes' chunks to one dim buffer
+        /// </summary>
+        /// <param name="buffer">out buffer</param>
+        /// <param name="messagesBytes">bytes' chunks</param>
+        /// <returns>total count of buffer's relevant bytes</returns>
+        private static int copyToBuffer (out byte[] buffer, byte[][] messagesBytes)
+        {
+            int count = 0;
+            buffer = new byte[Properties.Settings.Default.MaxBufferSize];
+            for (int i = 0; i < messagesBytes.GetLength(0); i++)
+            {
+                messagesBytes[i].CopyTo(buffer, count);
+                count += messagesBytes[i].Length;
+                buffer[count++] = (byte)23;
+            }
+            return count;
         }
     }
 }

@@ -14,6 +14,7 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
         public NetworkStreamAdapter(Stream _stream)
         {
             wrappedStream = _stream;
+ 
         }
         //TO DO
         public void Dispose()
@@ -21,14 +22,14 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
             return;
         }
 
-        public void Read(byte[] buf, int offset, int count)
+        public int Read(byte[] buf, int count)
         {
-            wrappedStream.Read(buf, offset, count);
+            return wrappedStream.Read(buf, 0, count);
         }
 
-        public void Write(byte[] buf, int offset, int count)
+        public void Write(byte[] buf, int count)
         {
-            wrappedStream.Write (buf, offset, count);
+            wrappedStream.Write (buf, 0, count);
         }
     }
 }

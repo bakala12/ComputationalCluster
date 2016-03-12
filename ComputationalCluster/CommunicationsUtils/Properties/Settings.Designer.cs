@@ -26,24 +26,12 @@ namespace CommunicationsUtils.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1000")]
-        public int MaxResponseSize {
+        public int MaxBufferSize {
             get {
-                return ((int)(this["MaxResponseSize"]));
+                return ((int)(this["MaxBufferSize"]));
             }
             set {
-                this["MaxResponseSize"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
-        public int MaxRequestSize {
-            get {
-                return ((int)(this["MaxRequestSize"]));
-            }
-            set {
-                this["MaxRequestSize"] = value;
+                this["MaxBufferSize"] = value;
             }
         }
     }

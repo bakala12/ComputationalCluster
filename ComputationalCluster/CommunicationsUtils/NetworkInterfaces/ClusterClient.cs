@@ -1,6 +1,7 @@
 ﻿using CommunicationsUtils.Messages;
 using CommunicationsUtils.Serialization;
 using CommunicationsUtils.NetworkInterfaces.Adapters;
+using System;
 
 namespace CommunicationsUtils.NetworkInterfaces
 {
@@ -34,21 +35,21 @@ namespace CommunicationsUtils.NetworkInterfaces
         /// <returns>Responses from the server</returns>
         public Message[] SendRequests (Message[] requests)
         {
+            byte[] requestsBytes;
+            int count = _converter.MessagesToBytes(out requestsBytes, requests);
+            
             _tcpClient.Connect(_address, _port);
             using (INetworkStream networkStream = _tcpClient.GetStream())
             {
-                byte[][] bytes = _converter.MessagesToBytes(requests);
-
-                for (int i = 0; i < bytes.GetLength(0); i++)
-                {
-                    networkStream.Write(bytes[i], 0, bytes[i].Length);
-                    networkStream.Write(new byte[] { 23 }, 0, 1);
-                }
-
-                byte[] responseBytes = new byte[Properties.Settings.Default.MaxResponseSize];
-                networkStream.Read(responseBytes, 0, Properties.Settings.Default.MaxResponseSize);
-
-                return _converter.BytesToMessages(responseBytes);
+                Console.WriteLine("Client: send requests");
+                networkStream.Write(requestsBytes, count);
+                Console.WriteLine("Client: request sending finished");
+                byte[] responseBytes = new byte[Properties.Settings.Default.MaxBufferSize];
+                Console.WriteLine("Client: reading responses");
+                int len = networkStream.Read(responseBytes, Properties.Settings.Default.MaxBufferSize);
+                Console.WriteLine("Client: reading responses finished.");
+                _tcpClient.Close();
+                return _converter.BytesToMessages(responseBytes, len);
             }
         }
     }

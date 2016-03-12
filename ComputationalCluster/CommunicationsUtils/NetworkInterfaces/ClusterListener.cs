@@ -35,9 +35,11 @@ namespace CommunicationsUtils.NetworkInterfaces
         public Message[] WaitForRequest ()
         {
             currentSocket = tcpListener.AcceptSocket();
-            byte[] requestBytes = new byte[Properties.Settings.Default.MaxRequestSize];
-            currentSocket.Receive(requestBytes);
-            return converter.BytesToMessages(requestBytes);
+            byte[] requestBytes = new byte[Properties.Settings.Default.MaxBufferSize];
+            Console.WriteLine("Server: receiving requests");
+            int len = currentSocket.Receive(requestBytes, Properties.Settings.Default.MaxBufferSize);
+            Console.WriteLine("Server: receiving requests finished");
+            return converter.BytesToMessages(requestBytes, len);
         }
 
         /// <summary>
@@ -50,14 +52,11 @@ namespace CommunicationsUtils.NetworkInterfaces
             {
                 throw new Exception("Something went wrong with connection (socket)");
             }
-            byte[][] responsesBytes = converter.MessagesToBytes(responses);
-
-            for (int i = 0; i < responsesBytes.GetLength(0); i++)
-            {
-                currentSocket.Send(responsesBytes[i]);
-                currentSocket.Send(new byte[] { 23 });
-            }
-
+            byte[] responsesBytes;
+            int count = converter.MessagesToBytes(out responsesBytes, responses);
+            Console.WriteLine("Server: sending responses");
+            currentSocket.Send(responsesBytes, count);
+            Console.WriteLine("Server: sending responses finished");
             currentSocket.Close();
             currentSocket = null;
         }

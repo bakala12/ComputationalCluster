@@ -13,12 +13,12 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
             return;
         }
 
-        public void Receive(byte[] requestBytes)
+        public int Receive(byte[] requestBytes, int count)
         {
-            return;
+            return 0;
         }
 
-        public void Send(byte[] v)
+        public void Send(byte[] v, int count)
         {
             return;
         }

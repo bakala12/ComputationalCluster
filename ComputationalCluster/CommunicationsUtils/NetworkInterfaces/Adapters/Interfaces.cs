@@ -16,8 +16,8 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
 
     public interface INetworkStream : IDisposable
     {
-        void Write(byte[] buf, int offset, int length);
-        void Read(byte[] buf, int offset, int length);
+        void Write(byte[] buf, int count);
+        int Read(byte[] buf, int count);
     }
 
     public interface ITcpListener
@@ -29,8 +29,8 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
 
     public interface ISocket
     {
-        void Receive(byte[] requestBytes);
+        int Receive(byte[] requestBytes, int count);
         void Close();
-        void Send(byte[] v);
+        void Send(byte[] v, int count);
     }
 }

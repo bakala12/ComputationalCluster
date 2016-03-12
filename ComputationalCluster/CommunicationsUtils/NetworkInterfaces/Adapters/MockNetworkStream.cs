@@ -13,12 +13,12 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
             return;
         }
 
-        public void Read(byte[] buf, int offset, int length)
+        public int Read(byte[] buf, int count)
         {
-            return;
+            return 0;
         }
 
-        public void Write(byte[] buf, int offset, int length)
+        public void Write(byte[] buf, int count)
         {
             return;
         }

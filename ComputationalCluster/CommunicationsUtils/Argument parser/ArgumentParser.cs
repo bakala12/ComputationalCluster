@@ -9,8 +9,8 @@ namespace CommunicationsUtils.Argument_parser
 {
     public class ArgumentParser
     {
-        private readonly Dictionary<string, string> map = new Dictionary<string, string>();
-        private readonly OptionSet options;
+        public Dictionary<string, string> map { get; } = new Dictionary<string, string>();
+        public OptionSet options { get; }
 
         public ArgumentParser(IEnumerable<string> options)
         {

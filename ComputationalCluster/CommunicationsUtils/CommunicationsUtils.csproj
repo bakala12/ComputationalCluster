@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Argument parser\ArgumentParser.cs" />
     <Compile Include="Argument parser\CustomOptionSet.cs" />
+    <Compile Include="Argument parser\OptionSetPool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

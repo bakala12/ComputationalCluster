@@ -1,4 +1,7 @@
-﻿using System;
+﻿using CommunicationsUtils.Miscellaneous;
+using CommunicationsUtils.NetworkInterfaces;
+using CommunicationsUtils.NetworkInterfaces.Factories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +12,14 @@ namespace Client
     class Program
     {
         static void Main(string[] args)
-        {
+        {       
+            //args parsing
+
+            IClusterClient clusterClient = ClusterClientFactory.Factory.Create(
+                Properties.Settings.Default.Address, Properties.Settings.Default.Port);
+
+            ClientNode clientNode = new ClientNode(clusterClient);
+            clientNode.Run();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace CommunicationsUtils.NetworkInterfaces
     /// Computational Cluster Client component.
     /// Sends messages and retrieves response messages.
     /// </summary>
-    public class ClusterClient
+    public class ClusterClient : IClusterClient
     {
         ITcpClient _tcpClient;
         private readonly MessageToBytesConverter _converter = new MessageToBytesConverter();

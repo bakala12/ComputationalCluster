@@ -12,7 +12,7 @@ namespace CommunicationsUtils.NetworkInterfaces
     /// Computational Cluster Listener component (server-side)
     /// Provides configuration, sending and retrieving messages
     /// </summary>
-    public class ClusterListener
+    public class ClusterListener : IClusterListener
     {
         private ITcpListener tcpListener;
         private MessageToBytesConverter converter = new MessageToBytesConverter();
@@ -23,7 +23,7 @@ namespace CommunicationsUtils.NetworkInterfaces
             tcpListener = listener;
         }
 
-        public void StartListening ()
+        public void Start ()
         {
             tcpListener.Start();
         }

@@ -18,7 +18,7 @@ namespace Tests
         public void BasicClusterClientTest()
         {
             ITcpClient adapter = MockClientAdapterFactory.Factory.Create();
-            ClusterClient client = new ClusterClient("0", 0, adapter);
+            IClusterClient client = ClusterClientFactory.Factory.Create("0", 0, adapter);
             client.SendRequests(new Message[] {new DivideProblem () { ProblemType = "example"},
             new Status { Id = 123456789 }});
         }
@@ -30,8 +30,8 @@ namespace Tests
         public void BasicClusterListenerTest()
         {
             ITcpListener adapter = MockListenerAdapterFactory.Factory.Create(IPAddress.Any, 0);
-            ClusterListener listener = new ClusterListener(adapter);
-            listener.StartListening();
+            IClusterListener listener = ClusterListenerFactory.Factory.Create(adapter);
+            listener.Start();
             Message[] requests = listener.WaitForRequest();
             listener.SendResponse(new Message[] {new DivideProblem () { ProblemType = "example"},
             new Status { Id = 123456789 }});

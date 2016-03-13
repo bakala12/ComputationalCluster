@@ -49,7 +49,7 @@ namespace TaskManager
                 {
                     Message[] responses = sendStatus();
                     timeoutWatch.Restart();
-                    handleResponses(responses);
+                    HandleResponses(responses);
                 }
             }
         }
@@ -64,30 +64,47 @@ namespace TaskManager
             return clusterClient.SendRequests(new[] { statusMsg });
         }
 
-        private void handleResponses (Message[] responses)
-        { 
-            for (int i=0;i<responses.Length;i++)
+        /// <summary>
+        /// handler of respones, sends proper requests
+        /// </summary>
+        /// <param name="responses"></param>
+        public void HandleResponses (Message[] responses)
+        {
+            List<Message> newRequests = new List<Message>();
+            foreach (var response in responses)
             {
-                switch(responses[i].Type)
+                switch(response.Type)
                 {
                     case MessageType.NoOperationMessage:
                         //update backup servs list
                         break;
                     case MessageType.DivideProblemMessage:
-                        this.divideProblem(responses[i].Cast<DivideProblem>());
+                        SolvePartialProblems partialProblemsMsg = 
+                            this.HandleProblem(response.Cast<DivideProblem>());
+                        newRequests.Add(partialProblemsMsg);
+
                         break;
                     case MessageType.SolutionsMessage:
-                        this.handleSolutionsMsg(responses[i].Cast<Solutions>());
+                        Solutions solutions = this.HandleSolutions(response.Cast<Solutions>());
+                        //null if linking solutions didn't occur
+                        if (solutions != null)
+                        {
+                            newRequests.Add(solutions);
+                        }
+
                         break;
                     default:
-                        throw new Exception("Wrong message in TM!");
+                        throw new Exception("Wrong message in TM");
                 }
             }
+            Message[] newResponses = clusterClient.SendRequests(newRequests.ToArray());
+            timeoutWatch.Reset();
+            this.HandleResponses(newResponses);
         }
 
-        private void divideProblem (DivideProblem problem)
+        public SolvePartialProblems HandleProblem (DivideProblem problem)
         {
-            //implementation in second stage
+            //implementation in second stage, this is mocked:
 
             var partialProblem = new SolvePartialProblemsPartialProblem()
             {
@@ -99,13 +116,13 @@ namespace TaskManager
             //adding info about partial problems, their task ids, and partialProblem
             //some things can be temporary (partialProblems?)
             currentProblems.Add(problem.Id, new ProblemInfo() { ProblemsCount = 1,
-                ProblemType = problem.ProblemType });
+                ProblemType = problem.ProblemType, SolutionsCount = 0 });
 
             currentProblems[problem.Id].PartialProblems.Add(0, new PartialInfo()
             { Solution = null, Problem = partialProblem });
             //end of implementation
 
-            //sending
+            //creating msg
             SolvePartialProblems partialProblems = new SolvePartialProblems()
             {
                 ProblemType = problem.ProblemType,
@@ -117,9 +134,7 @@ namespace TaskManager
                 }
             };
 
-            Message[] responses = clusterClient.SendRequests(new[] { partialProblems });
-            timeoutWatch.Restart();
-            handleResponses(responses);
+            return partialProblems;
         }
 
         /// <summary>
@@ -127,7 +142,7 @@ namespace TaskManager
         /// concerns only one problem
         /// </summary>
         /// <param name="solutions"></param>
-        private void handleSolutionsMsg(Solutions solutions)
+        public Solutions HandleSolutions(Solutions solutions)
         {
             foreach (var solution in solutions.Solutions1)
             {
@@ -144,12 +159,29 @@ namespace TaskManager
             //can be linked, because all of partial problems were solved & delivered
             if (currentProblems[solutions.Id].SolutionsCount == currentProblems[solutions.Id].ProblemsCount)
             {
-
                 Solutions finalSolution = linkSolutions(solutions.Id);
-                Message[] responses = clusterClient.SendRequests(new[] { finalSolution });
-                timeoutWatch.Restart();
-                handleResponses(responses);
+                return finalSolution;
             }
+
+            return null;
+        }
+
+        //task solver stuff
+        private Solutions linkSolutions (ulong problemId)
+        {
+            //foreach (var pInfo in currentProblems[problemId].PartialProblems)
+            //get SolutionsSolution from pInfo and do something amazing
+
+            //return final solution (this one is mocked)
+            return new Solutions()
+            {
+                CommonData = new byte[] { 0 },
+                Id = problemId,
+                ProblemType = currentProblems[problemId].ProblemType,
+                Solutions1
+            = new[] { new SolutionsSolution() { Data = null, ComputationsTime = 1, TaskIdSpecified = false,
+            Type = SolutionsSolutionType.Final} }
+            };
         }
 
         private void registerComponent(out ulong id, out uint timeout)
@@ -170,22 +202,6 @@ namespace TaskManager
             RegisterResponse response = responses[0].Cast<RegisterResponse>();
             id = response.Id;
             timeout = response.Timeout;
-        }
-
-        private Solutions linkSolutions (ulong problemId)
-        {
-            //foreach (var pInfo in currentProblems[problemId].PartialProblems)
-            //get Solution from pInfo and do something amazing
-
-            return new Solutions()
-            {
-                CommonData = new byte[] { 0 },
-                Id = problemId,
-                ProblemType = currentProblems[problemId].ProblemType,
-                Solutions1
-            = new[] { new SolutionsSolution() { Data = null, ComputationsTime = 1, TaskIdSpecified = false,
-            Type = SolutionsSolutionType.Final} }
-            };
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Client
     public class ClientNode
     {
         private IClusterClient clusterClient;
-        private List<NoOperationBackupCommunicationServersBackupCommunicationServer> backups;
+        //private List<NoOperationBackupCommunicationServersBackupCommunicationServer> backups;
 
         public ClientNode(IClusterClient _clusterClient)
         {
@@ -46,7 +46,7 @@ namespace Client
             {
                 Id = problemId
             };
-            solvingWatch.Start();
+
             while (true)
             {
                 Thread.Sleep((int)Properties.Settings.Default.SolutionCheckingInterval);
@@ -69,10 +69,26 @@ namespace Client
         private Solutions checkComputations(ulong problemId, SolutionRequest request)
         {
             Message[] response = clusterClient.SendRequests(new[] { request });
+            Solutions solutionReponse = null;
 
-            if (response.Length > 1 || response[0].GetType() != typeof(Solutions))
+            for (int i=0;i<response.Length;i++)
             {
-                throw new Exception("SolutionRequest communication fail.");
+                switch (response[i].Type)
+                {
+                    case MessageType.NoOperationMessage:
+                        //update backups' list
+                        break;
+                    case MessageType.SolutionsMessage:
+                        if (solutionReponse != null)
+                        {
+                            throw new Exception("Multiple solutions msg from CS to CC");
+                        }
+                        solutionReponse = response[i].Cast<Solutions>();
+                        break;
+                    default:
+                        //ignore
+                        break;
+                }
             }
 
             return response[0].Cast<Solutions>();

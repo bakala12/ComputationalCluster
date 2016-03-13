@@ -47,7 +47,7 @@ namespace TaskManager
                 {
                     Message[] responses = sendStatus();
                     timeoutWatch.Restart();
-                    HandleResponses(responses);
+                    handleResponses(responses);
                 }
             }
         }
@@ -66,7 +66,7 @@ namespace TaskManager
         /// handler of respones, sends proper requests
         /// </summary>
         /// <param name="responses"></param>
-        public void HandleResponses (Message[] responses)
+        private void handleResponses (Message[] responses)
         {
             List<Message> newRequests = new List<Message>();
             foreach (var response in responses)
@@ -78,12 +78,12 @@ namespace TaskManager
                         break;
                     case MessageType.DivideProblemMessage:
                         SolvePartialProblems partialProblemsMsg = 
-                            this.HandleProblem(response.Cast<DivideProblem>());
+                            this.handleDivideProblem(response.Cast<DivideProblem>());
                         newRequests.Add(partialProblemsMsg);
 
                         break;
                     case MessageType.SolutionsMessage:
-                        Solutions solutions = this.HandleSolutions(response.Cast<Solutions>());
+                        Solutions solutions = this.handleSolutions(response.Cast<Solutions>());
                         //null if linking solutions didn't occur
                         if (solutions != null)
                         {
@@ -97,10 +97,10 @@ namespace TaskManager
             }
             Message[] newResponses = clusterClient.SendRequests(newRequests.ToArray());
             timeoutWatch.Reset();
-            this.HandleResponses(newResponses);
+            this.handleResponses(newResponses);
         }
 
-        public SolvePartialProblems HandleProblem (DivideProblem divideProblem)
+        private SolvePartialProblems handleDivideProblem (DivideProblem divideProblem)
         {
             //implementation in second stage, this is mocked:
 
@@ -140,7 +140,7 @@ namespace TaskManager
         /// concerns only one problem
         /// </summary>
         /// <param name="solutions"></param>
-        public Solutions HandleSolutions(Solutions solutions)
+        private Solutions handleSolutions(Solutions solutions)
         {
             foreach (var solution in solutions.Solutions1)
             {

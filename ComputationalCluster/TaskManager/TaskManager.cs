@@ -1,4 +1,5 @@
-﻿using CommunicationsUtils.Messages;
+﻿using CommunicationsUtils.ClientComponentCommon;
+using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
 using System;
 using System.Collections.Generic;
@@ -10,24 +11,21 @@ using System.Threading.Tasks;
 
 namespace TaskManager
 {
-    public class TaskManager
+    public class TaskManager : ClientComponent
     {
-        private IClusterClient clusterClient;
-        private ulong id;
         private ulong threadCount = 0;
-        private uint timeout;
         private List<StatusThread> threads;
         Stopwatch timeoutWatch = new Stopwatch();
+
         /// <summary>
         /// current problems in TM indexed by problem id in cluster (given by CS)
         /// </summary>
         private Dictionary<ulong, ProblemInfo> currentProblems = new Dictionary<ulong, ProblemInfo>();
 
-        public TaskManager(IClusterClient _clusterClient)
+        public TaskManager(IClusterClient _clusterClient) : base (_clusterClient)
         {
-            clusterClient = _clusterClient;
             threads = new List<StatusThread>();
-            //listener thread
+            //enough for this stage:
             threads.Add(new StatusThread()
             {
                 HowLongSpecified = false,
@@ -41,7 +39,7 @@ namespace TaskManager
 
         public void Run ()
         {
-            registerComponent(out id, out timeout);
+            registerComponent();
             timeoutWatch.Start();
             while(true)
             {
@@ -58,7 +56,7 @@ namespace TaskManager
         {
             Status statusMsg = new Status()
             {
-                Id = id,
+                Id = componentId,
                 Threads = threads.ToArray()
             };
             return clusterClient.SendRequests(new[] { statusMsg });
@@ -77,6 +75,7 @@ namespace TaskManager
                 {
                     case MessageType.NoOperationMessage:
                         //update backup servs list
+                        //doesnt return any extra request
                         break;
                     case MessageType.DivideProblemMessage:
                         SolvePartialProblems partialProblemsMsg = 
@@ -102,7 +101,7 @@ namespace TaskManager
             this.HandleResponses(newResponses);
         }
 
-        public SolvePartialProblems HandleProblem (DivideProblem problem)
+        public SolvePartialProblems HandleProblem (DivideProblem divideProblem)
         {
             //implementation in second stage, this is mocked:
 
@@ -110,24 +109,24 @@ namespace TaskManager
             {
                 TaskId = 0,
                 Data = new byte[] { 0 },
-                NodeID = id
+                NodeID = componentId
             };
 
             //adding info about partial problems, their task ids, and partialProblem
             //some things can be temporary (partialProblems?)
-            currentProblems.Add(problem.Id, new ProblemInfo() { ProblemsCount = 1,
-                ProblemType = problem.ProblemType, SolutionsCount = 0 });
+            currentProblems.Add(divideProblem.Id, new ProblemInfo() { ProblemsCount = 1,
+                ProblemType = divideProblem.ProblemType, SolutionsCount = 0 });
 
-            currentProblems[problem.Id].PartialProblems.Add(0, new PartialInfo()
+            currentProblems[divideProblem.Id].PartialProblems.Add(0, new PartialInfo()
             { Solution = null, Problem = partialProblem });
             //end of implementation
 
             //creating msg
             SolvePartialProblems partialProblems = new SolvePartialProblems()
             {
-                ProblemType = problem.ProblemType,
-                Id = id,
-                CommonData = problem.Data,
+                ProblemType = divideProblem.ProblemType,
+                Id = divideProblem.Id,
+                CommonData = divideProblem.Data,
                 PartialProblems = new SolvePartialProblemsPartialProblem[]
                 {
                     partialProblem
@@ -184,8 +183,9 @@ namespace TaskManager
             };
         }
 
-        private void registerComponent(out ulong id, out uint timeout)
+        protected override void registerComponent()
         {
+            // some mock:
             Register registerRequest = new Register()
             {
                 ParallelThreads = 1,
@@ -200,7 +200,7 @@ namespace TaskManager
                 throw new Exception("Register fail in TM");
             }
             RegisterResponse response = responses[0].Cast<RegisterResponse>();
-            id = response.Id;
+            componentId = response.Id;
             timeout = response.Timeout;
         }
     }

@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientComponentCommon\ClientComponent.cs" />
     <Compile Include="Messages\Constructors.cs" />
     <Compile Include="Messages\DivideProblemMessage.cs" />
     <Compile Include="Messages\Message.cs" />

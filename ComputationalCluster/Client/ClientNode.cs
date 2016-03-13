@@ -1,4 +1,5 @@
-﻿using CommunicationsUtils.Messages;
+﻿using CommunicationsUtils.ClientComponentCommon;
+using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
 using System;
 using System.Collections.Generic;
@@ -10,21 +11,23 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    public class ClientNode
+    public class ClientNode : IClusterComponent
     {
         private IClusterClient clusterClient;
+        private Stopwatch solvingWatch;
         //private List<NoOperationBackupCommunicationServersBackupCommunicationServer> backups;
 
         public ClientNode(IClusterClient _clusterClient)
         {
             clusterClient = _clusterClient;
+            solvingWatch = new Stopwatch();
         }
 
         public void Run ()
         {
             //while (true)
             //{
-                //this thing will grow on second stage of project
+                //this thing will grow on second stage of project:
                 byte[] byteData = getProblem();
                 //could be in another thread:
                 SolutionsSolution solution = workProblem(byteData);
@@ -39,9 +42,11 @@ namespace Client
 
         private SolutionsSolution workProblem (byte[] byteData)
         {
-            Stopwatch solvingWatch = new Stopwatch();
+            solvingWatch.Reset();
+            SolveRequestResponse response = sendProblem(byteData);
+            ulong problemId = response.Id;
+            solvingWatch.Start();
 
-            ulong problemId = sendProblem(byteData);
             SolutionRequest request = new SolutionRequest()
             {
                 Id = problemId
@@ -51,7 +56,8 @@ namespace Client
             {
                 Thread.Sleep((int)Properties.Settings.Default.SolutionCheckingInterval);
 
-                Solutions solution = checkComputations(problemId, request);
+                Solutions solution = checkComputations(request);
+
                 //assuming that final solution has one element with type==final
                 if (solution.Solutions1[0].Type == SolutionsSolutionType.Final)
                 {
@@ -62,39 +68,18 @@ namespace Client
                 {
                     break;
                 }
+                // ~~ else continue
             }
+
             return null;
         }
 
-        private Solutions checkComputations(ulong problemId, SolutionRequest request)
-        {
-            Message[] response = clusterClient.SendRequests(new[] { request });
-            Solutions solutionReponse = null;
-
-            for (int i=0;i<response.Length;i++)
-            {
-                switch (response[i].Type)
-                {
-                    case MessageType.NoOperationMessage:
-                        //update backups' list
-                        break;
-                    case MessageType.SolutionsMessage:
-                        if (solutionReponse != null)
-                        {
-                            throw new Exception("Multiple solutions msg from CS to CC");
-                        }
-                        solutionReponse = response[i].Cast<Solutions>();
-                        break;
-                    default:
-                        //ignore
-                        break;
-                }
-            }
-
-            return response[0].Cast<Solutions>();
-        }
-
-        private ulong sendProblem (byte[] byteData)
+        /// <summary>
+        /// sends problem to cluster, returns unique problem id
+        /// </summary>
+        /// <param name="byteData"></param>
+        /// <returns></returns>
+        private SolveRequestResponse sendProblem(byte[] byteData)
         {
             ulong solvingTimeout = Properties.Settings.Default.SolveTimeout;
             bool solvingTimeoutSpecified = true;
@@ -109,12 +94,61 @@ namespace Client
                 ProblemType = problemType
             };
 
-            Message[] response = clusterClient.SendRequests(new[] { request });
-            if (response.Length > 1 || response.GetType() != typeof(SolveRequestResponse))
-                throw new Exception("SolveRequest communication fail");
+            Message[] responses = clusterClient.SendRequests(new[] { request });
+            SolveRequestResponse solveResponse = null;
+            foreach (var response in responses)
+            {
+                switch (response.Type)
+                {
+                    case MessageType.SolveRequestResponseMessage:
+                        if (solveResponse != null)
+                            throw new Exception("Multiple SolveRequestResponse messages in CC");
+                        solveResponse = response.Cast<SolveRequestResponse>();
+                        break;
+                    case MessageType.NoOperationMessage:
+                        updateBackups(response.Cast<NoOperation>());
+                        break;
+                    default:
+                        throw new Exception("Invalid message delivered in CC's sendProblem procedure "
+                            + response.ToString());
+                }
+            }
+            if (solveResponse == null)
+                throw new Exception("No solveRequestResponse in CC");
 
-            SolveRequestResponse solveResponse = response[0].Cast<SolveRequestResponse>();
-            return solveResponse.Id;
+            return solveResponse;
+        }
+
+        /// <summary>
+        /// checks computations - sends solutionRequest msg
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns>complete solution if cluster finished task</returns>
+        private Solutions checkComputations(SolutionRequest request)
+        {
+            Message[] responses = clusterClient.SendRequests(new[] { request });
+            Solutions solutionReponse = null;
+
+            foreach (var response in responses)
+            {
+                switch (response.Type)
+                {
+                    case MessageType.NoOperationMessage:
+                        this.updateBackups(response.Cast<NoOperation>());
+                        break;
+                    case MessageType.SolutionsMessage:
+                        if (solutionReponse != null)
+                        {
+                            throw new Exception("Multiple solutions msg from CS to CC");
+                        }
+                        solutionReponse = response.Cast<Solutions>();
+                        break;
+                    default:
+                        throw new Exception("Wrong msg type delivered to CC: " + response.ToString());
+                }
+            }
+            //could be null:
+            return solutionReponse;
         }
 
         /// <summary>
@@ -125,6 +159,11 @@ namespace Client
         private byte[] getProblem ()
         {
             return new byte[1] { 123 };
+        }
+
+        public void updateBackups(NoOperation msg)
+        {
+
         }
     }
 }

@@ -37,7 +37,7 @@ namespace TaskManager
             });
         }
 
-        public void Run ()
+        public override void Run ()
         {
             registerComponent();
             timeoutWatch.Start();
@@ -74,8 +74,7 @@ namespace TaskManager
                 switch(response.Type)
                 {
                     case MessageType.NoOperationMessage:
-                        //update backup servs list
-                        //doesnt return any extra request
+                        updateBackups(response.Cast<NoOperation>());
                         break;
                     case MessageType.DivideProblemMessage:
                         SolvePartialProblems partialProblemsMsg = 
@@ -93,7 +92,7 @@ namespace TaskManager
 
                         break;
                     default:
-                        throw new Exception("Wrong message in TM");
+                        throw new Exception("Wrong message delivered to TM: " + response.ToString());
                 }
             }
             Message[] newResponses = clusterClient.SendRequests(newRequests.ToArray());
@@ -194,14 +193,13 @@ namespace TaskManager
                 DeregisterSpecified = false,
                 IdSpecified = false
             };
-            Message[] responses = clusterClient.SendRequests(new[] { registerRequest });
-            if (responses.Length > 1 || responses[0].GetType() != typeof(RegisterResponse))
-            {
-                throw new Exception("Register fail in TM");
-            }
-            RegisterResponse response = responses[0].Cast<RegisterResponse>();
-            componentId = response.Id;
-            timeout = response.Timeout;
+
+            base.handleRegisterResponses(registerRequest);
+        }
+
+        public override void updateBackups (NoOperation msg)
+        {
+
         }
     }
 }

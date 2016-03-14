@@ -1,13 +1,13 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using CommunicationsUtils.ClientComponentCommon;
+using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
+// ReSharper disable FunctionNeverReturns
 
 namespace Server
 {
-    public partial class ComputationalServer : IRunnable
+    public class ComputationalServer : IRunnable
     {
         /// <summary>
         /// Listener which allows to receive and send messages.
@@ -64,20 +64,79 @@ namespace Server
         }
 
         /// <summary>
-        /// Server working loop.
+        /// Starts void argumentsless delegate in new thread.
         /// </summary>
-        protected virtual void DoWork()
+        /// <param name="delegatFunc"></param>
+        private static void ProcessInParallel(Action delegatFunc)
+        {
+            Task.Run(delegatFunc);
+        }
+
+        /// <summary>
+        /// Creates array of response messages for specified message.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        private static Message[] CreateResponseMessages(Message message)
+        {
+            //TODO
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Processes specified message.
+        /// </summary>
+        /// <param name="message"></param>
+        private static void ProcessMessage(Message message)
+        {
+            //TODO
+            // jak wywołać na listenerze SendResponse. Z kolejki mamy tylko wiadomość, nie mamy listenera, skąd go wziąć.
+            throw new NotImplementedException();
+            // ewentualne dodanie wiadomości spowrotem do kolejki jeżeli potrzeba
+
+        }
+
+        /// <summary>
+        /// Delegate for listening and storing messages thread.
+        /// </summary>
+        private void ListenAndStoreMessages()
         {
             while (true)
             {
-                Message[] requests = _clusterListener.WaitForRequest();
-                foreach (var item in requests)
+                var requestsMessages = _clusterListener.WaitForRequest();
+                foreach (var message in requestsMessages)
                 {
-                    _messagesQueue.Enqueue(item);
+                    _messagesQueue.Enqueue(message);
+                    // gadalismy o tym że jak komponent wysle wiadomość ze statusem że jest wolny to mozna mu odesłać wtedy coś do porobienia
+                    // no ale to wychodzi na to że powinno być to w tym wątku bo on nasłuchuje i tu istnieje ten listener, a miało być w osobnym wątku,
+                    // trochę crap
+                    var responseMessages = CreateResponseMessages(message);
+                    _clusterListener.SendResponse(responseMessages);
                 }
-                //Do sth with received messages. And send responeses. This is the main server task.
-                //This can be handled by a dedicated class.
             }
+        }
+
+        /// <summary>
+        /// Delegate for dequeueing and processing messages thread.
+        /// </summary>
+        private void DequeueAndProcessMessages()
+        {
+                while (true)
+                {
+                    Message message;
+                    var result = _messagesQueue.TryDequeue(out message);
+                    if (!result) continue;
+                    ProcessMessage(message);
+                }
+        }
+
+        /// <summary>
+        /// Server work function.
+        /// </summary>
+        protected virtual void DoWork()
+        {
+            ProcessInParallel(ListenAndStoreMessages);
+            ProcessInParallel(DequeueAndProcessMessages);           
         }
     }
 }

@@ -8,14 +8,17 @@ using System.Threading.Tasks;
 namespace CommunicationsUtils.ClientComponentCommon
 {
     //will be abstract class with table of backup serv information in future
-    //provides methods for internal+external client components (TM+CN+CC)
+    //provides methods for internal+external client components (TM+CN+Comp. Client)
     public interface IExternalClientComponent
     {
+        //there will be here something like:
+        //private List<NoOperationBackupCommunicationServersBackupCommunicationServer> backups;
+
         /// <summary>
         /// basic, very general method - called in main() of component
         /// </summary>
         void Run();
-
+      
         /// <summary>
         /// all of the clients store malfunction-related info
         /// </summary>

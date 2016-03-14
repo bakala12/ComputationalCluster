@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CommunicationsUtils.ClientComponentCommon
 {
-    //common things for cluster's internal client components (TM and CN)
+    //common things for cluster's internal client components (TM and CN, not comp. client)
     public abstract class InternalClientComponent: IExternalClientComponent
     {
         //external:

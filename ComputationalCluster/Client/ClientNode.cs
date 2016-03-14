@@ -16,7 +16,6 @@ namespace Client
         private IClusterClient clusterClient;
         private Stopwatch solvingWatch;
         private IClientNodeProcessing core;
-        //private List<NoOperationBackupCommunicationServersBackupCommunicationServer> backups;
 
         public ClientNode(IClusterClient _clusterClient, IClientNodeProcessing _core)
         {

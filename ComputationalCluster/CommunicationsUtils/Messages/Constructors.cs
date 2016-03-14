@@ -75,4 +75,11 @@ namespace CommunicationsUtils.Messages
         {
         }
     }
+
+    public partial class Error : Message
+    {
+        public Error() : base(MessageType.ErrorMessage)
+        {
+        }
+    }
 }

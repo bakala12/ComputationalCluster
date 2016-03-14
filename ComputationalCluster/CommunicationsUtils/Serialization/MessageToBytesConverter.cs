@@ -40,6 +40,14 @@ namespace CommunicationsUtils.Serialization
                     msgStart = i + 1;
                 }
             }
+            //compatibility issue - our bytes end with ETB, 
+            //other groups could not
+            if (msgStart < len)
+            {
+                byte[] chunk = bytes.GetSubarray(msgStart, len-1);
+                messages.Add(this.FromBytesArray(chunk));
+            }
+
             return messages.ToArray();
         }
 

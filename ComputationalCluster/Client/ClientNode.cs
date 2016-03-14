@@ -1,4 +1,5 @@
-﻿using CommunicationsUtils.ClientComponentCommon;
+﻿using Client.Core;
+using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
 using System;
@@ -16,16 +17,24 @@ namespace Client
         private IClusterClient clusterClient;
         private Stopwatch solvingWatch;
         private IClientNodeProcessing core;
+        private IMessageArrayCreator creator;
 
-        public ClientNode(IClusterClient _clusterClient, IClientNodeProcessing _core)
+        public ClientNode(IClusterClient _clusterClient, IClientNodeProcessing _core,
+            IMessageArrayCreator _creator)
         {
             clusterClient = _clusterClient;
             core = _core;
+            creator = _creator;
             solvingWatch = new Stopwatch();
         }
 
+        public ClientNode()
+        {
+
+        }
+
         /// <summary>
-        /// main CC loop
+        /// main CC loop (I dont see a need to unit test it)
         /// </summary>
         public void Run ()
         {
@@ -34,7 +43,17 @@ namespace Client
                 //this thing will grow on second stage of project:
                 core.GetProblem();
                 //could be in another thread:
-                SolutionsSolution solution = this.WorkProblem();
+                solvingWatch.Reset();
+                SolveRequestResponse response = SendProblem();
+                ulong problemId = response.Id;
+                solvingWatch.Start();
+
+                SolutionRequest request = new SolutionRequest()
+                {
+                    Id = problemId
+                };
+
+                SolutionsSolution solution = this.WorkProblem(request);
                 if (solution == null)
                 {
                     Console.WriteLine("Solving timeout. Aborting.");
@@ -51,18 +70,8 @@ namespace Client
         /// main communication loop concerning actual problem context
         /// </summary>
         /// <returns>final solution (or none if something crashed)</returns>
-        public SolutionsSolution WorkProblem ()
+        public virtual SolutionsSolution WorkProblem (SolutionRequest request)
         {
-            solvingWatch.Reset();
-            SolveRequestResponse response = SendProblem();
-            ulong problemId = response.Id;
-            solvingWatch.Start();
-
-            SolutionRequest request = new SolutionRequest()
-            {
-                Id = problemId
-            };
-
             while (true)
             {
                 Thread.Sleep((int)Properties.Settings.Default.SolutionCheckingInterval);
@@ -90,12 +99,13 @@ namespace Client
         /// </summary>
         /// <param name="byteData"></param>
         /// <returns></returns>
-        public SolveRequestResponse SendProblem()
+        public virtual SolveRequestResponse SendProblem()
         {
             SolveRequest problemRequest = core.GetRequest();
             problemRequest.IdSpecified = false;
-            
-            Message[] responses = clusterClient.SendRequests(new[] { problemRequest });
+
+            Message[] requests = creator.Create(problemRequest);
+            Message[] responses = clusterClient.SendRequests(requests);
             SolveRequestResponse solveResponse = null;
 
             foreach (var response in responses)
@@ -126,9 +136,10 @@ namespace Client
         /// </summary>
         /// <param name="request"></param>
         /// <returns>complete solution if cluster finished task</returns>
-        public Solutions CheckComputations(SolutionRequest request)
+        public virtual Solutions CheckComputations(SolutionRequest request)
         {
-            Message[] responses = clusterClient.SendRequests(new[] { request });
+            Message[] requests = creator.Create(request);
+            Message[] responses = clusterClient.SendRequests(requests);
             Solutions solutionReponse = null;
 
             foreach (var response in responses)
@@ -149,7 +160,11 @@ namespace Client
                         throw new Exception("Wrong msg type delivered to CC: " + response.ToString());
                 }
             }
-            //could be null:
+            if (solutionReponse == null)
+            {
+                throw new Exception("No Solutions message from server delivered (it always should do it)");
+            }
+            //could (or couldn't?) be null:
             return solutionReponse;
         }
 

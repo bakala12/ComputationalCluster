@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 
-namespace Client
+namespace Client.Core
 {
     /// <summary>
     /// handles a problem in console - reading, preparing message,
@@ -16,9 +16,23 @@ namespace Client
         private byte[] data;
         private string type;
 
+        public string Type
+        {
+            get
+            {
+                return type;
+            }
+        }
+
         public ClientNodeProcessingModule()
         {
 
+        }
+
+        public ClientNodeProcessingModule(byte[] _data, string _type)
+        {
+            data = _data;
+            type = _type;
         }
 
         /// <summary>

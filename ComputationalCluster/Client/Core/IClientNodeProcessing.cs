@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 
-namespace Client
+namespace Client.Core
 {
     /// <summary>
     /// interface for processing module to make it look neat

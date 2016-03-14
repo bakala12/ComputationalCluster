@@ -33,7 +33,7 @@ namespace Server
         /// <summary>
         /// List of active problem data sets.
         /// </summary>
-        private readonly List<ProblemDataSet> _problemDataSets; 
+        private readonly Dictionary<int, ProblemDataSet> _problemDataSets; 
 
         /// <summary>
         /// Initializes a new instance of ComputationalServer with the specified listener.
@@ -47,7 +47,7 @@ namespace Server
             State = ServerState.Backup;
             _messagesQueue = new ConcurrentQueue<Message>();
             _activeComponents = new List<ActiveComponent>();
-            _problemDataSets= new List<ProblemDataSet>();
+            _problemDataSets= new Dictionary<int, ProblemDataSet>();
         }
 
         /// <summary>

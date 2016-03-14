@@ -36,9 +36,9 @@ namespace Server
             throw new NotImplementedException();
         }
 
-        private static ProblemDataSet FindDataSetByProblemId(int problemId, IEnumerable<ProblemDataSet> dataSets)
+        private static ProblemDataSet FindDataSetByProblemId(int problemId, IReadOnlyDictionary<int, ProblemDataSet> dataSets)
         {
-            return dataSets.FirstOrDefault(dataSet => dataSet.ProblemID == problemId);
+            return dataSets.ContainsKey(problemId) ? dataSets[problemId] : null;
         }
     }
 }

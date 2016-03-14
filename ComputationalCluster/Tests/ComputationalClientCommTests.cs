@@ -26,7 +26,7 @@ namespace Tests
             mockcore.Setup(u => u.GetRequest()).Returns(solveRequest);
 
             var mockclient = new Mock<IClusterClient>();
-            var shouldReturn = new SolveRequestResponse { Id = 222, IdSpecified = true };
+            var shouldReturn = new SolveRequestResponse { Id = 222 };
             var responses = new Message[] {new NoOperation(),
                 shouldReturn };
             mockclient.Setup(u => u.SendRequests(request)).Returns(responses);
@@ -52,8 +52,8 @@ namespace Tests
             mockcore.Setup(u => u.GetRequest()).Returns(solveRequest);
 
             var mockclient = new Mock<IClusterClient>();
-            var shouldReturn = new SolveRequestResponse { Id = 222, IdSpecified = true };
-            var duplicated = new SolveRequestResponse { Id = 222, IdSpecified = true };
+            var shouldReturn = new SolveRequestResponse { Id = 222 };
+            var duplicated = new SolveRequestResponse { Id = 222 };
             var responses = new Message[] {shouldReturn, duplicated};
             mockclient.Setup(u => u.SendRequests(request)).Returns(responses);
 

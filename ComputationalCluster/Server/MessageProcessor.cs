@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using CommunicationsUtils.Messages;
 
 namespace Server
@@ -15,7 +15,7 @@ namespace Server
         /// <param name="message"></param>
         /// <param name="dataSets"></param>
         /// <param name="activeComponents"></param>
-        public static void ProcessMessage(Message message, Dictionary<int, ProblemDataSet> dataSets, Dictionary<int, ActiveComponent> activeComponents)
+        public static void ProcessMessage(Message message, ConcurrentDictionary<int, ProblemDataSet> dataSets, ConcurrentDictionary<int, ActiveComponent> activeComponents)
         {
             //TODO
             throw new NotImplementedException();
@@ -30,13 +30,13 @@ namespace Server
         /// <param name="dataSets"></param>
         /// <param name="activeComponents"></param>
         /// <returns></returns>
-        public static Message[] CreateResponseMessages(Message message, Dictionary<int, ProblemDataSet> dataSets, Dictionary<int, ActiveComponent> activeComponents)
+        public static Message[] CreateResponseMessages(Message message, ConcurrentDictionary<int, ProblemDataSet> dataSets, ConcurrentDictionary<int, ActiveComponent> activeComponents)
         {
             //TODO
             throw new NotImplementedException();
         }
 
-        private static ProblemDataSet FindDataSetByProblemId(int problemId, IReadOnlyDictionary<int, ProblemDataSet> dataSets)
+        private static ProblemDataSet FindDataSetByProblemId(int problemId, IDictionary<int, ProblemDataSet> dataSets)
         {
             return dataSets.ContainsKey(problemId) ? dataSets[problemId] : null;
         }

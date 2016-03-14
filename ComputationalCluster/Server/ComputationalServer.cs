@@ -97,7 +97,7 @@ namespace Server
                 foreach (var message in requestsMessages)
                 {
                     _messagesQueue.Enqueue(message);
-                    var responseMessages = MessageProcessor.CreateResponseMessages(message, _problemDataSets);
+                    var responseMessages = MessageProcessor.CreateResponseMessages(message, _problemDataSets, _activeComponents);
                     _clusterListener.SendResponse(responseMessages);
                 }
             }
@@ -113,7 +113,7 @@ namespace Server
                 Message message;
                 var result = _messagesQueue.TryDequeue(out message);
                 if (!result) continue;
-                MessageProcessor.ProcessMessage(message, _problemDataSets);
+                MessageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
             }
         }
 

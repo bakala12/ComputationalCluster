@@ -2,7 +2,7 @@
 
 namespace Server
 {
-    internal struct ActiveComponent
+    public struct ActiveComponent
     {
         ulong componentId;
         ComponentStatus componentStatus;

@@ -13,8 +13,9 @@ namespace Server
         /// Processes specified message.
         /// </summary>
         /// <param name="message"></param>
-        /// /// <param name="dataSets"></param>
-        public static void ProcessMessage(Message message, List<ProblemDataSet> dataSets)
+        /// <param name="dataSets"></param>
+        /// <param name="activeComponents"></param>
+        public static void ProcessMessage(Message message, List<ProblemDataSet> dataSets, List<ActiveComponent> activeComponents)
         {
             //TODO
             throw new NotImplementedException();
@@ -27,8 +28,9 @@ namespace Server
         /// </summary>
         /// <param name="message"></param>
         /// <param name="dataSets"></param>
+        /// <param name="activeComponents"></param>
         /// <returns></returns>
-        public static Message[] CreateResponseMessages(Message message, List<ProblemDataSet> dataSets)
+        public static Message[] CreateResponseMessages(Message message, List<ProblemDataSet> dataSets, List<ActiveComponent> activeComponents)
         {
             //TODO
             throw new NotImplementedException();

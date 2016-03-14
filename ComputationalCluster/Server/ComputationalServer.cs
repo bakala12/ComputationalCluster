@@ -14,6 +14,10 @@ namespace Server
         private readonly IClusterListener _clusterListener;
 
         /// <summary>
+        /// Stores messages in queue
+        /// </summary>
+        private readonly Queue<Message> _messagesQueue;
+        /// <summary>
         /// Current state of server.
         /// </summary>
         public ServerState State { get; set; }
@@ -28,6 +32,7 @@ namespace Server
             if(listener==null) throw new ArgumentNullException(nameof(listener));
             _clusterListener = listener;
             State = ServerState.Backup;
+            _messagesQueue = new Queue<Message>();
         }
 
         /// <summary>
@@ -65,6 +70,10 @@ namespace Server
             while (true)
             {
                 Message[] requests = _clusterListener.WaitForRequest();
+                foreach (var item in requests)
+                {
+                    _messagesQueue.Enqueue(item);
+                }
                 //Do sth with received messages. And send responeses. This is the main server task.
                 //This can be handled by a dedicated class.
             }

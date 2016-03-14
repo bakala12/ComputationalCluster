@@ -43,8 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActiveComponent.cs" />
     <Compile Include="ComputationalServer.cs" />
     <Compile Include="IRunnable.cs" />
+    <Compile Include="MessageProcessor.cs" />
+    <Compile Include="ProblemDataSet.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
@@ -18,10 +19,21 @@ namespace Server
         /// Stores messages in queue
         /// </summary>
         private readonly ConcurrentQueue<Message> _messagesQueue;
+
         /// <summary>
         /// Current state of server.
         /// </summary>
         public ServerState State { get; set; }
+
+        /// <summary>
+        /// List of active components in the system.
+        /// </summary>
+        private readonly List<ActiveComponent> _activeComponents;
+
+        /// <summary>
+        /// List of active problem data sets.
+        /// </summary>
+        private readonly List<ProblemDataSet> _problemDataSets; 
 
         /// <summary>
         /// Initializes a new instance of ComputationalServer with the specified listener.
@@ -30,10 +42,12 @@ namespace Server
         /// <param name="listener">Listener object which handle communication.</param>
         public ComputationalServer(IClusterListener listener)
         {
-            if(listener==null) throw new ArgumentNullException(nameof(listener));
+            if (listener == null) throw new ArgumentNullException(nameof(listener));
             _clusterListener = listener;
             State = ServerState.Backup;
             _messagesQueue = new ConcurrentQueue<Message>();
+            _activeComponents = new List<ActiveComponent>();
+            _problemDataSets= new List<ProblemDataSet>();
         }
 
         /// <summary>
@@ -73,33 +87,9 @@ namespace Server
         }
 
         /// <summary>
-        /// Creates array of response messages for specified message.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        private static Message[] CreateResponseMessages(Message message)
-        {
-            //TODO
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Processes specified message.
-        /// </summary>
-        /// <param name="message"></param>
-        private static void ProcessMessage(Message message)
-        {
-            //TODO
-            // jak wywołać na listenerze SendResponse. Z kolejki mamy tylko wiadomość, nie mamy listenera, skąd go wziąć.
-            throw new NotImplementedException();
-            // ewentualne dodanie wiadomości spowrotem do kolejki jeżeli potrzeba
-
-        }
-
-        /// <summary>
         /// Delegate for listening and storing messages thread.
         /// </summary>
-        private void ListenAndStoreMessages()
+        private void ListenAndStoreMessagesAndSendResponses()
         {
             while (true)
             {
@@ -107,10 +97,7 @@ namespace Server
                 foreach (var message in requestsMessages)
                 {
                     _messagesQueue.Enqueue(message);
-                    // gadalismy o tym że jak komponent wysle wiadomość ze statusem że jest wolny to mozna mu odesłać wtedy coś do porobienia
-                    // no ale to wychodzi na to że powinno być to w tym wątku bo on nasłuchuje i tu istnieje ten listener, a miało być w osobnym wątku,
-                    // trochę crap
-                    var responseMessages = CreateResponseMessages(message);
+                    var responseMessages = MessageProcessor.CreateResponseMessages(message, _problemDataSets);
                     _clusterListener.SendResponse(responseMessages);
                 }
             }
@@ -119,15 +106,15 @@ namespace Server
         /// <summary>
         /// Delegate for dequeueing and processing messages thread.
         /// </summary>
-        private void DequeueAndProcessMessages()
+        private void DequeueMessagesAndUpdateProblemStructures()
         {
-                while (true)
-                {
-                    Message message;
-                    var result = _messagesQueue.TryDequeue(out message);
-                    if (!result) continue;
-                    ProcessMessage(message);
-                }
+            while (true)
+            {
+                Message message;
+                var result = _messagesQueue.TryDequeue(out message);
+                if (!result) continue;
+                MessageProcessor.ProcessMessage(message, _problemDataSets);
+            }
         }
 
         /// <summary>
@@ -135,8 +122,8 @@ namespace Server
         /// </summary>
         protected virtual void DoWork()
         {
-            ProcessInParallel(ListenAndStoreMessages);
-            ProcessInParallel(DequeueAndProcessMessages);           
+            ProcessInParallel(ListenAndStoreMessagesAndSendResponses);
+            ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
         }
     }
 }

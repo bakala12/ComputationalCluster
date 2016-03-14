@@ -4,6 +4,7 @@ using CommunicationsUtils.NetworkInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using TaskManager.Core;
 
 namespace TaskManager
 {

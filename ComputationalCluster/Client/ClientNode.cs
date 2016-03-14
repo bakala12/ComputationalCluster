@@ -1,4 +1,5 @@
-﻿using CommunicationsUtils.ClientComponentCommon;
+﻿using Client.Core;
+using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
 using System;

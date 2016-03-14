@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TaskManager
+namespace TaskManager.Core
 {
     /// <summary>
     /// provides non-communication TM's functionalities

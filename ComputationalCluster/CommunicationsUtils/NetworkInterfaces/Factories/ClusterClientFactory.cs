@@ -26,11 +26,24 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
             }
         }
 
+        /// <summary>
+        /// potential use in mocking only
+        /// </summary>
+        /// <param name="hostname"></param>
+        /// <param name="port"></param>
+        /// <param name="adapter"></param>
+        /// <returns></returns>
         public IClusterClient Create(string hostname, int port, ITcpClient adapter)
         {
             return new ClusterClient(hostname, port, adapter);
         }
 
+        /// <summary>
+        /// this overload should be used in components' code
+        /// </summary>
+        /// <param name="hostname"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
         public IClusterClient Create(string hostname, int port)
         {
             ITcpClient adapter = TcpClientAdapterFactory.Factory.Create();

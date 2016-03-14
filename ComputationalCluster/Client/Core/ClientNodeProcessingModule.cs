@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 
-namespace Client
+namespace Client.Core
 {
     /// <summary>
     /// handles a problem in console - reading, preparing message,

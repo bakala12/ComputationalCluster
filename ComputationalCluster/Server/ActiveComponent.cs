@@ -1,10 +1,10 @@
-﻿using CommunicationsUtils.Shared;
+﻿using CommunicationsUtils.Messages;
 
 namespace Server
 {
     public struct ActiveComponent
     {
         ulong componentId;
-        ComponentStatus componentStatus;
+        StatusThreadState componentStatus;
     }
 }

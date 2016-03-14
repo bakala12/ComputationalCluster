@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Messages;
@@ -16,7 +17,7 @@ namespace Server
         /// <summary>
         /// Stores messages in queue
         /// </summary>
-        private readonly Queue<Message> _messagesQueue;
+        private readonly ConcurrentQueue<Message> _messagesQueue;
         /// <summary>
         /// Current state of server.
         /// </summary>
@@ -32,7 +33,7 @@ namespace Server
             if(listener==null) throw new ArgumentNullException(nameof(listener));
             _clusterListener = listener;
             State = ServerState.Backup;
-            _messagesQueue = new Queue<Message>();
+            _messagesQueue = new ConcurrentQueue<Message>();
         }
 
         /// <summary>

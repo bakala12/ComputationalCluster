@@ -32,6 +32,8 @@ namespace CommunicationsUtils.Messages
                     return new SolveRequestResponse();
                 case MessageType.StatusMessage:
                     return new Status();
+                case MessageType.ErrorMessage:
+                    return new Error();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type));
             }

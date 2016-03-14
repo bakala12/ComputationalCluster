@@ -23,26 +23,42 @@ namespace CommunicationsUtils.Messages
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
     [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.mini.pw.edu.pl/ucc/", IsNullable = false)]
-    public partial class SolveRequestResponse
+    public partial class Error
     {
 
-        private ulong idField;
+        private ErrorErrorType errorTypeField;
 
-        private bool idFieldSpecified;
+        private string errorMessageField;
 
         /// <remarks/>
-        public ulong Id
+        public ErrorErrorType ErrorType
         {
-            get { return this.idField; }
-            set { this.idField = value; }
+            get { return this.errorTypeField; }
+            set { this.errorTypeField = value; }
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool IdSpecified
+        public string ErrorMessage
         {
-            get { return this.idFieldSpecified; }
-            set { this.idFieldSpecified = value; }
+            get { return this.errorMessageField; }
+            set { this.errorMessageField = value; }
         }
+    }
+
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
+    public enum ErrorErrorType
+    {
+
+        /// <remarks/>
+        UnknownSender,
+
+        /// <remarks/>
+        InvalidOperation,
+
+        /// <remarks/>
+        ExceptionOccured,
     }
 }

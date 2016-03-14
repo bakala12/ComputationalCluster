@@ -20,7 +20,7 @@ namespace Server
         {
             //TODO not in this sprint ?
             //to chyba ma modyfikować odpowiednie ciało ProblemDataSet lub zmieniać / rejestrować komponenty / nie ten etap?
-            switch (message.Type)
+            switch (message.MessageType)
             {
                 case MessageType.DivideProblemMessage:
                     break;
@@ -42,6 +42,8 @@ namespace Server
                     break;
                 case MessageType.StatusMessage:
                     break;
+                case MessageType.ErrorMessage:
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -57,7 +59,7 @@ namespace Server
         public static Message[] CreateResponseMessages(Message message, ConcurrentDictionary<int, ProblemDataSet> dataSets, ConcurrentDictionary<int, ActiveComponent> activeComponents)
         {
             //TODO same as above?
-            switch (message.Type)
+            switch (message.MessageType)
             {
                 case MessageType.DivideProblemMessage:
                     break;
@@ -80,6 +82,8 @@ namespace Server
                     break;
                 case MessageType.StatusMessage:
                     break;
+                case MessageType.ErrorMessage:
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -96,13 +100,12 @@ namespace Server
                         {
                             Id = 1,
                             Timeout = 15000,
-                            BackupCommunicationServers = new RegisterResponseBackupCommunicationServers()
+                            BackupCommunicationServers = new RegisterResponseBackupCommunicationServer[]
                             {
-                                BackupCommunicationServer = new RegisterResponseBackupCommunicationServersBackupCommunicationServer()
+                                new RegisterResponseBackupCommunicationServer()
                                 {
-                                    address = "0.0.0.0",
-                                    port = 8086,
-                                    portSpecified =true
+                                      address = "0.0.0.0",
+                                      port = 8086
                                 }
                             }
                         }

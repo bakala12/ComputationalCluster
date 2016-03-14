@@ -24,17 +24,10 @@ namespace CommunicationsUtils.Argument_parser
                 this.options.Add(o, action);
             }
         }
-
+        
         public void ProcessArguments(string[] args)
         {
             options.Parse(args);
-            var keys = new List<string>(map.Keys);
-            keys.Sort();
-            //TODO
-            foreach (var key in keys)
-            {
-                Console.WriteLine("Key: {0}={1}", key, map[key]);
-            }
         }
     }
 }

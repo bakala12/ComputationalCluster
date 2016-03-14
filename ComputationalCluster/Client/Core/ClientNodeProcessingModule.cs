@@ -16,9 +16,23 @@ namespace Client.Core
         private byte[] data;
         private string type;
 
+        public string Type
+        {
+            get
+            {
+                return type;
+            }
+        }
+
         public ClientNodeProcessingModule()
         {
 
+        }
+
+        public ClientNodeProcessingModule(byte[] _data, string _type)
+        {
+            data = _data;
+            type = _type;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using Client.Core;
+using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Miscellaneous;
 using CommunicationsUtils.NetworkInterfaces;
 using CommunicationsUtils.NetworkInterfaces.Factories;
@@ -19,8 +20,9 @@ namespace Client
             IClusterClient clusterClient = ClusterClientFactory.Factory.Create(
                 Properties.Settings.Default.Address, Properties.Settings.Default.Port);
             var core = ClientNodeProcessingModuleFactory.Factory.Create();
+            IMessageArrayCreator creator = new MessageArrayCreator();
 
-            ClientNode clientNode = new ClientNode(clusterClient, core);
+            ClientNode clientNode = new ClientNode(clusterClient, core, creator);
             clientNode.Run();
         }
     }

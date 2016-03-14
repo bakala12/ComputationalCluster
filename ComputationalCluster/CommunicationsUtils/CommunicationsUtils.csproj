@@ -40,8 +40,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientComponentCommon\IMessageArrayCreator.cs" />
     <Compile Include="ClientComponentCommon\InternalClientComponent.cs" />
     <Compile Include="ClientComponentCommon\IExternalClientComponent.cs" />
+    <Compile Include="ClientComponentCommon\MessageArrayCreator.cs" />
     <Compile Include="Messages\Constructors.cs" />
     <Compile Include="Messages\DivideProblemMessage.cs" />
     <Compile Include="Messages\Message.cs" />

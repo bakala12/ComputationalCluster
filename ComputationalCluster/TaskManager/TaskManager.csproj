@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\ITaskManagerProcessing.cs" />
     <Compile Include="PartialInfo.cs" />
     <Compile Include="ProblemInfo.cs" />
     <Compile Include="Program.cs" />
@@ -53,6 +54,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="TaskManager.cs" />
+    <Compile Include="Core\TaskManagerProcessingModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

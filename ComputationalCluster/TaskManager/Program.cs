@@ -16,7 +16,9 @@ namespace TaskManager
 
             IClusterClient clusterClient = ClusterClientFactory.Factory.Create(
                 Properties.Settings.Default.Address, Properties.Settings.Default.Port);
-            TaskManager taskManager = new TaskManager(clusterClient);
+            //factory will be here in the future:
+            var newCore = new TaskManagerProcessingModule();
+            TaskManager taskManager = new TaskManager(clusterClient, newCore);
 
             taskManager.Run();
         }

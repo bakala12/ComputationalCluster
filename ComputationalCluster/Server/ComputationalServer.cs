@@ -28,7 +28,7 @@ namespace Server
         /// <summary>
         /// List of active components in the system.
         /// </summary>
-        private readonly List<ActiveComponent> _activeComponents;
+        private readonly Dictionary<int, ActiveComponent> _activeComponents;
 
         /// <summary>
         /// List of active problem data sets.
@@ -46,7 +46,7 @@ namespace Server
             _clusterListener = listener;
             State = ServerState.Backup;
             _messagesQueue = new ConcurrentQueue<Message>();
-            _activeComponents = new List<ActiveComponent>();
+            _activeComponents = new Dictionary<int, ActiveComponent>();
             _problemDataSets= new Dictionary<int, ProblemDataSet>();
         }
 

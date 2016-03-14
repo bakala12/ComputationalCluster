@@ -15,7 +15,7 @@ namespace Server
         /// <param name="message"></param>
         /// <param name="dataSets"></param>
         /// <param name="activeComponents"></param>
-        public static void ProcessMessage(Message message, List<ProblemDataSet> dataSets, List<ActiveComponent> activeComponents)
+        public static void ProcessMessage(Message message, Dictionary<int, ProblemDataSet> dataSets, Dictionary<int, ActiveComponent> activeComponents)
         {
             //TODO
             throw new NotImplementedException();
@@ -30,7 +30,7 @@ namespace Server
         /// <param name="dataSets"></param>
         /// <param name="activeComponents"></param>
         /// <returns></returns>
-        public static Message[] CreateResponseMessages(Message message, List<ProblemDataSet> dataSets, List<ActiveComponent> activeComponents)
+        public static Message[] CreateResponseMessages(Message message, Dictionary<int, ProblemDataSet> dataSets, Dictionary<int, ActiveComponent> activeComponents)
         {
             //TODO
             throw new NotImplementedException();

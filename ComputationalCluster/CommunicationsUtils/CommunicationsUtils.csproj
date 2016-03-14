@@ -44,8 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientComponentCommon\ClientComponent.cs" />
-    <Compile Include="ClientComponentCommon\IClusterComponent.cs" />
+    <Compile Include="ClientComponentCommon\InternalClientComponent.cs" />
+    <Compile Include="ClientComponentCommon\IExternalClientComponent.cs" />
     <Compile Include="Messages\Constructors.cs" />
     <Compile Include="Messages\DivideProblem.cs" />
     <Compile Include="Messages\Error.cs" />

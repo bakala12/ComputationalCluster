@@ -11,39 +11,50 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    public class ClientNode : IClusterComponent
+    public class ClientNode : IExternalClientComponent
     {
         private IClusterClient clusterClient;
         private Stopwatch solvingWatch;
-        //private List<NoOperationBackupCommunicationServersBackupCommunicationServer> backups;
+        private IClientNodeProcessing core;
 
-        public ClientNode(IClusterClient _clusterClient)
+        public ClientNode(IClusterClient _clusterClient, IClientNodeProcessing _core)
         {
             clusterClient = _clusterClient;
+            core = _core;
             solvingWatch = new Stopwatch();
         }
 
+        /// <summary>
+        /// main CC loop
+        /// </summary>
         public void Run ()
         {
-            //while (true)
-            //{
+            while (true)
+            {
                 //this thing will grow on second stage of project:
-                byte[] byteData = getProblem();
+                core.GetProblem();
                 //could be in another thread:
-                SolutionsSolution solution = workProblem(byteData);
+                SolutionsSolution solution = this.WorkProblem();
                 if (solution == null)
                 {
                     Console.WriteLine("Solving timeout. Aborting.");
+                    continue;
                 }
                 else
                     Console.WriteLine("Solution Found.");
-            //}
+
+            core.DoSomethingWithSolution(solution);
+            }
         }
 
-        private SolutionsSolution workProblem (byte[] byteData)
+        /// <summary>
+        /// main communication loop concerning actual problem context
+        /// </summary>
+        /// <returns>final solution (or none if something crashed)</returns>
+        public SolutionsSolution WorkProblem ()
         {
             solvingWatch.Reset();
-            SolveRequestResponse response = sendProblem(byteData);
+            SolveRequestResponse response = SendProblem();
             ulong problemId = response.Id;
             solvingWatch.Start();
 
@@ -56,7 +67,7 @@ namespace Client
             {
                 Thread.Sleep((int)Properties.Settings.Default.SolutionCheckingInterval);
 
-                Solutions solution = checkComputations(request);
+                Solutions solution = CheckComputations(request);
 
                 //assuming that final solution has one element with type==final
                 if (solution.Solutions1[0].Type == SolutionsSolutionType.Final)
@@ -79,23 +90,14 @@ namespace Client
         /// </summary>
         /// <param name="byteData"></param>
         /// <returns></returns>
-        private SolveRequestResponse sendProblem(byte[] byteData)
+        public SolveRequestResponse SendProblem()
         {
-            ulong solvingTimeout = Properties.Settings.Default.SolveTimeout;
-            bool solvingTimeoutSpecified = true;
-            string problemType = "EXAMPLE";
-
-            SolveRequest request = new SolveRequest()
-            {
-                SolvingTimeout = solvingTimeout,
-                SolvingTimeoutSpecified = solvingTimeoutSpecified,
-                IdSpecified = false,
-                Data = byteData,
-                ProblemType = problemType
-            };
-
-            Message[] responses = clusterClient.SendRequests(new[] { request });
+            SolveRequest problemRequest = core.GetRequest();
+            problemRequest.IdSpecified = false;
+            
+            Message[] responses = clusterClient.SendRequests(new[] { problemRequest });
             SolveRequestResponse solveResponse = null;
+
             foreach (var response in responses)
             {
                 switch (response.MessageType)
@@ -106,7 +108,7 @@ namespace Client
                         solveResponse = response.Cast<SolveRequestResponse>();
                         break;
                     case MessageType.NoOperationMessage:
-                        updateBackups(response.Cast<NoOperation>());
+                        UpdateBackups(response.Cast<NoOperation>());
                         break;
                     default:
                         throw new Exception("Invalid message delivered in CC's sendProblem procedure "
@@ -124,7 +126,7 @@ namespace Client
         /// </summary>
         /// <param name="request"></param>
         /// <returns>complete solution if cluster finished task</returns>
-        private Solutions checkComputations(SolutionRequest request)
+        public Solutions CheckComputations(SolutionRequest request)
         {
             Message[] responses = clusterClient.SendRequests(new[] { request });
             Solutions solutionReponse = null;
@@ -134,7 +136,7 @@ namespace Client
                 switch (response.MessageType)
                 {
                     case MessageType.NoOperationMessage:
-                        this.updateBackups(response.Cast<NoOperation>());
+                        this.UpdateBackups(response.Cast<NoOperation>());
                         break;
                     case MessageType.SolutionsMessage:
                         if (solutionReponse != null)
@@ -152,16 +154,10 @@ namespace Client
         }
 
         /// <summary>
-        /// not-implemented yet subroutine of getting a problem to solver
-        /// and transforming it into the byte data
+        /// will be implemented in the future
         /// </summary>
-        /// <returns></returns>
-        private byte[] getProblem ()
-        {
-            return new byte[1] { 123 };
-        }
-
-        public void updateBackups(NoOperation msg)
+        /// <param name="msg"></param>
+        public void UpdateBackups(NoOperation msg)
         {
 
         }

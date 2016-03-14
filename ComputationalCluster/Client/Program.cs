@@ -17,8 +17,8 @@ namespace Client
 
             IClusterClient clusterClient = ClusterClientFactory.Factory.Create(
                 Properties.Settings.Default.Address, Properties.Settings.Default.Port);
-
-            ClientNode clientNode = new ClientNode(clusterClient);
+            var core = new ClientNodeProcessingModule();
+            ClientNode clientNode = new ClientNode(clusterClient, core);
             clientNode.Run();
         }
     }

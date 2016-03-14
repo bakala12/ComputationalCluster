@@ -4,37 +4,23 @@ using CommunicationsUtils.NetworkInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace TaskManager
 {
-    public class TaskManager : ClientComponent
+    /// <summary>
+    /// task manager communication context
+    /// </summary>
+    public class TaskManager : InternalClientComponent
     {
-        private ulong threadCount = 0;
-        private List<StatusThread> threads;
-        Stopwatch timeoutWatch = new Stopwatch();
+        //watch to obey timeout
+        private Stopwatch timeoutWatch = new Stopwatch();
+        //task manager non-communication context
+        private ITaskManagerProcessing core;
 
-        /// <summary>
-        /// current problems in TM indexed by problem id in cluster (given by CS)
-        /// </summary>
-        private Dictionary<ulong, ProblemInfo> currentProblems = new Dictionary<ulong, ProblemInfo>();
-
-        public TaskManager(IClusterClient _clusterClient) : base (_clusterClient)
+        public TaskManager(IClusterClient _clusterClient, ITaskManagerProcessing _core) 
+            : base (_clusterClient)
         {
-            threads = new List<StatusThread>();
-            //enough for this stage:
-            threads.Add(new StatusThread()
-            {
-                HowLongSpecified = false,
-                ProblemInstanceIdSpecified = false,
-                State = StatusThreadState.Idle,
-                ProblemType = "",
-                TaskIdSpecified = true,
-                TaskId = ++threadCount
-            });
+            core = _core;
         }
 
         public override void Run ()
@@ -43,30 +29,32 @@ namespace TaskManager
             timeoutWatch.Start();
             while(true)
             {
-                if (timeoutWatch.ElapsedMilliseconds > (long)(0.8*timeout))
+                //could be adjusted:
+                if (timeoutWatch.ElapsedMilliseconds > (long)(0.7*timeout))
                 {
-                    Message[] responses = sendStatus();
+                    Message[] responses = SendStatus();
                     timeoutWatch.Restart();
-                    handleResponses(responses);
+                    HandleResponses(responses);
                 }
             }
         }
 
-        private Message[] sendStatus()
+        /// <summary>
+        /// sends status, basing on core's state
+        /// </summary>
+        /// <returns>responses (potential tasks) from server</returns>
+        public override Message[] SendStatus()
         {
-            Status statusMsg = new Status()
-            {
-                Id = componentId,
-                Threads = threads.ToArray()
-            };
-            return clusterClient.SendRequests(new[] { statusMsg });
+            Status status = core.GetStatus();
+            status.Id = this.componentId;
+            return clusterClient.SendRequests(new[] { status });
         }
 
         /// <summary>
         /// handler of respones, sends proper requests
         /// </summary>
         /// <param name="responses"></param>
-        private void handleResponses (Message[] responses)
+        public void HandleResponses (Message[] responses)
         {
             List<Message> newRequests = new List<Message>();
             foreach (var response in responses)
@@ -74,16 +62,16 @@ namespace TaskManager
                 switch(response.MessageType)
                 {
                     case MessageType.NoOperationMessage:
-                        updateBackups(response.Cast<NoOperation>());
+                        UpdateBackups(response.Cast<NoOperation>());
                         break;
                     case MessageType.DivideProblemMessage:
                         SolvePartialProblems partialProblemsMsg = 
-                            this.handleDivideProblem(response.Cast<DivideProblem>());
+                            core.DivideProblem(response.Cast<DivideProblem>());
                         newRequests.Add(partialProblemsMsg);
 
                         break;
                     case MessageType.SolutionsMessage:
-                        Solutions solutions = this.handleSolutions(response.Cast<Solutions>());
+                        Solutions solutions = core.HandleSolutions((response.Cast<Solutions>()));
                         //null if linking solutions didn't occur
                         if (solutions != null)
                         {
@@ -97,91 +85,12 @@ namespace TaskManager
             }
             Message[] newResponses = clusterClient.SendRequests(newRequests.ToArray());
             timeoutWatch.Reset();
-            this.handleResponses(newResponses);
-        }
-
-        private SolvePartialProblems handleDivideProblem (DivideProblem divideProblem)
-        {
-            //implementation in second stage, this is mocked:
-
-            var partialProblem = new SolvePartialProblemsPartialProblem()
-            {
-                TaskId = 0,
-                Data = new byte[] { 0 },
-                NodeID = componentId
-            };
-
-            //adding info about partial problems, their task ids, and partialProblem
-            //some things can be temporary (partialProblems?)
-            currentProblems.Add(divideProblem.Id, new ProblemInfo() { ProblemsCount = 1,
-                ProblemType = divideProblem.ProblemType, SolutionsCount = 0 });
-
-            currentProblems[divideProblem.Id].PartialProblems.Add(0, new PartialInfo()
-            { Solution = null, Problem = partialProblem });
-            //end of implementation
-
-            //creating msg
-            SolvePartialProblems partialProblems = new SolvePartialProblems()
-            {
-                ProblemType = divideProblem.ProblemType,
-                Id = divideProblem.Id,
-                CommonData = divideProblem.Data,
-                PartialProblems = new SolvePartialProblemsPartialProblem[]
-                {
-                    partialProblem
-                }
-            };
-
-            return partialProblems;
+            this.HandleResponses(newResponses);
         }
 
         /// <summary>
-        /// handles solutions msg. according to specifiaction, Solutions message
-        /// concerns only one problem
+        /// provides proper register message
         /// </summary>
-        /// <param name="solutions"></param>
-        private Solutions handleSolutions(Solutions solutions)
-        {
-            foreach (var solution in solutions.Solutions1)
-            {
-                if (currentProblems[solutions.Id].PartialProblems[solution.TaskId].Solution != null)
-                {
-                    throw new Exception("Problem with multiple sending of partialProblem by CS");
-                }
-                currentProblems[solutions.Id].PartialProblems[solution.TaskId].Solution = solution;
-                currentProblems[solutions.Id].SolutionsCount++;
-            }
-            //this is not possible:
-            //if (currentProblems[solutions.Id].SolutionsCount > currentProblems[solutions.Id].ProblemsCount)
-
-            //can be linked, because all of partial problems were solved & delivered
-            if (currentProblems[solutions.Id].SolutionsCount == currentProblems[solutions.Id].ProblemsCount)
-            {
-                Solutions finalSolution = linkSolutions(solutions.Id);
-                return finalSolution;
-            }
-
-            return null;
-        }
-
-        //task solver stuff
-        private Solutions linkSolutions (ulong problemId)
-        {
-            //foreach (var pInfo in currentProblems[problemId].PartialProblems)
-            //get SolutionsSolution from pInfo and do something amazing
-
-            //return final solution (this one is mocked)
-            return new Solutions()
-            {
-                CommonData = new byte[] { 0 },
-                Id = problemId,
-                ProblemType = currentProblems[problemId].ProblemType,
-                Solutions1
-            = new[] { new SolutionsSolution() { Data = null, ComputationsTime = 1, TaskIdSpecified = false,
-            Type = SolutionsSolutionType.Final} }
-            };
-        }
-
         protected override void registerComponent()
         {
             // some mock:
@@ -197,7 +106,11 @@ namespace TaskManager
             base.handleRegisterResponses(registerRequest);
         }
 
-        public override void updateBackups (NoOperation msg)
+        /// <summary>
+        /// nothing for now:
+        /// </summary>
+        /// <param name="msg"></param>
+        public override void UpdateBackups (NoOperation msg)
         {
 
         }

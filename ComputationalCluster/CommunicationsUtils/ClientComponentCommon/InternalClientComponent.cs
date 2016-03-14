@@ -9,22 +9,36 @@ using System.Threading.Tasks;
 
 namespace CommunicationsUtils.ClientComponentCommon
 {
-    //common things for client components (that means TM and CN, but NO CC)
-    public abstract class ClientComponent: IClusterComponent
+    //common things for cluster's internal client components (TM and CN, not comp. client)
+    public abstract class InternalClientComponent: IExternalClientComponent
     {
-        protected IClusterClient clusterClient;
-        protected ulong componentId;
-        protected uint timeout;
+        //external:
+        public abstract void Run();
+        public abstract void UpdateBackups(NoOperation msg);
 
-        public ClientComponent(IClusterClient _clusterClient)
+        //internal:
+        protected IClusterClient clusterClient;
+        protected uint timeout;
+        protected ulong componentId;
+
+        public InternalClientComponent(IClusterClient _clusterClient)
         {
             clusterClient = _clusterClient;
         }
 
+        /// <summary>
+        /// send register message to server
+        /// </summary>
         protected abstract void registerComponent();
-        public abstract void Run();
-        public abstract void updateBackups(NoOperation msg);
 
+        /// <summary>
+        /// send status message to server
+        /// </summary>
+        /// <returns></returns>
+        public abstract Message[] SendStatus();
+
+        //common for TM and CN method: handles register responses
+        //getting component's id, initializing backup table...
         protected virtual void handleRegisterResponses(Register registerMessage)
         {
             Message[] responses = clusterClient.SendRequests(new[] { registerMessage });
@@ -39,7 +53,7 @@ namespace CommunicationsUtils.ClientComponentCommon
                         registerResponse = response.Cast<RegisterResponse>();
                         break;
                     case MessageType.NoOperationMessage:
-                        updateBackups(response.Cast<NoOperation>());
+                        UpdateBackups(response.Cast<NoOperation>());
                         break;
                     default:
                         throw new Exception("Invalid message delivered in register procedure "

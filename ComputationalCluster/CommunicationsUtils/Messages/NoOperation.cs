@@ -16,6 +16,7 @@ using System.Xml.Serialization;
 
 namespace CommunicationsUtils.Messages
 {
+
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
     [System.SerializableAttribute()]
@@ -23,31 +24,14 @@ namespace CommunicationsUtils.Messages
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
     [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.mini.pw.edu.pl/ucc/", IsNullable = false)]
-    public partial class RegisterResponse
+    public partial class NoOperation
     {
 
-        private ulong idField;
-
-        private uint timeoutField;
-
-        private RegisterResponseBackupCommunicationServers backupCommunicationServersField;
+        private NoOperationBackupCommunicationServer[] backupCommunicationServersField;
 
         /// <remarks/>
-        public ulong Id
-        {
-            get { return this.idField; }
-            set { this.idField = value; }
-        }
-
-        /// <remarks/>
-        public uint Timeout
-        {
-            get { return this.timeoutField; }
-            set { this.timeoutField = value; }
-        }
-
-        /// <remarks/>
-        public RegisterResponseBackupCommunicationServers BackupCommunicationServers
+        [System.Xml.Serialization.XmlArrayItemAttribute("BackupCommunicationServer", IsNullable = false)]
+        public NoOperationBackupCommunicationServer[] BackupCommunicationServers
         {
             get { return this.backupCommunicationServersField; }
             set { this.backupCommunicationServersField = value; }
@@ -60,33 +44,12 @@ namespace CommunicationsUtils.Messages
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    public partial class RegisterResponseBackupCommunicationServers
-    {
-
-        private RegisterResponseBackupCommunicationServersBackupCommunicationServer backupCommunicationServerField;
-
-        /// <remarks/>
-        public RegisterResponseBackupCommunicationServersBackupCommunicationServer BackupCommunicationServer
-        {
-            get { return this.backupCommunicationServerField; }
-            set { this.backupCommunicationServerField = value; }
-        }
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    public partial class RegisterResponseBackupCommunicationServersBackupCommunicationServer
+    public partial class NoOperationBackupCommunicationServer
     {
 
         private string addressField;
 
         private ushort portField;
-
-        private bool portFieldSpecified;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute(DataType = "anyURI")]
@@ -102,14 +65,6 @@ namespace CommunicationsUtils.Messages
         {
             get { return this.portField; }
             set { this.portField = value; }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool portSpecified
-        {
-            get { return this.portFieldSpecified; }
-            set { this.portFieldSpecified = value; }
         }
     }
 }

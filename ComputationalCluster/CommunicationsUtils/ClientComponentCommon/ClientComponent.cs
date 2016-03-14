@@ -31,7 +31,7 @@ namespace CommunicationsUtils.ClientComponentCommon
             RegisterResponse registerResponse = null;
             foreach (var response in responses)
             {
-                switch (response.Type)
+                switch (response.MessageType)
                 {
                     case MessageType.RegisterResponseMessage:
                         if (registerResponse != null)

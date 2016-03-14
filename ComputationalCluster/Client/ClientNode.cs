@@ -98,7 +98,7 @@ namespace Client
             SolveRequestResponse solveResponse = null;
             foreach (var response in responses)
             {
-                switch (response.Type)
+                switch (response.MessageType)
                 {
                     case MessageType.SolveRequestResponseMessage:
                         if (solveResponse != null)
@@ -131,7 +131,7 @@ namespace Client
 
             foreach (var response in responses)
             {
-                switch (response.Type)
+                switch (response.MessageType)
                 {
                     case MessageType.NoOperationMessage:
                         this.updateBackups(response.Cast<NoOperation>());

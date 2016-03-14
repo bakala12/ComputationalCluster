@@ -47,14 +47,14 @@ namespace Tests
         {
             Message message = MessagesFactory.CreateEmptyMessage(MessageType.NoOperationMessage);
             NoOperation noOperation = message.Cast<NoOperation>();
-            noOperation.BackupCommunicationServers = new NoOperationBackupCommunicationServers();
-            noOperation.BackupCommunicationServers.BackupCommunicationServer = new NoOperationBackupCommunicationServersBackupCommunicationServer();
-            noOperation.BackupCommunicationServers.BackupCommunicationServer.port = 1234;
+            noOperation.BackupCommunicationServers = new NoOperationBackupCommunicationServer[1];
+            noOperation.BackupCommunicationServers[0] = new NoOperationBackupCommunicationServer();
+            noOperation.BackupCommunicationServers[0].port = 1234;
             string xml = _serializer.ToXmlString(noOperation);
             Message m = _serializer.FromXmlString(xml);
             NoOperation noOperationDeserialized = m.Cast<NoOperation>();
-            Assert.AreEqual(noOperationDeserialized.BackupCommunicationServers.BackupCommunicationServer.port, 
-                noOperationDeserialized.BackupCommunicationServers.BackupCommunicationServer.port);
+            Assert.AreEqual(noOperationDeserialized.BackupCommunicationServers[0].port, 
+                noOperationDeserialized.BackupCommunicationServers[0].port);
         }
 
         [TestMethod]
@@ -79,7 +79,6 @@ namespace Tests
             SolveRequestResponse response =
                 MessagesFactory.CreateEmptyMessage(MessageType.SolveRequestResponseMessage).Cast<SolveRequestResponse>();
             response.Id = 100;
-            response.IdSpecified = true;
             string xml = _serializer.ToXmlString(response);
             SolveRequestResponse responseDeserialized = _serializer.FromXmlString(xml).Cast<SolveRequestResponse>();
             Assert.AreEqual(response.Id, responseDeserialized.Id);
@@ -108,16 +107,15 @@ namespace Tests
                 MessagesFactory.CreateEmptyMessage(MessageType.RegisterResponseMessage).Cast<RegisterResponse>();
             response.Id = 1234;
             response.Timeout = 12345;
-            response.BackupCommunicationServers = new RegisterResponseBackupCommunicationServers();
-            response.BackupCommunicationServers.BackupCommunicationServer = new RegisterResponseBackupCommunicationServersBackupCommunicationServer();
-            response.BackupCommunicationServers.BackupCommunicationServer.port = 123;
-            response.BackupCommunicationServers.BackupCommunicationServer.portSpecified = true;
+            response.BackupCommunicationServers = new RegisterResponseBackupCommunicationServer[1];
+            response.BackupCommunicationServers[0] = new RegisterResponseBackupCommunicationServer();
+            response.BackupCommunicationServers[0].port = 123;
             string xml = _serializer.ToXmlString(response);
             RegisterResponse responseDeserialized = _serializer.FromXmlString(xml).Cast<RegisterResponse>();
             Assert.AreEqual(response.Id, responseDeserialized.Id);
             Assert.AreEqual(response.Timeout, responseDeserialized.Timeout);
-            Assert.AreEqual(response.BackupCommunicationServers.BackupCommunicationServer.port,
-                responseDeserialized.BackupCommunicationServers.BackupCommunicationServer.port);
+            Assert.AreEqual(response.BackupCommunicationServers[0].port,
+                responseDeserialized.BackupCommunicationServers[0].port);
         }
 
         [TestMethod]
@@ -138,7 +136,7 @@ namespace Tests
             MessageToBytesConverter converter = new MessageToBytesConverter();
             byte[] bytes = converter.ToByteArray(message);
             Message messageDeserialized = converter.FromBytesArray(bytes);
-            Assert.AreEqual(MessageType.StatusMessage, messageDeserialized.Type);
+            Assert.AreEqual(MessageType.StatusMessage, messageDeserialized.MessageType);
             Status mStatus = messageDeserialized.Cast<Status>();
             Assert.AreEqual(message.Id, mStatus.Id);
             Assert.AreEqual(message.Threads.Length, mStatus.Threads.Length);

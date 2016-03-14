@@ -71,7 +71,7 @@ namespace TaskManager
             List<Message> newRequests = new List<Message>();
             foreach (var response in responses)
             {
-                switch(response.Type)
+                switch(response.MessageType)
                 {
                     case MessageType.NoOperationMessage:
                         updateBackups(response.Cast<NoOperation>());

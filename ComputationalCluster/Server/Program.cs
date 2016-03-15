@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommunicationsUtils.NetworkInterfaces;
 using CommunicationsUtils.NetworkInterfaces.Factories;
+using Server.Data;
 
 namespace Server
 {

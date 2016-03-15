@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using CommunicationsUtils.Shared;
-namespace Server
+
+namespace Server.Extensions
 {
     public static class ArgumentParserExtensionsForServer
     {

@@ -38,6 +38,7 @@ namespace TaskManager
 
             //this thread becomes now status sending thread
             RegisterComponent();
+            core.ComponentId = this.componentId;
             while(true)
             {
                 Thread.Sleep((int)(0.7 * timeout));

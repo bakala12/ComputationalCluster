@@ -20,8 +20,13 @@ namespace TaskManager.Core
         private List<StatusThread> threads;
         private ulong threadCount = 0;
 
+        //necessary for now, but could/should be removed:
         public ulong ComponentId
         {
+            get
+            {
+                return componentId;
+            }
             set
             {
                 componentId = value;

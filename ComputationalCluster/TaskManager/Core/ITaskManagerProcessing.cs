@@ -17,5 +17,6 @@ namespace TaskManager.Core
         Solutions HandleSolutions(Solutions solutions);
         Solutions LinkSolutions(ulong problemId);
         Status GetStatus();
+        ulong ComponentId {get;set;}
     }
 }

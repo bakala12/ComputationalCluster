@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
 using Server.Data;
@@ -18,7 +17,7 @@ namespace Server
         /// <summary>
         /// Indicating whether server threads work.
         /// </summary>
-        private volatile bool _isWorking = false;
+        private volatile bool _isWorking;
         
         /// <summary>
         /// A list of currently running threads at server.
@@ -58,7 +57,7 @@ namespace Server
         /// <summary>
         /// Object responsible for processing messages.
         /// </summary>
-        private IMessageProcessor MessageProcessor;
+        private readonly IMessageProcessor _messageProcessor;
         
         /// <summary>
         /// Initializes a new instance of ComputationalServer with the specified listener.
@@ -73,7 +72,7 @@ namespace Server
             _messagesQueue = new ConcurrentQueue<Message>();
             _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
             _problemDataSets= new ConcurrentDictionary<int, ProblemDataSet>();
-            MessageProcessor = new BackupMessageProcessor();
+            _messageProcessor = new BackupMessageProcessor();
         }
 
         /// <summary>
@@ -86,7 +85,7 @@ namespace Server
         {
             State = state;
             if(state == ServerState.Primary)
-                MessageProcessor = new PrimaryMessageProcessor();
+                _messageProcessor = new PrimaryMessageProcessor();
         }
 
         /// <summary>
@@ -120,7 +119,7 @@ namespace Server
         /// <param name="delegatFunc">Function to be invoked in a separate thread</param>
         private void ProcessInParallel(Action delegatFunc)
         {
-            Thread thread = new Thread(()=>delegatFunc());
+            var thread = new Thread(()=>delegatFunc());
             _currentlyWorkingThreads.Add(thread);
             thread.Start();
         }
@@ -138,9 +137,11 @@ namespace Server
                     foreach (var message in requestsMessages)
                     {
                         _messagesQueue.Enqueue(message);
-                        var responseMessages = MessageProcessor.CreateResponseMessages(message, _problemDataSets,
+                        Console.WriteLine("Enqueueing {0} message.", message.MessageType);
+                        var responseMessages = _messageProcessor.CreateResponseMessages(message, _problemDataSets,
                             _activeComponents);
                         _clusterListener.SendResponse(responseMessages);
+                        Console.WriteLine("Response for {0} message has been sent.", message.MessageType);
                     }
                 }
             }
@@ -157,8 +158,10 @@ namespace Server
                 {
                     Message message;
                     var result = _messagesQueue.TryDequeue(out message);
+                    Console.WriteLine("Dequeueing {0} message.", message.MessageType);
                     if (!result) continue;
-                    MessageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
+                    _messageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
+                    Console.WriteLine("Message {0} has been proccessed.", message.MessageType);
                 }
             }
         }

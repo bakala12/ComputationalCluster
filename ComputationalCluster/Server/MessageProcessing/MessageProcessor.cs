@@ -1,13 +1,16 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net;
 using CommunicationsUtils.Messages;
 using Server.Data;
 using Server.Interfaces;
 
 namespace Server.MessageProcessing
 {
+    /// <summary>
+    /// So far some processing is same for primary server and backup server, 
+    /// will be developed in the future.
+    /// It prints some information to console.
+    /// </summary>
     public abstract class MessageProcessor : IMessageProcessor
     {
         public virtual void ProcessMessage(Message message, IDictionary<int, ProblemDataSet> dataSets,
@@ -85,81 +88,91 @@ namespace Server.MessageProcessing
             }
         }
 
+        private static void WriteControlInformation(Message message)
+        {
+            Console.WriteLine("Message is dequeued and is being processed. Message type: " + message.MessageType);
+        }
+
+        protected static void WriteResponseMessageControlInformation(Message message, MessageType type)
+        {
+            Console.WriteLine("Responding {0} message. Returning new {1} message in response.", message.MessageType, type);
+        }
+
         protected virtual void ProcessDivideProblemMessage(DivideProblem message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual void ProcessNoOperationMessage(NoOperation message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual void ProcessSolvePartialProblemMessage(SolvePartialProblems message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual void ProcessRegisterMessage(Register message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual void ProcessRegisterResponseMessage(RegisterResponse message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual void ProcessSolutionsMessage(Solutions message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual void ProcessSolutionRequestMessage(SolutionRequest message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual void ProcessSolveRequestMessage(SolveRequest message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual void ProcessSolveRequestResponseMessage(SolveRequestResponse message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual void ProcessStatusMessage(Status message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual void ProcessErrorMessage(Error message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-
+            WriteControlInformation(message);
         }
 
         protected virtual Message[] RespondDivideProblemMessage(DivideProblem message,

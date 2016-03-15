@@ -7,6 +7,7 @@ using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
 using Server.Data;
 using Server.Interfaces;
+using Server.MessageProcessing;
 
 // ReSharper disable FunctionNeverReturns
 
@@ -52,8 +53,13 @@ namespace Server
         /// <summary>
         /// List of active problem data sets.
         /// </summary>
-        private readonly ConcurrentDictionary<int, ProblemDataSet> _problemDataSets; 
+        private readonly ConcurrentDictionary<int, ProblemDataSet> _problemDataSets;
 
+        /// <summary>
+        /// Object responsible for processing messages.
+        /// </summary>
+        private IMessageProcessor MessageProcessor;
+        
         /// <summary>
         /// Initializes a new instance of ComputationalServer with the specified listener.
         /// The default state of server is Backup.
@@ -67,6 +73,7 @@ namespace Server
             _messagesQueue = new ConcurrentQueue<Message>();
             _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
             _problemDataSets= new ConcurrentDictionary<int, ProblemDataSet>();
+            MessageProcessor = new BackupMessageProcessor();
         }
 
         /// <summary>
@@ -78,6 +85,8 @@ namespace Server
         public ComputationalServer(IClusterListener listener, ServerState state) : this(listener)
         {
             State = state;
+            if(state == ServerState.Primary)
+                MessageProcessor = new PrimaryMessageProcessor();
         }
 
         /// <summary>

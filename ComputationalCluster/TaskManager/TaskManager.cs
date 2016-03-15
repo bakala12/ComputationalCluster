@@ -2,6 +2,7 @@
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -11,16 +12,20 @@ namespace TaskManager
 {
     /// <summary>
     /// task manager communication context
+    /// uses 2+ threads
+    /// status sending thread - used in Run(), sends status via statusClient
+    /// message processing thread - works in HandleResponses, checks responses queue
+    /// long-running threads - invoked in message processing, work on divide/link problems
+    /// and send proper messages via problemClient
     /// </summary>
     public class TaskManager : InternalClientComponent
     {
         //task manager non-communication context
         private ITaskManagerProcessing core;
-        private Queue<Message> messageQueue;
 
-        public TaskManager(IClusterClient _clusterClient, IClusterClient _special, 
+        public TaskManager(IClusterClient _statusClient, IClusterClient _problemClient, 
             IMessageArrayCreator _creator, ITaskManagerProcessing _core) 
-            : base (_clusterClient, _special, _creator)
+            : base (_statusClient, _problemClient, _creator)
         {
             core = _core;
         }
@@ -31,15 +36,16 @@ namespace TaskManager
             Thread handlerThread = new Thread(this.HandleResponses);
             handlerThread.Start();
 
-            registerComponent();
+            //this thread becomes now status sending thread
+            RegisterComponent();
             while(true)
             {
-                Message[] responses = SendStatus();
+                Thread.Sleep((int)(0.7 * timeout));
+                Message[] responses = this.SendStatus();
                 foreach (var response in responses)
                 {
                     messageQueue.Enqueue(response);
                 }
-                Thread.Sleep((int)(0.7 * timeout));
             }
         }
 
@@ -52,65 +58,13 @@ namespace TaskManager
             Status status = core.GetStatus();
             status.Id = this.componentId;
             Message[] requests = creator.Create(status);
-            return clusterClient.SendRequests(requests);
-        }
-
-        /// <summary>
-        /// handler of respones, sends proper requests
-        /// </summary>
-        /// <param name="responses"></param>
-        public void HandleResponses ()
-        {
-            while (true)
-            {
-                //busy waiting. must be changed.
-                if (messageQueue.Count == 0)
-                {
-                    Thread.Sleep(50);
-                    continue;
-                }
-                var message = messageQueue.Dequeue();
-
-                switch (message.MessageType)
-                {
-                    case MessageType.NoOperationMessage:
-                        UpdateBackups(message.Cast<NoOperation>());
-                        break;
-                    case MessageType.DivideProblemMessage:
-                        //should be done in another thread not to
-                        //overload message handler thread
-                        Thread compThread = new Thread
-                            (o=> this.longComputation(() => core.DivideProblem
-                        (message.Cast<DivideProblem>())));
-                        compThread.Start();
-                        break;
-                    case MessageType.SolutionsMessage:
-                        //first, in this thread, if solution needs to be linked,
-                        //create new thread
-                        Thread solThread = new Thread (o=> 
-                        core.HandleSolutions((message.Cast<Solutions>())));
-                        solThread.Start();
-                        
-                        break;
-                        //case errormsg
-                    default:
-                        throw new Exception("Wrong message delivered to TM: " + message.ToString());
-                }
-            }
-        }
-
-        private void sendSomething (Message request)
-        {
-            Message[] requests = creator.Create(request);
-            Message[] responses = specialClusterClient.SendRequests(requests);
-            foreach (var response in responses)
-                messageQueue.Enqueue(response);
+            return statusClient.SendRequests(requests);
         }
 
         /// <summary>
         /// provides proper register message
         /// </summary>
-        protected override void registerComponent()
+        public override void RegisterComponent()
         {
             // some mock:
             Register registerRequest = new Register()
@@ -121,15 +75,51 @@ namespace TaskManager
                 DeregisterSpecified = false,
                 IdSpecified = false
             };
-
             base.handleRegisterResponses(registerRequest);
         }
 
-        private void longComputation (Func<Message> a)
+
+        /// <summary>
+        /// handler of respones, sends proper requests
+        /// </summary>
+        /// <param name="responses"></param>
+        public override void HandleResponses ()
         {
-            Message m = a.Invoke();
-            if (m != null)
-                sendSomething(m);
+            while (true)
+            {
+                Message message;
+                if (!messageQueue.TryDequeue (out message))
+                {
+                    Thread.Sleep(100);
+                    continue;
+                }
+                switch (message.MessageType)
+                {
+                    case MessageType.NoOperationMessage:
+                        UpdateBackups(message.Cast<NoOperation>());
+                        break;
+                    case MessageType.DivideProblemMessage:
+                        //should be done in another thread not to
+                        //overload message handler thread
+                        Thread compThread = new Thread
+                            (o=> this.StartLongComputation(() => core.DivideProblem
+                        (message.Cast<DivideProblem>())));
+                        compThread.Start();
+                        break;
+                    case MessageType.SolutionsMessage:
+                        //first, in this thread, if solution needs to be linked,
+                        //create new thread
+                        Thread solThread = new Thread (o=> 
+                        core.HandleSolutions((message.Cast<Solutions>())));
+                        solThread.Start();
+                        break;
+                    case MessageType.ErrorMessage:
+                        //something?
+                        break;
+                    default:
+                        throw new Exception("Wrong message delivered to TM: " + message.ToString());
+                }
+            }
         }
 
         /// <summary>
@@ -138,7 +128,7 @@ namespace TaskManager
         /// <param name="msg"></param>
         public override void UpdateBackups (NoOperation msg)
         {
-
+            //will be implemented in internalclientcomponent in the next week
         }
     }
 }

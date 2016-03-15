@@ -44,7 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveComponent.cs" />
-    <Compile Include="ArgumentParserExtensions.cs" />
+    <Compile Include="ArgumentParserExtensionsForServer.cs" />
     <Compile Include="ComputationalServer.cs" />
     <Compile Include="IRunnable.cs" />
     <Compile Include="MessageProcessor.cs" />

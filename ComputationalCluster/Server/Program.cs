@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using CommunicationsUtils.Argument_parser;
 using CommunicationsUtils.NetworkInterfaces;
 using CommunicationsUtils.NetworkInterfaces.Factories;
 
@@ -16,8 +17,10 @@ namespace Server
             string address = Properties.Settings.Default.Address;
             int port = Properties.Settings.Default.Port;
             ServerState state = Properties.Settings.Default.IsBackup ? ServerState.Backup : ServerState.Primary;
-            //arg parsing
-            //fell free here to override default values here
+
+            var parser = new ArgumentParser(OptionSetPool.ServerOptionsSet);
+            parser.ProcessArguments(args);
+            parser.UpdateConfiguration(parser.map);
 
             IPAddress ipAddress;
             if(!IPAddress.TryParse(address, out ipAddress))

@@ -18,12 +18,17 @@ namespace CommunicationsUtils.ClientComponentCommon
 
         //internal:
         protected IClusterClient clusterClient;
+        protected IClusterClient specialClusterClient;
+        protected IMessageArrayCreator creator;
         protected uint timeout;
         protected ulong componentId;
 
-        public InternalClientComponent(IClusterClient _clusterClient)
+        public InternalClientComponent(IClusterClient _clusterClient, IClusterClient _special,
+            IMessageArrayCreator _creator)
         {
             clusterClient = _clusterClient;
+            specialClusterClient = _special;
+            creator = _creator;
         }
 
         /// <summary>

@@ -46,5 +46,29 @@ namespace Client.Properties {
                 this["Port"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public ulong SolutionCheckingInterval {
+            get {
+                return ((ulong)(this["SolutionCheckingInterval"]));
+            }
+            set {
+                this["SolutionCheckingInterval"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public ulong SolveTimeout {
+            get {
+                return ((ulong)(this["SolveTimeout"]));
+            }
+            set {
+                this["SolveTimeout"] = value;
+            }
+        }
     }
 }

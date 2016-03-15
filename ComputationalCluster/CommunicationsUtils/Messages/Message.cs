@@ -9,13 +9,13 @@ namespace CommunicationsUtils.Messages
     [System.Xml.Serialization.XmlInclude(typeof(Status))]
     public abstract class Message
     {
-        protected Message(MessageType type)
+        protected Message(MessageType messageType)
         {
-            Type = type;
+            MessageType = messageType;
         }
 
         [System.Xml.Serialization.XmlIgnore]
-        public MessageType Type { get; } 
+        public MessageType MessageType { get; } 
 
         public T Cast<T> () where T : Message
         {
@@ -34,6 +34,7 @@ namespace CommunicationsUtils.Messages
         SolutionRequestMessage,
         SolveRequestMessage,
         SolveRequestResponseMessage,
-        StatusMessage
+        StatusMessage,
+        ErrorMessage
     }
 }

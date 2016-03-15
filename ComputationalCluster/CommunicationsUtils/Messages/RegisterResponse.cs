@@ -23,13 +23,32 @@ namespace CommunicationsUtils.Messages
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
     [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.mini.pw.edu.pl/ucc/", IsNullable = false)]
-    public partial class NoOperation
+    public partial class RegisterResponse
     {
 
-        private NoOperationBackupCommunicationServers backupCommunicationServersField;
+        private ulong idField;
+
+        private uint timeoutField;
+
+        private RegisterResponseBackupCommunicationServer[] backupCommunicationServersField;
 
         /// <remarks/>
-        public NoOperationBackupCommunicationServers BackupCommunicationServers
+        public ulong Id
+        {
+            get { return this.idField; }
+            set { this.idField = value; }
+        }
+
+        /// <remarks/>
+        public uint Timeout
+        {
+            get { return this.timeoutField; }
+            set { this.timeoutField = value; }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlArrayItemAttribute("BackupCommunicationServer", IsNullable = false)]
+        public RegisterResponseBackupCommunicationServer[] BackupCommunicationServers
         {
             get { return this.backupCommunicationServersField; }
             set { this.backupCommunicationServersField = value; }
@@ -42,33 +61,12 @@ namespace CommunicationsUtils.Messages
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    public partial class NoOperationBackupCommunicationServers
-    {
-
-        private NoOperationBackupCommunicationServersBackupCommunicationServer backupCommunicationServerField;
-
-        /// <remarks/>
-        public NoOperationBackupCommunicationServersBackupCommunicationServer BackupCommunicationServer
-        {
-            get { return this.backupCommunicationServerField; }
-            set { this.backupCommunicationServerField = value; }
-        }
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    public partial class NoOperationBackupCommunicationServersBackupCommunicationServer
+    public partial class RegisterResponseBackupCommunicationServer
     {
 
         private string addressField;
 
         private ushort portField;
-
-        private bool portFieldSpecified;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute(DataType = "anyURI")]
@@ -84,14 +82,6 @@ namespace CommunicationsUtils.Messages
         {
             get { return this.portField; }
             set { this.portField = value; }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool portSpecified
-        {
-            get { return this.portFieldSpecified; }
-            set { this.portFieldSpecified = value; }
         }
     }
 }

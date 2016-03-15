@@ -39,7 +39,7 @@ namespace Server
         /// <summary>
         /// Current state of server.
         /// </summary>
-        public ServerState State { get; set; }
+        public ServerState State { get; private set; }
 
         /// <summary>
         /// List of active components in the system.

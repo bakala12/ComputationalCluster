@@ -11,8 +11,20 @@ namespace Server
 {
     public class ComputationalServer : IRunnable
     {
-        private volatile bool isWorking = false;
-        private List<Thread> _currentlyWorkingThreads = new List<Thread>(); 
+        /// <summary>
+        /// Indicating whether server threads work.
+        /// </summary>
+        private volatile bool _isWorking = false;
+        
+        /// <summary>
+        /// A list of currently running threads at server.
+        /// </summary>
+        private readonly List<Thread> _currentlyWorkingThreads = new List<Thread>(); 
+
+        /// <summary>
+        /// An object for multithread synchronization.
+        /// </summary>
+        private readonly object _syncRoot = new object();
 
         /// <summary>
         /// Listener which allows to receive and send messages.
@@ -71,7 +83,7 @@ namespace Server
         public void Run()
         {
             _clusterListener.Start();
-            isWorking = true;
+            _isWorking = true;
             _currentlyWorkingThreads.Clear();
             DoWork();
         }
@@ -82,7 +94,7 @@ namespace Server
         public void Stop()
         {
             _clusterListener.Stop();
-            isWorking = false;
+            _isWorking = false;
             foreach (var currentlyWorkingThread in _currentlyWorkingThreads)
             {
                 currentlyWorkingThread?.Join();
@@ -106,14 +118,18 @@ namespace Server
         /// </summary>
         private void ListenAndStoreMessagesAndSendResponses()
         {
-            while (true)
+            while (_isWorking)
             {
-                var requestsMessages = _clusterListener.WaitForRequest();
-                foreach (var message in requestsMessages)
+                lock (_syncRoot)
                 {
-                    _messagesQueue.Enqueue(message);
-                    var responseMessages = MessageProcessor.CreateResponseMessages(message, _problemDataSets, _activeComponents);
-                    _clusterListener.SendResponse(responseMessages);
+                    var requestsMessages = _clusterListener.WaitForRequest();
+                    foreach (var message in requestsMessages)
+                    {
+                        _messagesQueue.Enqueue(message);
+                        var responseMessages = MessageProcessor.CreateResponseMessages(message, _problemDataSets,
+                            _activeComponents);
+                        _clusterListener.SendResponse(responseMessages);
+                    }
                 }
             }
         }
@@ -123,12 +139,15 @@ namespace Server
         /// </summary>
         private void DequeueMessagesAndUpdateProblemStructures()
         {
-            while (true)
+            while (_isWorking)
             {
-                Message message;
-                var result = _messagesQueue.TryDequeue(out message);
-                if (!result) continue;
-                MessageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
+                lock (_syncRoot)
+                {
+                    Message message;
+                    var result = _messagesQueue.TryDequeue(out message);
+                    if (!result) continue;
+                    MessageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
+                }
             }
         }
 

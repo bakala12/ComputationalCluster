@@ -4,7 +4,7 @@ using CommunicationsUtils.Shared;
 
 namespace Client
 {
-    public class ArgumentParserExtensionsForClient
+    public class ArgumentParserExtensions
     {
         public static void UpdateConfiguration(Dictionary<string, string> map)
         {

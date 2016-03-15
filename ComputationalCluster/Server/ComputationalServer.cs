@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
@@ -10,6 +11,9 @@ namespace Server
 {
     public class ComputationalServer : IRunnable
     {
+        private volatile bool isWorking = false;
+        private List<Thread> _currentlyWorkingThreads = new List<Thread>(); 
+
         /// <summary>
         /// Listener which allows to receive and send messages.
         /// </summary>
@@ -67,6 +71,9 @@ namespace Server
         public void Run()
         {
             _clusterListener.Start();
+            isWorking = true;
+            _currentlyWorkingThreads.Clear();
+            DoWork();
         }
 
         /// <summary>
@@ -75,15 +82,23 @@ namespace Server
         public void Stop()
         {
             _clusterListener.Stop();
+            isWorking = false;
+            foreach (var currentlyWorkingThread in _currentlyWorkingThreads)
+            {
+                currentlyWorkingThread?.Join();
+            }
+            _currentlyWorkingThreads.Clear();
         }
 
         /// <summary>
         /// Starts void argumentsless delegate in new thread.
         /// </summary>
-        /// <param name="delegatFunc"></param>
-        private static void ProcessInParallel(Action delegatFunc)
+        /// <param name="delegatFunc">Function to be invoked in a separate thread</param>
+        private void ProcessInParallel(Action delegatFunc)
         {
-            Task.Run(delegatFunc);
+            Thread thread = new Thread(()=>delegatFunc());
+            _currentlyWorkingThreads.Add(thread);
+            thread.Start();
         }
 
         /// <summary>

@@ -36,9 +36,7 @@ namespace CommunicationsUtils.NetworkInterfaces
         {
             currentSocket = tcpListener.AcceptSocket();
             byte[] requestBytes = new byte[Properties.Settings.Default.MaxBufferSize];
-            Console.WriteLine("Server: receiving requests");
             int len = currentSocket.Receive(requestBytes, Properties.Settings.Default.MaxBufferSize);
-            Console.WriteLine("Server: receiving requests finished");
             return converter.BytesToMessages(requestBytes, len);
         }
 
@@ -54,9 +52,7 @@ namespace CommunicationsUtils.NetworkInterfaces
             }
             byte[] responsesBytes;
             int count = converter.MessagesToBytes(out responsesBytes, responses);
-            Console.WriteLine("Server: sending responses");
             currentSocket.Send(responsesBytes, count);
-            Console.WriteLine("Server: sending responses finished");
             currentSocket.Close();
             currentSocket = null;
         }

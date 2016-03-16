@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommunicationsUtils.NetworkInterfaces.Adapters
+namespace CommunicationsUtils.NetworkInterfaces.Mocks
 {
     public class MockClientAdapter : ITcpClient
     {
@@ -21,7 +21,7 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
 
         public INetworkStream GetStream()
         {
-            return new MockNetworkStream();
+            return new MockStreamAdapter();
         }
     }
 }

@@ -18,6 +18,7 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
     {
         void Write(byte[] buf, int count);
         int Read(byte[] buf, int count);
+        void Close();
     }
 
     public interface ITcpListener

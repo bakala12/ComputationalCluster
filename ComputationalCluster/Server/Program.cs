@@ -27,7 +27,7 @@ namespace Server
             IPAddress ipAddress;
             if(!IPAddress.TryParse(address, out ipAddress))
                 throw new Exception("Invalid ip address");
-            IClusterListener listener = ClusterListenerFactory.Factory.Create(ipAddress, port);
+            IClusterListener listener = ClusterListenerFactory.Factory.Create(IPAddress.Any, port);
             var server = new ComputationalServer(listener, state); 
             server.Run();
         }

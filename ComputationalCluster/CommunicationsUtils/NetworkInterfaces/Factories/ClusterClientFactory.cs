@@ -11,7 +11,7 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
     public interface IClusterClientFactory
     {
         IClusterClient Create(string hostname, int port);
-        IClusterClient Create(string hostname, int port, ITcpClient adapter);
+        IClusterClient Create(string hostname, int port, IClientAdapterFactory factory);
     }
 
     public class ClusterClientFactory : IClusterClientFactory
@@ -33,9 +33,10 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
         /// <param name="port"></param>
         /// <param name="adapter"></param>
         /// <returns></returns>
-        public IClusterClient Create(string hostname, int port, ITcpClient adapter)
+        public IClusterClient Create(string hostname, int port, 
+            IClientAdapterFactory factory)
         {
-            return new ClusterClient(hostname, port, adapter);
+            return new ClusterClient(hostname, port, factory);
         }
 
         /// <summary>
@@ -46,8 +47,8 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
         /// <returns></returns>
         public IClusterClient Create(string hostname, int port)
         {
-            ITcpClient adapter = TcpClientAdapterFactory.Factory.Create();
-            return new ClusterClient(hostname, port, adapter);
+            IClientAdapterFactory factory = new TcpClientAdapterFactory();
+            return new ClusterClient(hostname, port, factory);
         }
     }
 }

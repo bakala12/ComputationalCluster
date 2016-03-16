@@ -8,6 +8,11 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
 {
     public class MockNetworkStream : INetworkStream
     {
+        public void Close()
+        {
+            return;
+        }
+
         public void Dispose()
         {
             return;

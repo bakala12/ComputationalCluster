@@ -21,10 +21,10 @@ namespace TaskManager
     public class TaskManager : InternalClientComponent
     {
         //task manager non-communication context
-        private ITaskManagerProcessing core;
+        private TaskManagerProcessingModule core;
 
         public TaskManager(IClusterClient _statusClient, IClusterClient _problemClient, 
-            IMessageArrayCreator _creator, ITaskManagerProcessing _core) 
+            IMessageArrayCreator _creator, TaskManagerProcessingModule _core) 
             : base (_statusClient, _problemClient, _creator)
         {
             core = _core;
@@ -37,12 +37,16 @@ namespace TaskManager
             handlerThread.Start();
 
             //this thread becomes now status sending thread
+            Console.WriteLine("Registering TM...");
             RegisterComponent();
             core.ComponentId = this.componentId;
+            Console.WriteLine("Registering complete with id={0}", componentId);
             while(true)
             {
                 Thread.Sleep((int)(0.7 * timeout));
+                Console.WriteLine("Sending status");
                 Message[] responses = this.SendStatus();
+                Console.WriteLine("Status sent");
                 foreach (var response in responses)
                 {
                     messageQueue.Enqueue(response);
@@ -102,9 +106,10 @@ namespace TaskManager
                     case MessageType.DivideProblemMessage:
                         //should be done in another thread not to
                         //overload message handler thread
+                        DivideProblem msg = message.Cast<DivideProblem>();
                         Thread compThread = new Thread
                             (o=> this.StartLongComputation(() => core.DivideProblem
-                        (message.Cast<DivideProblem>())));
+                        (msg)));
                         compThread.Start();
                         break;
                     case MessageType.SolutionsMessage:

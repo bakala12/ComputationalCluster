@@ -123,7 +123,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            WriteControlInformation(message);
+            
         }
 
         protected virtual void ProcessRegisterResponseMessage(RegisterResponse message,

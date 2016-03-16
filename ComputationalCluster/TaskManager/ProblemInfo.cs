@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunicationsUtils.Messages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,14 +11,14 @@ namespace TaskManager
     {
         public int ProblemsCount = 0;
         public int SolutionsCount = 0;
-        public string ProblemType = "";
+        public string ProblemType;
         /// <summary>
         /// partial problems indexed by task id (given by TM)
         /// </summary>
-        public Dictionary<ulong, PartialInfo> PartialProblems;
+        public Dictionary<ulong, SolutionsSolution> PartialSolutions;
         public ProblemInfo()
         {
-            PartialProblems = new Dictionary<ulong, PartialInfo>();
+            PartialSolutions = new Dictionary<ulong, SolutionsSolution>();
         }
     }
 }

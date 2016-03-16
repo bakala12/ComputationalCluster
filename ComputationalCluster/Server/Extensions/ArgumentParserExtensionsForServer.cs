@@ -12,12 +12,12 @@ namespace Server.Extensions
             foreach (var pair in map)
             {
                 switch (pair.Key)
-                {
+                { 
                     case "port=":
                         Properties.Settings.Default.Port = pair.Value.ChangeType<int>();
                         break;
                     case "time=":
-                        Properties.Settings.Default.Timeout = pair.Value.ChangeType<long>();
+                        Properties.Settings.Default.Timeout = pair.Value.ChangeType<uint>();
                         break;
                     case "backup":
                         Properties.Settings.Default.IsBackup = pair.Value.ChangeType<bool>();

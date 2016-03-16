@@ -8,7 +8,7 @@ namespace TaskManager.Core
 {
     public interface ITaskManagerProcessingFactory
     {
-        ITaskManagerProcessing Create();
+        TaskManagerProcessingModule Create(List<string> problems);
     }
 
     /// <summary>
@@ -27,9 +27,10 @@ namespace TaskManager.Core
             }
         }
 
-        public ITaskManagerProcessing Create()
+        public TaskManagerProcessingModule Create(List<string> problems)
         {
-            return new TaskManagerProcessingModule();
+            var storage = new TaskManagerStorage();
+            return new TaskManagerProcessingModule(problems, storage);
         }
     }
 }

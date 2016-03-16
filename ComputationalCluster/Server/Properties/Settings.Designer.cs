@@ -85,10 +85,10 @@ namespace Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("50000")]
-        public long Timeout {
+        [global::System.Configuration.DefaultSettingValueAttribute("5000")]
+        public uint Timeout {
             get {
-                return ((long)(this["Timeout"]));
+                return ((uint)(this["Timeout"]));
             }
             set {
                 this["Timeout"] = value;

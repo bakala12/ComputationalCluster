@@ -20,7 +20,7 @@ namespace Server.MessageProcessing
             {
                 new RegisterResponse()
                 {
-                    Timeout = 50000,
+                    Timeout = Properties.Settings.Default.Timeout,
                     Id = 1,
                     BackupCommunicationServers = new []
                     {

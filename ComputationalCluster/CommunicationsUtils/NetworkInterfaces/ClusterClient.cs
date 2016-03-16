@@ -43,13 +43,9 @@ namespace CommunicationsUtils.NetworkInterfaces
             _tcpClient.Connect(_address, _port);
             using (INetworkStream networkStream = _tcpClient.GetStream())
             {
-                Console.WriteLine("Client: send requests");
                 networkStream.Write(requestsBytes, count);
-                Console.WriteLine("Client: request sending finished");
                 byte[] responseBytes = new byte[Properties.Settings.Default.MaxBufferSize];
-                Console.WriteLine("Client: reading responses");
                 int len = networkStream.Read(responseBytes, Properties.Settings.Default.MaxBufferSize);
-                Console.WriteLine("Client: reading responses finished.");
                 networkStream.Close();
                 _tcpClient.Close();
                 return _converter.BytesToMessages(responseBytes, len);

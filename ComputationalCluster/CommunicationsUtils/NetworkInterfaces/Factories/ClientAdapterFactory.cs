@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using CommunicationsUtils.NetworkInterfaces.Adapters;
+using CommunicationsUtils.NetworkInterfaces.Mocks;
 
 namespace CommunicationsUtils.NetworkInterfaces.Factories
 {

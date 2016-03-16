@@ -16,13 +16,13 @@ namespace Server
     {
         static void Main(string[] args)
         {
-            string address = Properties.Settings.Default.Address;
-            int port = Properties.Settings.Default.Port;
-            ServerState state = Properties.Settings.Default.IsBackup ? ServerState.Backup : ServerState.Primary;
-
             var parser = new ArgumentParser(OptionSetPool.ServerOptionsSet);
             parser.ProcessArguments(args);
             parser.UpdateConfiguration(parser.map);
+
+            string address = Properties.Settings.Default.Address;
+            int port = Properties.Settings.Default.Port;
+            ServerState state = Properties.Settings.Default.IsBackup ? ServerState.Backup : ServerState.Primary;
 
             IPAddress ipAddress;
             if(!IPAddress.TryParse(address, out ipAddress))

@@ -158,8 +158,8 @@ namespace Server
                 {
                     Message message;
                     var result = _messagesQueue.TryDequeue(out message);
-                    Console.WriteLine("Dequeueing {0} message.", message.MessageType);
                     if (!result) continue;
+                    Console.WriteLine("Dequeueing {0} message.", message.MessageType);
                     _messageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
                     Console.WriteLine("Message {0} has been proccessed.", message.MessageType);
                 }

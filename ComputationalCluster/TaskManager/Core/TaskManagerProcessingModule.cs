@@ -16,8 +16,6 @@ namespace TaskManager.Core
         /// <summary>
         /// current problems in TM indexed by problem id in cluster (given by CS)
         /// </summary>
-        /// this one should be changed into some object that handles storage
-        /// of problems in TM's memory. need that to unit test TM on second stage
         private TaskManagerStorage storage;
         private List<StatusThread> threads;
         private ulong threadCount = 0;

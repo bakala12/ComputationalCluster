@@ -17,8 +17,8 @@
     <Setting Name="MasterPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">8086</Value>
     </Setting>
-    <Setting Name="Timeout" Type="System.Int64" Scope="User">
-      <Value Profile="(Default)">50000</Value>
+    <Setting Name="Timeout" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">5000</Value>
     </Setting>
   </Settings>
 </SettingsFile>

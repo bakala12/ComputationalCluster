@@ -1,4 +1,5 @@
-﻿using CommunicationsUtils.NetworkInterfaces;
+﻿using CommunicationsUtils.ClientComponentCommon;
+using CommunicationsUtils.NetworkInterfaces;
 using CommunicationsUtils.NetworkInterfaces.Factories;
 using System;
 using System.Collections.Generic;
@@ -15,12 +16,18 @@ namespace TaskManager
         {
             //args parsing
 
-            IClusterClient clusterClient = ClusterClientFactory.Factory.Create(
+            IClusterClient statusClient = ClusterClientFactory.Factory.Create(
+                Properties.Settings.Default.Address, Properties.Settings.Default.Port);
+            IClusterClient problemClient = ClusterClientFactory.Factory.Create(
                 Properties.Settings.Default.Address, Properties.Settings.Default.Port);
             //factory will be here in the future:
-            var newCore = TaskManagerProcessingModuleFactory.Factory.Create();
+            var newCore = TaskManagerProcessingModuleFactory.Factory.Create
+                (new List<string> { "DVRP" });
 
-            TaskManager taskManager = new TaskManager(clusterClient, newCore);
+            var creator = new MessageArrayCreator();
+
+            TaskManager taskManager = new TaskManager(statusClient, problemClient, creator,
+                newCore);
 
             taskManager.Run();
         }

@@ -43,9 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\ITaskManagerProcessing.cs" />
     <Compile Include="Core\TaskManagerProcessingFactory.cs" />
-    <Compile Include="PartialInfo.cs" />
+    <Compile Include="Core\TaskManagerStorage.cs" />
     <Compile Include="ProblemInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

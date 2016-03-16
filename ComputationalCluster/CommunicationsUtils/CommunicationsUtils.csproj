@@ -48,6 +48,7 @@
     <Compile Include="ClientComponentCommon\InternalClientComponent.cs" />
     <Compile Include="ClientComponentCommon\IExternalClientComponent.cs" />
     <Compile Include="ClientComponentCommon\MessageArrayCreator.cs" />
+    <Compile Include="ClientComponentCommon\ProcessingModule.cs" />
     <Compile Include="Messages\Constructors.cs" />
     <Compile Include="Messages\DivideProblem.cs" />
     <Compile Include="Messages\Error.cs" />

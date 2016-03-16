@@ -1,0 +1,36 @@
+Rzeczy do zrobienia na środę/czwartek 16-17/03, które rzucają się w oczy:
+
+zadania implementacyjne
+1. Zrobienie pełnego "problem flow" na serwerze - problem przychodzi, CS wysyła go do TM, 
+potem podproblemy do CN, aż wysyła w końcu final solutions od TM do klienta, itd... - Paweł, Mati
+
+2. Testowanie client node, task manager - czy to w ogóle działa - Bondyra
+
+3. Dokończenie implementacji computational node - Augi
+
+3. Powyższe dwa zadania dla computational node - Augi
+
+5. Testowanie fizycznego połączenia - Bondyra
+
+6. Oczywiście - debugowanie serwera - Paweł, Mati
+
+7. Unit testy do TM - Bondyra (zrobione, częściowo)
+
+
+zadania drobne
+1. "Ulepszenie" network interfaces - ogólnie napchałem zbyt dużo interfejsów i fabryk,
+niby po to aby to było bardziej testowalne, ale nie widzę w tym znaczącego pożytku, a te rzeczy można zrobić dużo
+bardziej zrozumiale w końcu - Bondyra (zrobione)
+
+2. Dodanie settingsów do .gitignore - Mati
+
+3. Wyrzucenie address z settingsów serwera (chodzi o address, nie o backupowy master address). Myślałem, że będzie potrzebne, ale
+jest to absoultnie zbyteczne. Z tego wynika - nasłuchiwanie tcp listenerem na IPAddress.Any. - Mati, Paweł
+
+4. Takie kosmetyczne zadanie - zrobienie dużej ilości Console.WriteLine() w odpowiednich miejscach, żeby można było
+zobaczyć co się dzieje. - wszyscy
+
+
+testowanie na czwartek
+1. Fizyczne testowanie klastra - wszyscy nawet niezależnie od siebie mogą to robić.
+Oczywiście należy wykonać wcześniejsze zadania.

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server
+namespace Server.Data
 {
     /// <summary>
     /// Indicates the current state of the server.

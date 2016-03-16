@@ -15,6 +15,12 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
         {
             wrappedStream = _stream;
         }
+
+        public void Close()
+        {
+            wrappedStream.Close();
+        }
+
         //TO DO
         public void Dispose()
         {

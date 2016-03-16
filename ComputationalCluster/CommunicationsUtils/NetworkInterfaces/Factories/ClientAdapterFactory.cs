@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using CommunicationsUtils.NetworkInterfaces.Adapters;
+using CommunicationsUtils.NetworkInterfaces.Mocks;
 
 namespace CommunicationsUtils.NetworkInterfaces.Factories
 {
@@ -14,15 +15,6 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
 
     public class TcpClientAdapterFactory : IClientAdapterFactory
     {
-        private static TcpClientAdapterFactory instance = new TcpClientAdapterFactory();
-
-        public static TcpClientAdapterFactory Factory
-        {
-            get
-            {
-                return instance;
-            }
-        }
 
         public ITcpClient Create()
         {
@@ -32,15 +24,6 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
 
     public class MockClientAdapterFactory : IClientAdapterFactory
     {
-        private static MockClientAdapterFactory instance = new MockClientAdapterFactory();
-
-        public static MockClientAdapterFactory Factory
-        {
-            get
-            {
-                return instance;
-            }
-        }
 
         public ITcpClient Create()
         {

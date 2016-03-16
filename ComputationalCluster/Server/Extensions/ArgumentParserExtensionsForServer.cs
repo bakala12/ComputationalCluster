@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using CommunicationsUtils.Argument_parser;
 using CommunicationsUtils.Shared;
-namespace Server
+
+namespace Server.Extensions
 {
     public static class ArgumentParserExtensionsForServer
     {
-        public static void UpdateConfiguration(Dictionary<string, string> map)
+        public static void UpdateConfiguration(this ArgumentParser parser, Dictionary<string, string> map)
         {
             foreach (var pair in map)
             {

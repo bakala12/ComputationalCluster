@@ -17,8 +17,8 @@ namespace Tests
         [TestMethod]
         public void BasicClusterClientTest()
         {
-            ITcpClient adapter = MockClientAdapterFactory.Factory.Create();
-            IClusterClient client = ClusterClientFactory.Factory.Create("0", 0, adapter);
+            IClientAdapterFactory factory = new MockClientAdapterFactory();
+            IClusterClient client = ClusterClientFactory.Factory.Create("0", 0, factory);
             client.SendRequests(new Message[] {new DivideProblem () { ProblemType = "example"},
             new Status { Id = 123456789 }});
         }

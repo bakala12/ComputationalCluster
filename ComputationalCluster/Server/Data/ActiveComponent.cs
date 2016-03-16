@@ -1,6 +1,6 @@
 ﻿using CommunicationsUtils.Messages;
 
-namespace Server
+namespace Server.Data
 {
     public struct ActiveComponent
     {

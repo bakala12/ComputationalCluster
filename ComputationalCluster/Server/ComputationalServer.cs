@@ -64,6 +64,7 @@ namespace Server
         /// <param name="listener">Listener object which handle communication.</param>
         public ComputationalServer(IClusterListener listener)
         {
+            Console.WriteLine("Creating new instance of ComputationalServer.");
             if (listener == null) throw new ArgumentNullException(nameof(listener));
             _clusterListener = listener;
             State = ServerState.Backup;
@@ -84,6 +85,7 @@ namespace Server
             State = state;
             if(state == ServerState.Primary)
                 _messageProcessor = new PrimaryMessageProcessor();
+            Console.WriteLine("New instance of ComputationalServer has been created.");
         }
 
         /// <summary>
@@ -91,9 +93,11 @@ namespace Server
         /// </summary>
         public void Run()
         {
+            Console.WriteLine("Starting listening mechanism.");
             _clusterListener.Start();
             _isWorking = true;
             _currentlyWorkingThreads.Clear();
+            Console.WriteLine("Listening mechanism has been started.");
             DoWork();
         }
 
@@ -102,6 +106,7 @@ namespace Server
         /// </summary>
         public void Stop()
         {
+            Console.WriteLine("Stopping threads.");
             _clusterListener.Stop();
             _isWorking = false;
             foreach (var currentlyWorkingThread in _currentlyWorkingThreads)
@@ -109,6 +114,7 @@ namespace Server
                 currentlyWorkingThread?.Join();
             }
             _currentlyWorkingThreads.Clear();
+            Console.WriteLine("Threads have been stopped.");
         }
 
         /// <summary>
@@ -131,7 +137,11 @@ namespace Server
             {
                 lock (_syncRoot)
                 {
+                    Console.WriteLine("Waiting for request messages.");
                     var requestsMessages = _clusterListener.WaitForRequest();
+                    if(requestsMessages==null) Console.WriteLine("No request messages detected.");
+                    // ReSharper disable once PossibleNullReferenceException
+                    Console.WriteLine("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);
                     foreach (var message in requestsMessages)
                     {
                         _messagesQueue.Enqueue(message);
@@ -169,8 +179,12 @@ namespace Server
         /// </summary>
         protected virtual void DoWork()
         {
+            Console.WriteLine("Starting new thread for listening, storing messages and sending responses.");
             ProcessInParallel(ListenAndStoreMessagesAndSendResponses);
+            Console.WriteLine("Thread for listening, storing messages and sending responses has been started.");
+            Console.WriteLine("Starting new thread for dequeueing messages and updating additional sets.");
             ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
+            Console.WriteLine("Thread for dequeueing messages and updating additional sets has been started.");
         }
     }
 }

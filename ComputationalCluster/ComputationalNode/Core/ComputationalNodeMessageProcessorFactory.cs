@@ -13,7 +13,7 @@ namespace ComputationalNode.Core
     public class ComputationalNodeProcessingModuleFactory : IComputationalNodeProcessingFactory
     {
         private static ComputationalNodeProcessingModuleFactory _instance;
-        private static readonly object _syncRoot = new object();
+        private static readonly object SyncRoot = new object();
 
         private ComputationalNodeProcessingModuleFactory() { }
 
@@ -21,7 +21,7 @@ namespace ComputationalNode.Core
         {
             get
             {
-                lock (_syncRoot)
+                lock (SyncRoot)
                 {
                     if (_instance == null)
                     {

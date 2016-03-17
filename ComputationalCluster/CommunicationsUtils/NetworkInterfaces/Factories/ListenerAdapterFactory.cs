@@ -16,13 +16,23 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
 
     public class TcpListenerAdapterFactory : IListenerAdapterFactory
     {
-        private static TcpListenerAdapterFactory instance = new TcpListenerAdapterFactory();
+        private static TcpListenerAdapterFactory _instance;
+        private static readonly object SyncRoot = new object();
 
-        public static TcpListenerAdapterFactory Factory
+        private TcpListenerAdapterFactory() { }
+
+        public static IListenerAdapterFactory Factory
         {
             get
             {
-                return instance;
+                lock (SyncRoot)
+                {
+                    if (_instance == null)
+                    {
+                        _instance = new TcpListenerAdapterFactory();
+                    }
+                }
+                return _instance;
             }
         }
 
@@ -34,13 +44,23 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
 
     public class MockListenerAdapterFactory : IListenerAdapterFactory
     {
-        private static MockListenerAdapterFactory instance = new MockListenerAdapterFactory();
+        private static MockListenerAdapterFactory _instance;
+        private static readonly object SyncRoot = new object();
 
-        public static MockListenerAdapterFactory Factory
+        private MockListenerAdapterFactory() { }
+
+        public static IListenerAdapterFactory Factory
         {
             get
             {
-                return instance;
+                lock (SyncRoot)
+                {
+                    if (_instance == null)
+                    {
+                        _instance=new MockListenerAdapterFactory();
+                    }
+                }
+                return _instance;
             }
         }
 

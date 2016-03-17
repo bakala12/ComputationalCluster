@@ -16,13 +16,21 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
 
     public class ClusterListenerFactory : IClusterListenerFactory
     {
-        private static ClusterListenerFactory instance = new ClusterListenerFactory();
+        private static ClusterListenerFactory _instance;
+        private static readonly object SyncRoot = new object();
 
-        public static ClusterListenerFactory Factory
+        private ClusterListenerFactory() { }
+
+        public static IClusterListenerFactory Factory
         {
             get
             {
-                return instance;
+                lock (SyncRoot)
+                {
+                    if(_instance==null)
+                        _instance=new ClusterListenerFactory();
+                }
+                return _instance;
             }
         }
 

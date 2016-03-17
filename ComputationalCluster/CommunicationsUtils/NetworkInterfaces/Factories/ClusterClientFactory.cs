@@ -16,13 +16,21 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
 
     public class ClusterClientFactory : IClusterClientFactory
     {
-        private static ClusterClientFactory instance = new ClusterClientFactory();
+        private static ClusterClientFactory _instance;
+        private static readonly object SyncRoot = new object();
 
-        public static ClusterClientFactory Factory
+        private ClusterClientFactory() { }
+
+        public static IClusterClientFactory Factory
         {
             get
             {
-                return instance;
+                lock (SyncRoot)
+                {
+                    if(_instance==null)
+                        _instance = new ClusterClientFactory();
+                }
+                return _instance;
             }
         }
 
@@ -31,7 +39,7 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
         /// </summary>
         /// <param name="hostname"></param>
         /// <param name="port"></param>
-        /// <param name="adapter"></param>
+        /// <param name="factory"></param>
         /// <returns></returns>
         public IClusterClient Create(string hostname, int port, 
             IClientAdapterFactory factory)
@@ -47,7 +55,7 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
         /// <returns></returns>
         public IClusterClient Create(string hostname, int port)
         {
-            IClientAdapterFactory factory = new TcpClientAdapterFactory();
+            IClientAdapterFactory factory = TcpClientAdapterFactory.Factory;
             return new ClusterClient(hostname, port, factory);
         }
     }

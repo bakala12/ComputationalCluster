@@ -10,18 +10,56 @@ namespace ComputationalNode.Core
     /// <summary>
     /// provides non-communication CN's functionalities
     /// </summary>
-    public class ComputationalNodeProcessingModule : IComputationalNodeProcessing
+    public class ComputationalNodeProcessingModule
     {
+        private List<StatusThread> threads;
+        private ulong threadCount = 0;
+
+        public ulong ComponentId { get; set; }
+
+        public ComputationalNodeProcessingModule()
+        {
+            threads = new List<StatusThread>();
+            //enough for this stage:
+            threads.Add(new StatusThread()
+            {
+                HowLongSpecified = false,
+                ProblemInstanceIdSpecified = false,
+                State = StatusThreadState.Idle,
+                ProblemType = "",
+                TaskIdSpecified = true,
+                TaskId = ++threadCount
+            });
+        }
+
         public Solutions ComputeSubtask(SolvePartialProblems solvePartialProblems)
         {
-            throw new NotImplementedException();
+            //implementation in second stage, now mocked:
+            return new Solutions()
+            {
+                CommonData = new byte[] {0},
+                Id = solvePartialProblems.Id,
+                ProblemType = solvePartialProblems.ProblemType,
+                Solutions1 = new[]
+                {
+                    new SolutionsSolution()
+                    {
+                        Data = null,
+                        ComputationsTime = 1,
+                        TaskIdSpecified = false,
+                        Type = SolutionsSolutionType.Partial
+                    }
+                }
+            };
         }
 
         public Status GetStatus()
         {
-            throw new NotImplementedException();
+            Status statusMsg = new Status()
+            {
+                Threads = threads.ToArray()
+            };
+            return statusMsg;
         }
-
-        public ulong ComponentId { get; set; }
     }
 }

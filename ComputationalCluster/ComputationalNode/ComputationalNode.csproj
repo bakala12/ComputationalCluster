@@ -45,7 +45,6 @@
   <ItemGroup>
     <Compile Include="ComputationalNode.cs" />
     <Compile Include="Core\ComputationalNodeProcessingFactory.cs" />
-    <Compile Include="Core\IComputationalNodeProcessing.cs" />
     <Compile Include="Core\ComputationalNodeProcessingModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

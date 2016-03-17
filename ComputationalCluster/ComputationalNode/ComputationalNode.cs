@@ -13,9 +13,9 @@ namespace ComputationalNode
 {
     public class ComputationalNode : InternalClientComponent
     {
-        private IComputationalNodeProcessing core;
+        private ComputationalNodeProcessingModule core;
         public ComputationalNode(IClusterClient _statusClient, IClusterClient _problemClient,
-            IMessageArrayCreator _creator, IComputationalNodeProcessing _core) 
+            IMessageArrayCreator _creator, ComputationalNodeProcessingModule _core) 
             : base(_statusClient, _problemClient, _creator)
         {
             core = _core;
@@ -78,6 +78,10 @@ namespace ComputationalNode
                         Thread compThread = new Thread( o =>
                         this.StartLongComputation(() => core.ComputeSubtask
                             (message.Cast<SolvePartialProblems>())));
+                        compThread.Start();
+                        break;
+                    case MessageType.ErrorMessage:
+                        //something?
                         break;
                     default:
                         throw new Exception("Wrong message delivered to TM: " + message.ToString());

@@ -2,6 +2,7 @@
 using CommunicationsUtils.Serialization;
 using CommunicationsUtils.NetworkInterfaces.Adapters;
 using System;
+using CommunicationsUtils.NetworkInterfaces.Factories;
 
 namespace CommunicationsUtils.NetworkInterfaces
 {
@@ -11,7 +12,7 @@ namespace CommunicationsUtils.NetworkInterfaces
     /// </summary>
     public class ClusterClient : IClusterClient
     {
-        ITcpClient _tcpClient;
+        IClientAdapterFactory _tcpFactory;
         private readonly MessageToBytesConverter _converter = new MessageToBytesConverter();
         private string _address;
         private int _port;
@@ -21,11 +22,11 @@ namespace CommunicationsUtils.NetworkInterfaces
         /// </summary>
         /// <param name="address">Address of the server</param>
         /// <param name="port">Port of the server</param>
-        public ClusterClient(string address, int port, ITcpClient tcpClient)
+        public ClusterClient(string address, int port, IClientAdapterFactory tcpFactory)
         {
             _address = address;
             _port = port;
-            _tcpClient = tcpClient;
+            _tcpFactory = tcpFactory;
         }
 
         /// <summary>
@@ -37,17 +38,15 @@ namespace CommunicationsUtils.NetworkInterfaces
         {
             byte[] requestsBytes;
             int count = _converter.MessagesToBytes(out requestsBytes, requests);
-            
+
+            ITcpClient _tcpClient = _tcpFactory.Create();
             _tcpClient.Connect(_address, _port);
             using (INetworkStream networkStream = _tcpClient.GetStream())
             {
-                Console.WriteLine("Client: send requests");
                 networkStream.Write(requestsBytes, count);
-                Console.WriteLine("Client: request sending finished");
                 byte[] responseBytes = new byte[Properties.Settings.Default.MaxBufferSize];
-                Console.WriteLine("Client: reading responses");
                 int len = networkStream.Read(responseBytes, Properties.Settings.Default.MaxBufferSize);
-                Console.WriteLine("Client: reading responses finished.");
+                networkStream.Close();
                 _tcpClient.Close();
                 return _converter.BytesToMessages(responseBytes, len);
             }

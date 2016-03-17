@@ -44,6 +44,7 @@ namespace Client
                 core.GetProblem();
                 //could be in another thread:
                 solvingWatch.Reset();
+                Console.WriteLine("Sending problem");
                 SolveRequestResponse response = SendProblem();
                 ulong problemId = response.Id;
                 solvingWatch.Start();

@@ -1,4 +1,4 @@
-namespace Server
+namespace Server.Interfaces
 {
     public interface IRunnable
     {

@@ -1,4 +1,5 @@
-﻿using CommunicationsUtils.Messages;
+﻿using CommunicationsUtils.ClientComponentCommon;
+using CommunicationsUtils.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,32 +11,19 @@ namespace TaskManager.Core
     /// <summary>
     /// provides non-communication TM's functionalities
     /// </summary>
-    public class TaskManagerProcessingModule: ITaskManagerProcessing
+    public class TaskManagerProcessingModule: ProcessingModule
     {
         /// <summary>
         /// current problems in TM indexed by problem id in cluster (given by CS)
         /// </summary>
-        private Dictionary<ulong, ProblemInfo> currentProblems;
-        private ulong componentId;
+        private TaskManagerStorage storage;
         private List<StatusThread> threads;
         private ulong threadCount = 0;
 
-        //necessary for now, but could/should be removed:
-        public ulong ComponentId
+        public TaskManagerProcessingModule(List<string> problems, TaskManagerStorage _storage)
+            : base(problems)
         {
-            get
-            {
-                return componentId;
-            }
-            set
-            {
-                componentId = value;
-            }
-        }
-
-        public TaskManagerProcessingModule()
-        {
-            currentProblems = new Dictionary<ulong, ProblemInfo>();
+            storage = _storage;
             threads = new List<StatusThread>();
             //enough for this stage:
             threads.Add(new StatusThread()
@@ -49,9 +37,15 @@ namespace TaskManager.Core
             });
         }
 
-        public SolvePartialProblems DivideProblem(DivideProblem divideProblem)
+        public Message DivideProblem(DivideProblem divideProblem)
         {
-            //implementation in second stage, this is mocked:
+            //implementation in second stage, this is mocked
+            if (!SolvableProblems.Contains(divideProblem.ProblemType))
+                return new Error()
+                {
+                    ErrorMessage = "not supported problem type",
+                    ErrorType = ErrorErrorType.InvalidOperation
+                };
 
             var partialProblem = new SolvePartialProblemsPartialProblem()
             {
@@ -62,15 +56,14 @@ namespace TaskManager.Core
 
             //adding info about partial problems, their task ids, and partialProblem
             //some things can be temporary (partialProblems?)
-            currentProblems.Add(divideProblem.Id, new ProblemInfo()
+            storage.AddIssue(divideProblem.Id, new ProblemInfo()
             {
                 ProblemsCount = 1,
                 ProblemType = divideProblem.ProblemType,
                 SolutionsCount = 0
             });
 
-            currentProblems[divideProblem.Id].PartialProblems.Add(0, new PartialInfo()
-            { Solution = null, Problem = partialProblem });
+            storage.AddTaskToIssue(divideProblem.Id, partialProblem);
             //end of implementation
 
             //creating msg
@@ -95,20 +88,22 @@ namespace TaskManager.Core
         /// <param name="solutions"></param>
         public Solutions HandleSolutions(Solutions solutions)
         {
+            if (solutions.Solutions1 == null)
+                return null;
+            
             foreach (var solution in solutions.Solutions1)
             {
-                if (currentProblems[solutions.Id].PartialProblems[solution.TaskId].Solution != null)
+                if (!storage.ContainsIssue(solutions.Id) || storage.ExistsTask(solutions.Id,solution.TaskId))
                 {
-                    throw new Exception("Problem with multiple sending of partialProblem by CS");
+                    throw new Exception("Invalid solutions message delivered to TM");
                 }
-                currentProblems[solutions.Id].PartialProblems[solution.TaskId].Solution = solution;
-                currentProblems[solutions.Id].SolutionsCount++;
+                storage.AddSolutionToIssue(solutions.Id, solution.TaskId, solution);
             }
             //this is not possible:
             //if (currentProblems[solutions.Id].SolutionsCount > currentProblems[solutions.Id].ProblemsCount)
 
             //can be linked, because all of partial problems were solved & delivered
-            if (currentProblems[solutions.Id].SolutionsCount == currentProblems[solutions.Id].ProblemsCount)
+            if (storage.IssueCanBeLinked(solutions.Id))
             {
                 Solutions finalSolution = LinkSolutions(solutions.Id);
                 return finalSolution;
@@ -120,15 +115,15 @@ namespace TaskManager.Core
         //task solver stuff
         public Solutions LinkSolutions(ulong problemId)
         {
-            //foreach (var pInfo in currentProblems[problemId].PartialProblems)
-            //get SolutionsSolution from pInfo and do something amazing
+            //for issue in storage (by problemId) - get all tasks
+            //get SolutionsSolution from them and do something amazing
 
             //return final solution (this one is mocked)
             return new Solutions()
             {
                 CommonData = new byte[] { 0 },
                 Id = problemId,
-                ProblemType = currentProblems[problemId].ProblemType,
+                ProblemType = storage.GetIssueType(problemId),
                 Solutions1
             = new[] { new SolutionsSolution() { Data = null, ComputationsTime = 1, TaskIdSpecified = false,
             Type = SolutionsSolutionType.Final} }

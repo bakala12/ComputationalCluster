@@ -108,7 +108,8 @@ namespace CommunicationsUtils.ClientComponentCommon
         /// <param name="registerMessage"></param>
         protected virtual void handleRegisterResponses(Register registerMessage)
         {
-            Message[] responses = statusClient.SendRequests(new[] { registerMessage });
+            Message[] requests = creator.Create(registerMessage);
+            Message[] responses = statusClient.SendRequests(requests);
             RegisterResponse registerResponse = null;
             foreach (var response in responses)
             {

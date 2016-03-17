@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArgumentParserExtensionsForClient.cs" />
     <Compile Include="ClientNode.cs" />
     <Compile Include="Core\ClientNodeProcessingFactory.cs" />
     <Compile Include="Core\ClientNodeProcessingModule.cs" />

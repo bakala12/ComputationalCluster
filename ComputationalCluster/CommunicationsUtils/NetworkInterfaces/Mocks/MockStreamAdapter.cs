@@ -4,10 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommunicationsUtils.NetworkInterfaces.Adapters
+namespace CommunicationsUtils.NetworkInterfaces.Mocks
 {
-    public class MockNetworkStream : INetworkStream
+    public class MockStreamAdapter : INetworkStream
     {
+        public void Close()
+        {
+            return;
+        }
+
         public void Dispose()
         {
             return;

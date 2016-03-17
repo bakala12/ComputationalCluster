@@ -1,12 +1,12 @@
 ﻿using System.Net.Sockets;
 using CommunicationsUtils.NetworkInterfaces.Adapters;
+using CommunicationsUtils.NetworkInterfaces.Mocks;
 
 namespace CommunicationsUtils.NetworkInterfaces.Factories
 {
     /// <summary>
     /// factory creating mocked and real client for communication
     /// </summary>
-
     public interface IClientAdapterFactory
     {
         ITcpClient Create();
@@ -14,13 +14,21 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
 
     public class TcpClientAdapterFactory : IClientAdapterFactory
     {
-        private static TcpClientAdapterFactory instance = new TcpClientAdapterFactory();
+        private static TcpClientAdapterFactory _instance;
+        private static readonly object SyncRoot = new object();
 
-        public static TcpClientAdapterFactory Factory
+        private TcpClientAdapterFactory() { }
+
+        public static IClientAdapterFactory Factory
         {
             get
             {
-                return instance;
+                lock (SyncRoot)
+                {
+                    if(_instance==null)
+                        _instance = new TcpClientAdapterFactory();
+                }
+                return _instance;
             }
         }
 
@@ -32,13 +40,21 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
 
     public class MockClientAdapterFactory : IClientAdapterFactory
     {
-        private static MockClientAdapterFactory instance = new MockClientAdapterFactory();
+        private static MockClientAdapterFactory _instance;
+        private static readonly object SyncRoot = new object();
 
-        public static MockClientAdapterFactory Factory
+        private MockClientAdapterFactory() { }
+
+        public static IClientAdapterFactory Factory
         {
             get
             {
-                return instance;
+                lock (SyncRoot)
+                {
+                    if(_instance==null)
+                        _instance = new MockClientAdapterFactory();
+                }
+                return _instance;
             }
         }
 

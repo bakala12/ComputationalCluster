@@ -44,8 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientComponentCommon\ClientComponent.cs" />
-    <Compile Include="ClientComponentCommon\IClusterComponent.cs" />
+    <Compile Include="ClientComponentCommon\IMessageArrayCreator.cs" />
+    <Compile Include="ClientComponentCommon\InternalClientComponent.cs" />
+    <Compile Include="ClientComponentCommon\IExternalClientComponent.cs" />
+    <Compile Include="ClientComponentCommon\MessageArrayCreator.cs" />
+    <Compile Include="ClientComponentCommon\ClientMessageProcessor.cs" />
     <Compile Include="Messages\Constructors.cs" />
     <Compile Include="Messages\DivideProblem.cs" />
     <Compile Include="Messages\Error.cs" />
@@ -62,16 +65,16 @@
     <Compile Include="Messages\Status.cs" />
     <Compile Include="Miscellaneous\ArrayEx.cs" />
     <Compile Include="Miscellaneous\IPAddressEx.cs" />
-    <Compile Include="NetworkInterfaces\Adapters\Interfaces.cs" />
-    <Compile Include="NetworkInterfaces\Adapters\MockListenerAdapter.cs" />
-    <Compile Include="NetworkInterfaces\Adapters\MockSocketAdapter.cs" />
+    <Compile Include="NetworkInterfaces\Interfaces.cs" />
+    <Compile Include="NetworkInterfaces\Mocks\MockListenerAdapter.cs" />
+    <Compile Include="NetworkInterfaces\Mocks\MockSocketAdapter.cs" />
     <Compile Include="NetworkInterfaces\Adapters\SocketAdapter.cs" />
     <Compile Include="NetworkInterfaces\Adapters\TcpListenerAdapter.cs" />
     <Compile Include="NetworkInterfaces\Factories\ClientAdapterFactory.cs" />
     <Compile Include="NetworkInterfaces\ClusterClient.cs" />
     <Compile Include="NetworkInterfaces\ClusterListener.cs" />
-    <Compile Include="NetworkInterfaces\Adapters\MockClientAdapter.cs" />
-    <Compile Include="NetworkInterfaces\Adapters\MockNetworkStream.cs" />
+    <Compile Include="NetworkInterfaces\Mocks\MockClientAdapter.cs" />
+    <Compile Include="NetworkInterfaces\Mocks\MockStreamAdapter.cs" />
     <Compile Include="NetworkInterfaces\Adapters\NetworkStreamAdapter.cs" />
     <Compile Include="NetworkInterfaces\Adapters\TcpClientAdapter.cs" />
     <Compile Include="NetworkInterfaces\Factories\ClusterClientFactory.cs" />
@@ -91,6 +94,7 @@
     <Compile Include="Serialization\MessagesSerializer.cs" />
     <Compile Include="Serialization\MessageToBytesConverter.cs" />
     <Compile Include="Serialization\XmlStringSerializer.cs" />
+    <Compile Include="Shared\StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -102,6 +106,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

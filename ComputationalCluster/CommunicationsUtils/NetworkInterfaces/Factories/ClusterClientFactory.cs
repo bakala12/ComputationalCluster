@@ -11,30 +11,52 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
     public interface IClusterClientFactory
     {
         IClusterClient Create(string hostname, int port);
-        IClusterClient Create(string hostname, int port, ITcpClient adapter);
+        IClusterClient Create(string hostname, int port, IClientAdapterFactory factory);
     }
 
     public class ClusterClientFactory : IClusterClientFactory
     {
-        private static ClusterClientFactory instance = new ClusterClientFactory();
+        private static ClusterClientFactory _instance;
+        private static readonly object SyncRoot = new object();
 
-        public static ClusterClientFactory Factory
+        private ClusterClientFactory() { }
+
+        public static IClusterClientFactory Factory
         {
             get
             {
-                return instance;
+                lock (SyncRoot)
+                {
+                    if(_instance==null)
+                        _instance = new ClusterClientFactory();
+                }
+                return _instance;
             }
         }
 
-        public IClusterClient Create(string hostname, int port, ITcpClient adapter)
+        /// <summary>
+        /// potential use in mocking only
+        /// </summary>
+        /// <param name="hostname"></param>
+        /// <param name="port"></param>
+        /// <param name="factory"></param>
+        /// <returns></returns>
+        public IClusterClient Create(string hostname, int port, 
+            IClientAdapterFactory factory)
         {
-            return new ClusterClient(hostname, port, adapter);
+            return new ClusterClient(hostname, port, factory);
         }
 
+        /// <summary>
+        /// this overload should be used in components' code
+        /// </summary>
+        /// <param name="hostname"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
         public IClusterClient Create(string hostname, int port)
         {
-            ITcpClient adapter = TcpClientAdapterFactory.Factory.Create();
-            return new ClusterClient(hostname, port, adapter);
+            IClientAdapterFactory factory = TcpClientAdapterFactory.Factory;
+            return new ClusterClient(hostname, port, factory);
         }
     }
 }

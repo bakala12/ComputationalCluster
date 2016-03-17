@@ -43,7 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PartialInfo.cs" />
+    <Compile Include="ArgumentParserExtensionsForTaskManager.cs" />
+    <Compile Include="Core\TaskManagerMessageProcessorFactory.cs" />
+    <Compile Include="Core\TaskManagerStorage.cs" />
     <Compile Include="ProblemInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -53,6 +55,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="TaskManager.cs" />
+    <Compile Include="Core\TaskManagerMessageProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

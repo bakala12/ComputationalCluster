@@ -16,21 +16,40 @@ namespace CommunicationsUtils.NetworkInterfaces.Factories
 
     public class ClusterListenerFactory : IClusterListenerFactory
     {
-        private static ClusterListenerFactory instance = new ClusterListenerFactory();
+        private static ClusterListenerFactory _instance;
+        private static readonly object SyncRoot = new object();
 
-        public static ClusterListenerFactory Factory
+        private ClusterListenerFactory() { }
+
+        public static IClusterListenerFactory Factory
         {
             get
             {
-                return instance;
+                lock (SyncRoot)
+                {
+                    if(_instance==null)
+                        _instance=new ClusterListenerFactory();
+                }
+                return _instance;
             }
         }
 
+        /// <summary>
+        /// potential use in mocking only
+        /// </summary>
+        /// <param name="adapter"></param>
+        /// <returns></returns>
         public IClusterListener Create(ITcpListener adapter)
         {
             return new ClusterListener(adapter);
         }
 
+        /// <summary>
+        /// this overload should be used in components' code
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
         public IClusterListener Create(IPAddress address, int port)
         {
             ITcpListener listener = TcpListenerAdapterFactory.Factory.Create(address, port);

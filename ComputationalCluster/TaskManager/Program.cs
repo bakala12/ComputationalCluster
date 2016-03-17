@@ -1,10 +1,13 @@
-﻿using CommunicationsUtils.NetworkInterfaces;
+﻿using CommunicationsUtils.ClientComponentCommon;
+using CommunicationsUtils.NetworkInterfaces;
 using CommunicationsUtils.NetworkInterfaces.Factories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunicationsUtils.Argument_parser;
+using TaskManager.Core;
 
 namespace TaskManager
 {
@@ -12,11 +15,22 @@ namespace TaskManager
     {
         static void Main(string[] args)
         {
-            //args parsing
+            var parser = new ArgumentParser(OptionSetPool.ClientOptionsSet);
+            parser.ProcessArguments(args);
+            parser.UpdateConfiguration(parser.map);
 
-            IClusterClient clusterClient = ClusterClientFactory.Factory.Create(
+            IClusterClient statusClient = ClusterClientFactory.Factory.Create(
                 Properties.Settings.Default.Address, Properties.Settings.Default.Port);
-            TaskManager taskManager = new TaskManager(clusterClient);
+            IClusterClient problemClient = ClusterClientFactory.Factory.Create(
+                Properties.Settings.Default.Address, Properties.Settings.Default.Port);
+
+            var newCore = TaskManagerMessageProcessorFactory.Factory.Create
+                (new List<string> { "DVRP" });
+
+            var creator = new MessageArrayCreator();
+
+            TaskManager taskManager = new TaskManager(statusClient, problemClient, creator,
+                newCore);
 
             taskManager.Run();
         }

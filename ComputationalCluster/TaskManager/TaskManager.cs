@@ -87,7 +87,7 @@ namespace TaskManager
         /// <summary>
         /// handler of respones, sends proper requests
         /// </summary>
-        /// <param name="responses"></param>
+        ///
         public override void HandleResponses ()
         {
             while (true)
@@ -101,11 +101,13 @@ namespace TaskManager
                 switch (message.MessageType)
                 {
                     case MessageType.NoOperationMessage:
+                        Console.WriteLine("NoOperation acquired: updating backups");
                         UpdateBackups(message.Cast<NoOperation>());
                         break;
                     case MessageType.DivideProblemMessage:
                         //should be done in another thread not to
                         //overload message handler thread
+                        Console.WriteLine("DivideProblem acquired: dividing problem processing...");
                         DivideProblem msg = message.Cast<DivideProblem>();
                         Thread compThread = new Thread
                             (o=> this.StartLongComputation(() => core.DivideProblem
@@ -115,6 +117,7 @@ namespace TaskManager
                     case MessageType.SolutionsMessage:
                         //first, in this thread, if solution needs to be linked,
                         //create new thread
+                        Console.WriteLine("Solutions acquired: solutions msg processing");
                         Thread solThread = new Thread (o=> 
                         core.HandleSolutions((message.Cast<Solutions>())));
                         solThread.Start();

@@ -41,12 +41,15 @@ namespace TaskManager.Core
         {
             //implementation in second stage, this is mocked
             if (!SolvableProblems.Contains(divideProblem.ProblemType))
+            {
+                Console.WriteLine("Not supported problem type. Sending error message.");
                 return new Error()
                 {
                     ErrorMessage = "not supported problem type",
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
-
+            }
+            Console.WriteLine("Division of problem has started.");
             var partialProblem = new SolvePartialProblemsPartialProblem()
             {
                 TaskId = 0,
@@ -77,7 +80,7 @@ namespace TaskManager.Core
                     partialProblem
                 }
             };
-
+            Console.WriteLine("Success. Problem divided");
             return partialProblems;
         }
 
@@ -90,7 +93,7 @@ namespace TaskManager.Core
         {
             if (solutions.Solutions1 == null)
                 return null;
-            
+            Console.WriteLine("Adding partial solutions to TM's memory.");
             foreach (var solution in solutions.Solutions1)
             {
                 if (!storage.ContainsIssue(solutions.Id) || storage.ExistsTask(solutions.Id,solution.TaskId))
@@ -105,6 +108,7 @@ namespace TaskManager.Core
             //can be linked, because all of partial problems were solved & delivered
             if (storage.IssueCanBeLinked(solutions.Id))
             {
+                Console.WriteLine("Linking solutions (id:{0})", solutions.Id);
                 Solutions finalSolution = LinkSolutions(solutions.Id);
                 return finalSolution;
             }

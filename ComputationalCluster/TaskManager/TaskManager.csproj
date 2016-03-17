@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArgumentParserExtensionsForTaskManager.cs" />
     <Compile Include="Core\TaskManagerMessageProcessorFactory.cs" />
     <Compile Include="Core\TaskManagerStorage.cs" />
     <Compile Include="ProblemInfo.cs" />

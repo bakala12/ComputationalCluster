@@ -16,10 +16,10 @@ namespace Client
     {
         private IClusterClient clusterClient;
         private Stopwatch solvingWatch;
-        private IClientNodeProcessing core;
+        private ClientNodeProcessingModule core;
         private IMessageArrayCreator creator;
 
-        public ClientNode(IClusterClient _clusterClient, IClientNodeProcessing _core,
+        public ClientNode(IClusterClient _clusterClient, ClientNodeProcessingModule _core,
             IMessageArrayCreator _creator)
         {
             clusterClient = _clusterClient;
@@ -61,7 +61,7 @@ namespace Client
                     continue;
                 }
                 else
-                    Console.WriteLine("Solution Found.");
+                    Console.WriteLine("Solution found.");
 
             core.DoSomethingWithSolution(solution);
             }
@@ -90,6 +90,7 @@ namespace Client
                     break;
                 }
                 // ~~ else continue
+                Console.WriteLine("No solution yet");
             }
 
             return null;
@@ -114,11 +115,13 @@ namespace Client
                 switch (response.MessageType)
                 {
                     case MessageType.SolveRequestResponseMessage:
+                        Console.WriteLine("SolveRequestResponse acquired: handling");
                         if (solveResponse != null)
                             throw new Exception("Multiple SolveRequestResponse messages in CC");
                         solveResponse = response.Cast<SolveRequestResponse>();
                         break;
                     case MessageType.NoOperationMessage:
+                        Console.WriteLine("NoOperation acquired: updating backups");
                         UpdateBackups(response.Cast<NoOperation>());
                         break;
                     default:
@@ -140,6 +143,7 @@ namespace Client
         public virtual Solutions CheckComputations(SolutionRequest request)
         {
             Message[] requests = creator.Create(request);
+            Console.WriteLine("Sending solution request...");
             Message[] responses = clusterClient.SendRequests(requests);
             Solutions solutionReponse = null;
 
@@ -148,9 +152,11 @@ namespace Client
                 switch (response.MessageType)
                 {
                     case MessageType.NoOperationMessage:
+                        Console.WriteLine("NoOperation acquired: updating backups");
                         this.UpdateBackups(response.Cast<NoOperation>());
                         break;
                     case MessageType.SolutionsMessage:
+                        Console.WriteLine("Solutions acquired: checking...");
                         if (solutionReponse != null)
                         {
                             throw new Exception("Multiple solutions msg from CS to CC");

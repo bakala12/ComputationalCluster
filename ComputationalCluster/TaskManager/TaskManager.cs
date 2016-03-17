@@ -21,10 +21,10 @@ namespace TaskManager
     public class TaskManager : InternalClientComponent
     {
         //task manager non-communication context
-        private TaskManagerProcessingModule core;
+        private TaskManagerMessageProcessor core;
 
         public TaskManager(IClusterClient _statusClient, IClusterClient _problemClient, 
-            IMessageArrayCreator _creator, TaskManagerProcessingModule _core) 
+            IMessageArrayCreator _creator, TaskManagerMessageProcessor _core) 
             : base (_statusClient, _problemClient, _creator)
         {
             core = _core;
@@ -43,6 +43,7 @@ namespace TaskManager
             Console.WriteLine("Registering complete with id={0}", componentId);
             while(true)
             {
+                Console.WriteLine("Sleeping (less than timeout={0}",timeout);
                 Thread.Sleep((int)(0.7 * timeout));
                 Console.WriteLine("Sending status");
                 Message[] responses = this.SendStatus();
@@ -87,7 +88,7 @@ namespace TaskManager
         /// <summary>
         /// handler of respones, sends proper requests
         /// </summary>
-        /// <param name="responses"></param>
+        ///
         public override void HandleResponses ()
         {
             while (true)
@@ -101,11 +102,13 @@ namespace TaskManager
                 switch (message.MessageType)
                 {
                     case MessageType.NoOperationMessage:
+                        Console.WriteLine("NoOperation acquired: updating backups");
                         UpdateBackups(message.Cast<NoOperation>());
                         break;
                     case MessageType.DivideProblemMessage:
                         //should be done in another thread not to
                         //overload message handler thread
+                        Console.WriteLine("DivideProblem acquired: dividing problem processing...");
                         DivideProblem msg = message.Cast<DivideProblem>();
                         Thread compThread = new Thread
                             (o=> this.StartLongComputation(() => core.DivideProblem
@@ -115,12 +118,14 @@ namespace TaskManager
                     case MessageType.SolutionsMessage:
                         //first, in this thread, if solution needs to be linked,
                         //create new thread
-                        Thread solThread = new Thread (o=> 
-                        core.HandleSolutions((message.Cast<Solutions>())));
+                        Console.WriteLine("Solutions acquired: solutions msg processing");
+                        Solutions smsg = message.Cast<Solutions>();
+                        Thread solThread = new Thread (o=> this.StartLongComputation
+                        (() => core.HandleSolutions(smsg)));
                         solThread.Start();
                         break;
                     case MessageType.ErrorMessage:
-                        //something?
+                        Console.WriteLine("Error message acquired:{0}",message.Cast<Error>().ErrorMessage);
                         break;
                     default:
                         throw new Exception("Wrong message delivered to TM: " + message.ToString());

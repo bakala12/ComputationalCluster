@@ -55,5 +55,10 @@ namespace TaskManager.Core
         {
             currentProblems[id].PartialSolutions[taskId] = solution;
         }
+
+        public void RemoveIssue(ulong id)
+        {
+            currentProblems.Remove(id);
+        }
     }
 }

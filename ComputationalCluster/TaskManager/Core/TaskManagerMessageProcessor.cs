@@ -9,22 +9,19 @@ using System.Threading.Tasks;
 namespace TaskManager.Core
 {
     /// <summary>
-    /// provides non-communication TM's functionalities
+    /// TM's message handling utilities
     /// </summary>
-    public class TaskManagerProcessingModule: ProcessingModule
+    public class TaskManagerMessageProcessor: ClientMessageProcessor
     {
         /// <summary>
         /// current problems in TM indexed by problem id in cluster (given by CS)
         /// </summary>
         private TaskManagerStorage storage;
-        private List<StatusThread> threads;
-        private ulong threadCount = 0;
 
-        public TaskManagerProcessingModule(List<string> problems, TaskManagerStorage _storage)
+        public TaskManagerMessageProcessor(List<string> problems, TaskManagerStorage _storage)
             : base(problems)
         {
             storage = _storage;
-            threads = new List<StatusThread>();
             //enough for this stage:
             threads.Add(new StatusThread()
             {
@@ -37,16 +34,28 @@ namespace TaskManager.Core
             });
         }
 
+        public Status GetStatus()
+        {
+            Status statusMsg = new Status()
+            {
+                Threads = threads.ToArray()
+            };
+            return statusMsg;
+        }
+
         public Message DivideProblem(DivideProblem divideProblem)
         {
             //implementation in second stage, this is mocked
             if (!SolvableProblems.Contains(divideProblem.ProblemType))
+            {
+                Console.WriteLine("Not supported problem type.");
                 return new Error()
                 {
                     ErrorMessage = "not supported problem type",
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
-
+            }
+            Console.WriteLine("Division of problem has started.");
             var partialProblem = new SolvePartialProblemsPartialProblem()
             {
                 TaskId = 0,
@@ -77,7 +86,7 @@ namespace TaskManager.Core
                     partialProblem
                 }
             };
-
+            Console.WriteLine("Success. Problem divided");
             return partialProblems;
         }
 
@@ -90,7 +99,7 @@ namespace TaskManager.Core
         {
             if (solutions.Solutions1 == null)
                 return null;
-            
+            Console.WriteLine("Adding partial solutions to TM's memory.");
             foreach (var solution in solutions.Solutions1)
             {
                 if (!storage.ContainsIssue(solutions.Id) || storage.ExistsTask(solutions.Id,solution.TaskId))
@@ -105,7 +114,9 @@ namespace TaskManager.Core
             //can be linked, because all of partial problems were solved & delivered
             if (storage.IssueCanBeLinked(solutions.Id))
             {
+                Console.WriteLine("Linking solutions (id:{0})", solutions.Id);
                 Solutions finalSolution = LinkSolutions(solutions.Id);
+                storage.RemoveIssue(solutions.Id);
                 return finalSolution;
             }
 
@@ -128,15 +139,6 @@ namespace TaskManager.Core
             = new[] { new SolutionsSolution() { Data = null, ComputationsTime = 1, TaskIdSpecified = false,
             Type = SolutionsSolutionType.Final} }
             };
-        }
-
-        public Status GetStatus()
-        {
-            Status statusMsg = new Status()
-            {
-                Threads = threads.ToArray()
-            };
-            return statusMsg;
         }
     }
 }

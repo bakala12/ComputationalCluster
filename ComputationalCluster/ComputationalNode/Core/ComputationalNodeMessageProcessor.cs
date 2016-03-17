@@ -9,16 +9,12 @@ using CommunicationsUtils.Messages;
 namespace ComputationalNode.Core
 {
     /// <summary>
-    /// provides non-communication CN's functionalities
+    /// provides CN's message handling utilities
     /// </summary>
-    public class ComputationalNodeProcessingModule : ProcessingModule
+    public class ComputationalNodeMessageProcessor: ClientMessageProcessor
     {
-        private List<StatusThread> threads;
-        private ulong threadCount = 0;
-
-        public ComputationalNodeProcessingModule(List<string> problems) : base(problems)
+        public ComputationalNodeMessageProcessor(List<string> problems ): base (problems)
         {
-            threads = new List<StatusThread>();
             //enough for this stage:
             threads.Add(new StatusThread()
             {
@@ -33,6 +29,16 @@ namespace ComputationalNode.Core
 
         public Message ComputeSubtask(SolvePartialProblems solvePartialProblems)
         {
+            //some error handling:
+            if (!this.SolvableProblems.Contains(solvePartialProblems.ProblemType))
+            {
+                return new Error()
+                {
+                    ErrorMessage = "Invalid type of problem delivered",
+                    ErrorType = ErrorErrorType.InvalidOperation
+                };
+            }
+            Console.WriteLine("Computation started & finished.");
             //implementation in second stage, now mocked:
             if (!SolvableProblems.Contains(solvePartialProblems.ProblemType))
                 return new Error()

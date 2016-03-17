@@ -16,7 +16,7 @@ namespace Tests
         public void ComputeSubtaskWrongProblemTypeTest()
         {
             SolvePartialProblems spp = new SolvePartialProblems() {ProblemType = "ABC"};
-            var cnp = new ComputationalNodeProcessingModule(new List<string>() {"DVRP"});
+            var cnp = new ComputationalNodeMessageProcessor(new List<string>() {"DVRP"});
             var msg = cnp.ComputeSubtask(spp);
             Assert.IsInstanceOfType(msg, typeof(Error));
         }
@@ -25,7 +25,7 @@ namespace Tests
         public void ComputationalNodeCorrectResponseTest()
         {
             SolvePartialProblems spp = new SolvePartialProblems() { ProblemType = "DEF", Id = 123 };
-            var cnp = new ComputationalNodeProcessingModule(new List<string>() {"DEF"});
+            var cnp = new ComputationalNodeMessageProcessor(new List<string>() {"DEF"});
             var msg = cnp.ComputeSubtask(spp);
             Assert.IsInstanceOfType(msg, typeof(Solutions));
             var msgc = msg.Cast<Solutions>();

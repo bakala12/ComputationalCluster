@@ -15,7 +15,7 @@ namespace Tests
         public void DivideProblemWrongProblemTypeTest()
         {
             DivideProblem dp = new DivideProblem() { ProblemType = "ASDF" };
-            var tmp = new TaskManagerProcessingModule(new List<string>() { "DEF" }, 
+            var tmp = new TaskManagerMessageProcessor(new List<string>() { "DEF" }, 
                 new TaskManagerStorage());
             var msg = tmp.DivideProblem(dp);
             Assert.IsInstanceOfType(msg, typeof(Error));
@@ -25,7 +25,7 @@ namespace Tests
         public void DivideProblemCorrectResponseTest ()
         {
             DivideProblem dp = new DivideProblem() { ProblemType = "DEF", Id = 123 };
-            var tmp = new TaskManagerProcessingModule(new List<string>() { "DEF" },
+            var tmp = new TaskManagerMessageProcessor(new List<string>() { "DEF" },
                 new TaskManagerStorage());
             var msg = tmp.DivideProblem(dp);
             Assert.IsInstanceOfType(msg, typeof(SolvePartialProblems));
@@ -44,7 +44,7 @@ namespace Tests
                 new SolutionsSolution () { TaskId=777 } }
             };
 
-            var tmp = new TaskManagerProcessingModule(null, new TaskManagerStorage());
+            var tmp = new TaskManagerMessageProcessor(null, new TaskManagerStorage());
             tmp.HandleSolutions(sol);
         }
     }

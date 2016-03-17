@@ -95,6 +95,7 @@ namespace CommunicationsUtils.ClientComponentCommon
         public void SendProblemRelatedMessage(Message request)
         {
             Message[] requests = creator.Create(request);
+            Console.WriteLine("Sending after computations: {0}", request.ToString());
             Message[] responses = problemClient.SendRequests(requests);
             foreach (var response in responses)
                 messageQueue.Enqueue(response);
@@ -118,9 +119,11 @@ namespace CommunicationsUtils.ClientComponentCommon
                     case MessageType.RegisterResponseMessage:
                         if (registerResponse != null)
                             throw new Exception("Multiple register responses");
+                        Console.WriteLine("RegisterResponse acquired: updating fields...");
                         registerResponse = response.Cast<RegisterResponse>();
                         break;
                     case MessageType.NoOperationMessage:
+                        Console.WriteLine("NoOperation acquired: updating backups");
                         UpdateBackups(response.Cast<NoOperation>());
                         break;
                     default:

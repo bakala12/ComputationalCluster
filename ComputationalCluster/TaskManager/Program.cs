@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunicationsUtils.Argument_parser;
 using TaskManager.Core;
 
 namespace TaskManager
@@ -14,7 +15,9 @@ namespace TaskManager
     {
         static void Main(string[] args)
         {
-            //args parsing
+            var parser = new ArgumentParser(OptionSetPool.ClientOptionsSet);
+            parser.ProcessArguments(args);
+            parser.UpdateConfiguration(parser.map);
 
             IClusterClient statusClient = ClusterClientFactory.Factory.Create(
                 Properties.Settings.Default.Address, Properties.Settings.Default.Port);

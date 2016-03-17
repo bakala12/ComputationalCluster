@@ -8,8 +8,6 @@ using Server.Data;
 using Server.Interfaces;
 using Server.MessageProcessing;
 
-// ReSharper disable FunctionNeverReturns
-
 namespace Server
 {
     public class ComputationalServer : IRunnable

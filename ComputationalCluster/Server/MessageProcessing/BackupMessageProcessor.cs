@@ -5,7 +5,8 @@ using Server.Data;
 namespace Server.MessageProcessing
 {
     /// <summary>
-    /// Some mocks in responding.
+    /// Message processor for backup server.
+    /// Contains implementations for handling different messages that occur in backup server.
     /// </summary>
     public class BackupMessageProcessor : MessageProcessor
     {

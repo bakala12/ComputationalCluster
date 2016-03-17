@@ -1,9 +1,16 @@
-﻿namespace Server.Data
+﻿// ReSharper disable UnusedAutoPropertyAccessor.Local
+// ReSharper disable InconsistentNaming
+namespace Server.Data
 {
+    /// <summary>
+    /// Stores information about the problem.
+    /// Will be used in future development.
+    /// </summary>
     public class ProblemDataSet
     {
-        //TODO
-        // some informations about the problem to be updated 
-        public int ProblemID { get; set; }
+        /// <summary>
+        /// Id of a problem
+        /// </summary>
+        public int ProblemID { get; private set; }
     }
 }

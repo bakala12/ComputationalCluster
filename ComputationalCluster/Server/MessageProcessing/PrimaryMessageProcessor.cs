@@ -5,9 +5,8 @@ using Server.Data;
 namespace Server.MessageProcessing
 {
     /// <summary>
-    /// Lets say that there are all messages that main server would send response.
-    /// So far it returns proper messages.
-    /// It also prints some information to console.
+    /// Message processor for primary server.
+    /// Contains implementations for handling different messages that occur in primary server.
     /// </summary>
     public class PrimaryMessageProcessor : MessageProcessor
     {

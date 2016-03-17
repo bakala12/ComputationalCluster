@@ -7,12 +7,17 @@ using Server.Interfaces;
 namespace Server.MessageProcessing
 {
     /// <summary>
-    /// So far some processing is same for primary server and backup server, 
-    /// will be developed in the future.
-    /// It prints some information to console.
+    /// Message processor for component.
+    /// Contains implementations for handling different messages that occur in component.
     /// </summary>
     public abstract class MessageProcessor : IMessageProcessor
     {
+        /// <summary>
+        /// Processes message.
+        /// </summary>
+        /// <param name="message">Instance of message to process</param>
+        /// <param name="dataSets">Dictionary of problem data sets (maybe to update one of these or maybe not)</param>
+        /// <param name="activeComponents">Dictionary of active components (maybe to update one of these or maybe not)</param>
         public virtual void ProcessMessage(Message message, IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
@@ -56,6 +61,13 @@ namespace Server.MessageProcessing
             }
         }
 
+        /// <summary>
+        /// Creates array of response messages for specified message.
+        /// </summary>
+        /// <param name="message">Instance of message to create response messages for</param>
+        /// <param name="dataSets">Dictionary of problem data sets (maybe to update one of these or maybe not)</param>
+        /// <param name="activeComponents">Dictionary of active components (maybe to update one of these or maybe not)</param>
+        /// <returns></returns>
         public virtual Message[] CreateResponseMessages(Message message, IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {

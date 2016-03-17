@@ -84,7 +84,7 @@ namespace ComputationalNode
                         //something?
                         break;
                     default:
-                        throw new Exception("Wrong message delivered to TM: " + message.ToString());
+                        throw new Exception("Wrong message delivered to CN: " + message.ToString());
                 }
             }
         }

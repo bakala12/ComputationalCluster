@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Messages;
 
 namespace ComputationalNode.Core
@@ -10,14 +11,12 @@ namespace ComputationalNode.Core
     /// <summary>
     /// provides non-communication CN's functionalities
     /// </summary>
-    public class ComputationalNodeProcessingModule
+    public class ComputationalNodeProcessingModule : ProcessingModule
     {
         private List<StatusThread> threads;
         private ulong threadCount = 0;
 
-        public ulong ComponentId { get; set; }
-
-        public ComputationalNodeProcessingModule()
+        public ComputationalNodeProcessingModule(List<string> problems) : base(problems)
         {
             threads = new List<StatusThread>();
             //enough for this stage:
@@ -32,9 +31,17 @@ namespace ComputationalNode.Core
             });
         }
 
-        public Solutions ComputeSubtask(SolvePartialProblems solvePartialProblems)
+        public Message ComputeSubtask(SolvePartialProblems solvePartialProblems)
         {
             //implementation in second stage, now mocked:
+            if (!SolvableProblems.Contains(solvePartialProblems.ProblemType))
+                return new Error()
+                {
+                    ErrorMessage = "not supported problem type",
+                    ErrorType = ErrorErrorType.InvalidOperation
+                };
+
+
             return new Solutions()
             {
                 CommonData = new byte[] {0},

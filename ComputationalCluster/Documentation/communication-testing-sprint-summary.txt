@@ -1,0 +1,65 @@
+Podsumowanie rzeczywistego czasu poœwiêconego na projekt w ramach sprintu na deadline 17/03 (communication testing)
+Pe³ne podsumowanie zostanie opublikowane w dniu 24/03.
+
+Communication Utils
+	1. Stworzenie generycznych interfejsów pozwalaj¹cych komponentom na komunikacjê po protokole TCP (10h) 
+	- poœwiêcono: 16-18h.
+	2. Stworzenie wiadomoœci wszystkich typów na podstawie schemy (3h) 
+	- poœwiêcono: 3-4 h (wraz z konwerterami i serializerami)
+	3. Skonstruowanie ogólnej klasy Message, bed¹c¹ klas¹ bazow¹ dla wszystkich wiadomoœci 
+	o strukturze danej ze schemy. (3h)
+	- poœwiêcono: 3-4 h.
+
+Algorithm Solvers : Augustyniak
+	1. Stworzenie szkieletowej implementacji TaskSolvera dla DVRP - na potrzeby etapu komunikacji 
+	zastosowaæ zaœlepki w miejscu prawdziwej implementacji algorytmu. (3h) 
+	- poœwiêcono: 0h. Zadanie okaza³o siê zbêdne.
+
+Computational Client : Bondyra
+	1. Skonstruowanie szkieletu klas dla projektu (4h) 
+	- poœwiêcono: ok. 3-4h.
+	2. Poprawna komunikacja z serwerem bez uwzglêdnienia awaryjnoœci (3h) 
+	- poœwiêcono: 3-4h.
+	3. Poprawna komunikacja z serwerem z uwzglêdnieniem awaryjnoœci(3h) 
+	- zadanie w toku
+
+Communication Server : B¹ka³a, Duszak
+	1. Skonstruowanie szkieletu klas dla projektu (5h) 
+	- poœwiêcono: oko³o 5.5h
+	2. Konfiguracja systemu przez parametry wywo³ania (3h) 
+	- poœwiêcono: 3h.
+	3. Implementacja sposobu komunikacji serwer - backupy (4h) 
+	- zadanie w toku
+	4. Implementacja komunikacji serwer - klient (3h) 
+	- zadanie w toku
+	5. Implementacja komunikacji z Task Managerami i wêz³ami obliczeniowymi (5h) - zadanie w toku
+	6. Poprawne kolejkowanie wiadomoœci (3h) 
+	- poœwiêcono ok. 2h.
+	7. Uwzglêdnienie awaryjnoœci (6h) 
+	- zadanie w toku
+
+Task Manager : Bondyra
+	1. Skonstruowanie szkieletu klas dla projektu (4h) 
+	- poœwiêcono: 4h.
+	2. Komunikacja z serwerem (4h) 
+	- poœwiêcono: 3-4h.
+	3. Zastosowanie zaœlepek w kodzie (mocków) maj¹cych na celu imitacjê przysz³ego dzielenia problemu przez 
+	komponent w celu przetestowania poprawnoœci implementacji komunikacji w systemie (4h) 
+	- poœwiêcono: 2h.
+	4. Uwzglêdnienie awaryjnoœci (3h) 
+	- zadanie w toku
+
+Computational Node : Augustyniak
+	1. Skonstruowanie szkieletu klas dla projektu (4h) 
+	- poœwiêcono: ok. 2h (bazuj¹c na wspólnych klasach z TM)
+	2. Komunikacja z serwerem (4h) 
+	- poœwiêcono: 3-4h.
+	3. Zastosowanie zaœlepek w kodzie (mocków) maj¹cych na celu imitacjê obliczeñ przez komponent w celu 
+	przetestowania poprawnoœci implementacji komunikacji w systemie (4h) 
+	- poœwiêcono: 1-2h.
+	4. Uwzglêdnienie awaryjnoœci (3h) 
+	- zadanie w toku
+
+Inne : Bondyra
+	1. Globalna konfiguracja systemu (3h) 
+	- poœwiêcono 2-3h.

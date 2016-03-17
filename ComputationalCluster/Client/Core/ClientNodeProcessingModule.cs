@@ -11,7 +11,7 @@ namespace Client.Core
     /// handles a problem in console - reading, preparing message,
     /// and maybe something more
     /// </summary>
-    public class ClientNodeProcessingModule : IClientNodeProcessing
+    public class ClientNodeProcessingModule
     {
         private byte[] data;
         private string type;
@@ -59,7 +59,7 @@ namespace Client.Core
         /// 
         /// </summary>
         /// <returns>solverequest based on current state of processing module</returns>
-        public SolveRequest GetRequest()
+        public virtual SolveRequest GetRequest()
         {
             return new SolveRequest()
             {

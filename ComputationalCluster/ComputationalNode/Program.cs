@@ -21,7 +21,8 @@ namespace ComputationalNode
             IClusterClient problemClient = ClusterClientFactory.Factory.Create(
                 Properties.Settings.Default.Address, Properties.Settings.Default.Port);
 
-            var newCore = ComputationalNodeProcessingModuleFactory.Factory.Create();
+            var newCore = ComputationalNodeProcessingModuleFactory.
+                Factory.Create(new List<string>() {"DVRP"});
 
             var creator = new MessageArrayCreator();
 

@@ -8,7 +8,7 @@ namespace Client.Core
 {
     public interface IClientNodeProcessingFactory
     {
-        IClientNodeProcessing Create();
+        ClientNodeProcessingModule Create();
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ namespace Client.Core
             }
         }
 
-        public IClientNodeProcessing Create()
+        public ClientNodeProcessingModule Create()
         {
             return new ClientNodeProcessingModule();
         }

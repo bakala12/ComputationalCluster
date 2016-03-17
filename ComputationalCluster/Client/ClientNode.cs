@@ -16,10 +16,10 @@ namespace Client
     {
         private IClusterClient clusterClient;
         private Stopwatch solvingWatch;
-        private IClientNodeProcessing core;
+        private ClientNodeProcessingModule core;
         private IMessageArrayCreator creator;
 
-        public ClientNode(IClusterClient _clusterClient, IClientNodeProcessing _core,
+        public ClientNode(IClusterClient _clusterClient, ClientNodeProcessingModule _core,
             IMessageArrayCreator _creator)
         {
             clusterClient = _clusterClient;

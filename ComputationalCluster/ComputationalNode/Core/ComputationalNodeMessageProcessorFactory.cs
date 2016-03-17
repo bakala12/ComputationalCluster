@@ -8,9 +8,10 @@ namespace ComputationalNode.Core
 {
     public interface IComputationalNodeProcessingFactory
     {
-        ComputationalNodeProcessingModule Create();
+        ComputationalNodeMessageProcessor Create(List<string> problems);
     }
-    public class ComputationalNodeProcessingModuleFactory : ComputationalNodeProcessingModule
+    public class ComputationalNodeProcessingModuleFactory : 
+        IComputationalNodeProcessingFactory
     {
         private static ComputationalNodeProcessingModuleFactory instance = 
             new ComputationalNodeProcessingModuleFactory();
@@ -23,9 +24,9 @@ namespace ComputationalNode.Core
             }
         }
 
-        public ComputationalNodeProcessingModule Create()
+        public ComputationalNodeMessageProcessor Create(List<string> problems)
         {
-            return new ComputationalNodeProcessingModule();
+            return new ComputationalNodeMessageProcessor(problems);
         }
     }
 }

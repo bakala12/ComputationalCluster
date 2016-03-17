@@ -15,7 +15,7 @@ namespace Tests
         [TestMethod]
         public void SendProblemGetResponseTest()
         {
-            var mockcore = new Mock<IClientNodeProcessing>();
+            var mockcore = new Mock<ClientNodeProcessingModule>();
             var mockcreator = new Mock<IMessageArrayCreator>();
             var solveRequest = new SolveRequest()
             {
@@ -41,7 +41,7 @@ namespace Tests
         [TestMethod]
         public void SendProblemMultipleResponsesExceptionTest()
         {
-            var mockcore = new Mock<IClientNodeProcessing>();
+            var mockcore = new Mock<ClientNodeProcessingModule>();
             var mockcreator = new Mock<IMessageArrayCreator>();
             var solveRequest = new SolveRequest()
             {
@@ -66,7 +66,7 @@ namespace Tests
         [TestMethod]
         public void SendProblemInvalidResponseExceptionTest()
         {
-            var mockcore = new Mock<IClientNodeProcessing>();
+            var mockcore = new Mock<ClientNodeProcessingModule>();
             var mockcreator = new Mock<IMessageArrayCreator>();
             var solveRequest = new SolveRequest()
             {
@@ -91,7 +91,7 @@ namespace Tests
         [TestMethod]
         public void SendProblemNoResponseExceptionTest()
         {
-            var mockcore = new Mock<IClientNodeProcessing>();
+            var mockcore = new Mock<ClientNodeProcessingModule>();
             var mockcreator = new Mock<IMessageArrayCreator>();
             var solveRequest = new SolveRequest()
             {
@@ -114,7 +114,7 @@ namespace Tests
         [TestMethod]
         public void CheckComputationsReturnsSolutionTest()
         {
-            var mockcore = new Mock<IClientNodeProcessing>();
+            var mockcore = new Mock<ClientNodeProcessingModule>();
             var mockcreator = new Mock<IMessageArrayCreator>();
             var solutionRequest = new SolutionRequest();
             Message[] request = new[] { solutionRequest };
@@ -137,7 +137,7 @@ namespace Tests
         [TestMethod]
         public void CheckComputationsMultipleSolutionsExceptionTest()
         {
-            var mockcore = new Mock<IClientNodeProcessing>();
+            var mockcore = new Mock<ClientNodeProcessingModule>();
             var mockcreator = new Mock<IMessageArrayCreator>();
             var solutionRequest = new SolutionRequest();
             Message[] request = new[] { solutionRequest };
@@ -158,7 +158,7 @@ namespace Tests
         [TestMethod]
         public void CheckComputationsWrongMessageExceptionTest()
         {
-            var mockcore = new Mock<IClientNodeProcessing>();
+            var mockcore = new Mock<ClientNodeProcessingModule>();
             var mockcreator = new Mock<IMessageArrayCreator>();
             var solutionRequest = new SolutionRequest();
             Message[] request = new[] { solutionRequest };
@@ -179,7 +179,7 @@ namespace Tests
         [TestMethod]
         public void CheckComputationsNoSolutionsExceptionTest()
         {
-            var mockcore = new Mock<IClientNodeProcessing>();
+            var mockcore = new Mock<ClientNodeProcessingModule>();
             var mockcreator = new Mock<IMessageArrayCreator>();
             var solutionRequest = new SolutionRequest();
             Message[] request = new[] { solutionRequest };

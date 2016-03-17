@@ -8,18 +8,18 @@ namespace TaskManager.Core
 {
     public interface ITaskManagerProcessingFactory
     {
-        TaskManagerProcessingModule Create(List<string> problems);
+        TaskManagerMessageProcessor Create(List<string> problems);
     }
 
     /// <summary>
     /// creates TaskManagerProcessingModule instances
     /// </summary>
-    public class TaskManagerProcessingModuleFactory : ITaskManagerProcessingFactory
+    public class TaskManagerMessageProcessorFactory : ITaskManagerProcessingFactory
     {
-        private static TaskManagerProcessingModuleFactory instance =
-    new TaskManagerProcessingModuleFactory();
+        private static TaskManagerMessageProcessorFactory instance =
+    new TaskManagerMessageProcessorFactory();
 
-        public static TaskManagerProcessingModuleFactory Factory
+        public static TaskManagerMessageProcessorFactory Factory
         {
             get
             {
@@ -27,10 +27,10 @@ namespace TaskManager.Core
             }
         }
 
-        public TaskManagerProcessingModule Create(List<string> problems)
+        public TaskManagerMessageProcessor Create(List<string> problems)
         {
             var storage = new TaskManagerStorage();
-            return new TaskManagerProcessingModule(problems, storage);
+            return new TaskManagerMessageProcessor(problems, storage);
         }
     }
 }

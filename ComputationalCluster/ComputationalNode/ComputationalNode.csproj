@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArgumentParserExtensionsForComputationalNode.cs" />
     <Compile Include="ComputationalNode.cs" />
     <Compile Include="Core\ComputationalNodeMessageProcessorFactory.cs" />
     <Compile Include="Core\ComputationalNodeMessageProcessor.cs" />

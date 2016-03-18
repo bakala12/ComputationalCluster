@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="ClientComponentCommon\IMessageArrayCreator.cs" />
     <Compile Include="ClientComponentCommon\InternalClientComponent.cs" />
-    <Compile Include="ClientComponentCommon\IExternalClientComponent.cs" />
+    <Compile Include="ClientComponentCommon\ExternalClientComponent.cs" />
     <Compile Include="ClientComponentCommon\MessageArrayCreator.cs" />
     <Compile Include="ClientComponentCommon\ClientMessageProcessor.cs" />
     <Compile Include="Messages\Constructors.cs" />

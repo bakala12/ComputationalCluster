@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    public class ClientNode : IExternalClientComponent
+    public class ClientNode : ExternalClientComponent
     {
         private IClusterClient clusterClient;
         private Stopwatch solvingWatch;
@@ -36,7 +36,7 @@ namespace Client
         /// <summary>
         /// main CC loop (I dont see a need to unit test it)
         /// </summary>
-        public void Run ()
+        public override void Run ()
         {
             while (true)
             {
@@ -173,15 +173,6 @@ namespace Client
             }
             //could (or couldn't?) be null:
             return solutionReponse;
-        }
-
-        /// <summary>
-        /// will be implemented in the future
-        /// </summary>
-        /// <param name="msg"></param>
-        public void UpdateBackups(NoOperation msg)
-        {
-
         }
     }
 }

@@ -36,9 +36,6 @@ namespace Server.Extensions
                     case "mport=":
                         Properties.Settings.Default.MasterPort = pair.Value.ChangeType<int>();
                         break;
-                    case "address=":
-                        Properties.Settings.Default.Address = pair.Value;
-                        break;
                     default:
                         throw new ArgumentException();
                 }

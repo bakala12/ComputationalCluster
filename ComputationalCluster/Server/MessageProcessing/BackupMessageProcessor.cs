@@ -19,9 +19,9 @@ namespace Server.MessageProcessing
             {
                 new NoOperation
                 {
-                    BackupCommunicationServers = new[]
+                    BackupServersInfo = new[]
                     {
-                        new NoOperationBackupCommunicationServer()
+                        new BackupServerInfo()
                         {
                             address = "0.0.0.0",
                             port = 8086
@@ -40,9 +40,9 @@ namespace Server.MessageProcessing
             {
                 new NoOperation
                 {
-                    BackupCommunicationServers = new[]
+                    BackupServersInfo = new[]
                     {
-                        new NoOperationBackupCommunicationServer()
+                        new BackupServerInfo()
                         {
                             address = "0.0.0.0",
                             port = 8086
@@ -61,9 +61,9 @@ namespace Server.MessageProcessing
             {
                 new NoOperation
                 {
-                    BackupCommunicationServers = new[]
+                    BackupServersInfo = new[]
                     {
-                        new NoOperationBackupCommunicationServer()
+                        new BackupServerInfo()
                         {
                             address = "0.0.0.0",
                             port = 8086
@@ -82,9 +82,9 @@ namespace Server.MessageProcessing
             {
                 new NoOperation
                 {
-                    BackupCommunicationServers = new[]
+                    BackupServersInfo = new[]
                     {
-                        new NoOperationBackupCommunicationServer()
+                        new BackupServerInfo()
                         {
                             address = "0.0.0.0",
                             port = 8086
@@ -103,9 +103,9 @@ namespace Server.MessageProcessing
             {
                 new NoOperation
                 {
-                    BackupCommunicationServers = new[]
+                    BackupServersInfo = new[]
                     {
-                        new NoOperationBackupCommunicationServer()
+                        new BackupServerInfo()
                         {
                             address = "0.0.0.0",
                             port = 8086
@@ -124,9 +124,9 @@ namespace Server.MessageProcessing
             {
                 new NoOperation
                 {
-                    BackupCommunicationServers = new[]
+                    BackupServersInfo = new[]
                     {
-                        new NoOperationBackupCommunicationServer()
+                        new BackupServerInfo()
                         {
                             address = "0.0.0.0",
                             port = 8086
@@ -145,9 +145,9 @@ namespace Server.MessageProcessing
             {
                 new NoOperation
                 {
-                    BackupCommunicationServers = new[]
+                    BackupServersInfo = new[]
                     {
-                        new NoOperationBackupCommunicationServer()
+                        new BackupServerInfo()
                         {
                             address = "0.0.0.0",
                             port = 8086

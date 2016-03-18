@@ -132,14 +132,5 @@ namespace TaskManager
                 }
             }
         }
-
-        /// <summary>
-        /// nothing for now:
-        /// </summary>
-        /// <param name="msg"></param>
-        public override void UpdateBackups (NoOperation msg)
-        {
-            //will be implemented in internalclientcomponent in the next week
-        }
     }
 }

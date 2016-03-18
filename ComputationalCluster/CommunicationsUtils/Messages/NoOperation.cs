@@ -27,14 +27,14 @@ namespace CommunicationsUtils.Messages
     public partial class NoOperation
     {
 
-        private NoOperationBackupCommunicationServer[] backupCommunicationServersField;
+        private BackupServerInfo[] _backupServersInfoField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayItemAttribute("BackupCommunicationServer", IsNullable = false)]
-        public NoOperationBackupCommunicationServer[] BackupCommunicationServers
+        public BackupServerInfo[] BackupServersInfo
         {
-            get { return this.backupCommunicationServersField; }
-            set { this.backupCommunicationServersField = value; }
+            get { return this._backupServersInfoField; }
+            set { this._backupServersInfoField = value; }
         }
     }
 
@@ -44,7 +44,7 @@ namespace CommunicationsUtils.Messages
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    public partial class NoOperationBackupCommunicationServer
+    public partial class BackupServerInfo
     {
 
         private string addressField;

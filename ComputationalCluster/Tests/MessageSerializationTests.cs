@@ -47,14 +47,14 @@ namespace Tests
         {
             Message message = MessagesFactory.CreateEmptyMessage(MessageType.NoOperationMessage);
             NoOperation noOperation = message.Cast<NoOperation>();
-            noOperation.BackupCommunicationServers = new NoOperationBackupCommunicationServer[1];
-            noOperation.BackupCommunicationServers[0] = new NoOperationBackupCommunicationServer();
-            noOperation.BackupCommunicationServers[0].port = 1234;
+            noOperation.BackupServersInfo = new BackupServerInfo[1];
+            noOperation.BackupServersInfo[0] = new BackupServerInfo();
+            noOperation.BackupServersInfo[0].port = 1234;
             string xml = _serializer.ToXmlString(noOperation);
             Message m = _serializer.FromXmlString(xml);
             NoOperation noOperationDeserialized = m.Cast<NoOperation>();
-            Assert.AreEqual(noOperationDeserialized.BackupCommunicationServers[0].port, 
-                noOperationDeserialized.BackupCommunicationServers[0].port);
+            Assert.AreEqual(noOperationDeserialized.BackupServersInfo[0].port, 
+                noOperationDeserialized.BackupServersInfo[0].port);
         }
 
         [TestMethod]

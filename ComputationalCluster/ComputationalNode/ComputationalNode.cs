@@ -105,10 +105,5 @@ namespace ComputationalNode
             Message[] requests = creator.Create(status);
             return statusClient.SendRequests(requests);
         }
-
-        public override void UpdateBackups(NoOperation msg)
-        {
-            //will be implemented in internalclientcomponent in the next week
-        }
     }
 }

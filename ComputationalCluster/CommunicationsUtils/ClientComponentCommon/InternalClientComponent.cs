@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 namespace CommunicationsUtils.ClientComponentCommon
 {
     //common things for cluster's internal client components (TM and CN, not comp. client)
-    public abstract class InternalClientComponent: IExternalClientComponent
+    public abstract class InternalClientComponent: ExternalClientComponent
     {
         //external:
-        public abstract void Run();
-        public abstract void UpdateBackups(NoOperation msg);
+        //run defined in inheriting classes
+        //updateBackups defined in inherited class
 
         //internal:
         #region fields

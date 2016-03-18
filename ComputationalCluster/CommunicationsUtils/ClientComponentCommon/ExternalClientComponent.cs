@@ -9,20 +9,23 @@ namespace CommunicationsUtils.ClientComponentCommon
 {
     //will be abstract class with table of backup serv information in future
     //provides methods for internal+external client components (TM+CN+Comp. Client)
-    public interface IExternalClientComponent
+    public abstract class ExternalClientComponent
     {
         //there will be here something like:
-        //private List<NoOperationBackupCommunicationServersBackupCommunicationServer> backups;
+        private BackupServerInfo[] _backups;
 
         /// <summary>
         /// basic, very general method - called in main() of component
         /// </summary>
-        void Run();
-      
+        public abstract void Run();
+
         /// <summary>
-        /// all of the clients store malfunction-related info
+        /// update backups' list
         /// </summary>
         /// <param name="msg"></param>
-        void UpdateBackups(NoOperation msg);
+        public void UpdateBackups(NoOperation msg)
+        {
+            _backups = msg.BackupServersInfo;
+        }
     }
 }

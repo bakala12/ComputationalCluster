@@ -14,23 +14,21 @@ namespace Client
 {
     public class ClientNode : ExternalClientComponent
     {
-        private IClusterClient clusterClient;
         private Stopwatch solvingWatch;
         private ClientNodeProcessingModule core;
         private IMessageArrayCreator creator;
 
         public ClientNode(IClusterClient _clusterClient, ClientNodeProcessingModule _core,
-            IMessageArrayCreator _creator)
+            IMessageArrayCreator _creator): base (_clusterClient)
         {
-            clusterClient = _clusterClient;
             core = _core;
             creator = _creator;
             solvingWatch = new Stopwatch();
         }
 
-        public ClientNode()
+        public ClientNode(IClusterClient _clusterClient): base (_clusterClient)
         {
-
+            
         }
 
         /// <summary>
@@ -107,7 +105,7 @@ namespace Client
             problemRequest.IdSpecified = false;
 
             Message[] requests = creator.Create(problemRequest);
-            Message[] responses = clusterClient.SendRequests(requests);
+            Message[] responses = this.SendMessages(clusterClient, requests);
             SolveRequestResponse solveResponse = null;
 
             foreach (var response in responses)
@@ -144,7 +142,7 @@ namespace Client
         {
             Message[] requests = creator.Create(request);
             Console.WriteLine("Sending solution request...");
-            Message[] responses = clusterClient.SendRequests(requests);
+            Message[] responses = this.SendMessages(clusterClient, requests);
             Solutions solutionReponse = null;
 
             foreach (var response in responses)

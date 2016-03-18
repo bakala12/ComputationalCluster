@@ -20,10 +20,6 @@ namespace CommunicationsUtils.ClientComponentCommon
         //internal:
         #region fields
         /// <summary>
-        /// tcp client wrapper used in status sending thread only
-        /// </summary>
-        protected IClusterClient statusClient;
-        /// <summary>
         /// tcp client wrapper used in sending problem related messages only
         /// </summary>
         protected IClusterClient problemClient;
@@ -51,9 +47,8 @@ namespace CommunicationsUtils.ClientComponentCommon
 
         public InternalClientComponent
             (IClusterClient _clusterClient, IClusterClient _problemClient,
-            IMessageArrayCreator _creator)
+            IMessageArrayCreator _creator) : base (_clusterClient)
         {
-            statusClient = _clusterClient;
             problemClient = _problemClient;
             creator = _creator;
             messageQueue = new ConcurrentQueue<Message>();
@@ -93,7 +88,7 @@ namespace CommunicationsUtils.ClientComponentCommon
         }
 
         /// <summary>
-        /// sends some problem solution via problemClient
+        /// sends some problem related message via problemClient
         /// </summary>
         /// <param name="request"></param>
         public void SendProblemRelatedMessage(Message request)
@@ -103,7 +98,7 @@ namespace CommunicationsUtils.ClientComponentCommon
             Message[] responses;
             lock (SyncRoot)
             {
-                responses = problemClient.SendRequests(requests);
+                responses = this.SendMessages(problemClient, requests);
             }
             foreach (var response in responses)
                 messageQueue.Enqueue(response);
@@ -118,7 +113,7 @@ namespace CommunicationsUtils.ClientComponentCommon
         protected virtual void handleRegisterResponses(Register registerMessage)
         {
             Message[] requests = creator.Create(registerMessage);
-            Message[] responses = statusClient.SendRequests(requests);
+            Message[] responses = this.SendMessages(clusterClient, requests);
             RegisterResponse registerResponse = null;
             foreach (var response in responses)
             {

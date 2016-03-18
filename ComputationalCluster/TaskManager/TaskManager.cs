@@ -64,7 +64,7 @@ namespace TaskManager
             Status status = core.GetStatus();
             status.Id = this.componentId;
             Message[] requests = creator.Create(status);
-            return statusClient.SendRequests(requests);
+            return this.SendMessages(clusterClient, requests);
         }
 
         /// <summary>

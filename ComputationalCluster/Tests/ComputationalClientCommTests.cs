@@ -6,6 +6,7 @@ using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
 using Client.Core;
 using CommunicationsUtils.ClientComponentCommon;
+using CommunicationsUtils.NetworkInterfaces.Factories;
 
 namespace Tests
 {
@@ -198,8 +199,9 @@ namespace Tests
         [TestMethod]
         public void WorkProblemGetFinalSolutionTest()
         {
-            var mock = new Mock<ClientNode>();
-            var mockClient = new Mock<IClusterClient>();
+            var mock = new Mock<ClientNode>(MockBehavior.Default, new ClusterClient("-1",
+                -1, TcpClientAdapterFactory.Factory));
+
             mock.CallBase = true;
             SolutionRequest solutionRequest = new SolutionRequest();
             SolutionsSolution finalSolution = new SolutionsSolution()
@@ -218,8 +220,9 @@ namespace Tests
         [TestMethod]
         public void WorkProblemTimeoutTest()
         {
-            var mock = new Mock<ClientNode>();
-            var mockClient = new Mock<IClusterClient>();
+            var mock = new Mock<ClientNode>(MockBehavior.Default, new ClusterClient("-1",
+                -1, TcpClientAdapterFactory.Factory));
+
             mock.CallBase = true;
             SolutionRequest solutionRequest = new SolutionRequest();
             SolutionsSolution solution = new SolutionsSolution()

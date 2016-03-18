@@ -2,6 +2,7 @@
 using CommunicationsUtils.Serialization;
 using CommunicationsUtils.NetworkInterfaces.Adapters;
 using System;
+using System.Threading;
 using CommunicationsUtils.NetworkInterfaces.Factories;
 
 namespace CommunicationsUtils.NetworkInterfaces
@@ -50,6 +51,12 @@ namespace CommunicationsUtils.NetworkInterfaces
                 _tcpClient.Close();
                 return _converter.BytesToMessages(responseBytes, len);
             }
+        }
+
+        public void ChangeListenerParameters(string address, int port)
+        {
+            this._address = address;
+            this._port = port;
         }
     }
 }

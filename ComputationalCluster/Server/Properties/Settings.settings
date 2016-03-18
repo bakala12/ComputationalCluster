@@ -5,9 +5,6 @@
     <Setting Name="IsBackup" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Address" Type="System.String" Scope="User">
-      <Value Profile="(Default)">109.243.41.236</Value>
-    </Setting>
     <Setting Name="Port" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">8086</Value>
     </Setting>

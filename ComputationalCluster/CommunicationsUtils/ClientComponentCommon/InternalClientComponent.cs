@@ -28,6 +28,10 @@ namespace CommunicationsUtils.ClientComponentCommon
         /// </summary>
         protected IClusterClient problemClient;
         /// <summary>
+        /// lock to handle possible undesirable concurrent writing via problemClient
+        /// </summary>
+        protected readonly object SyncRoot = new object();
+        /// <summary>
         /// creates Message[] array from params messages (test-friendly feature)
         /// </summary>
         protected IMessageArrayCreator creator;
@@ -96,7 +100,11 @@ namespace CommunicationsUtils.ClientComponentCommon
         {
             Message[] requests = creator.Create(request);
             Console.WriteLine("Sending after computations: {0}", request.ToString());
-            Message[] responses = problemClient.SendRequests(requests);
+            Message[] responses;
+            lock (SyncRoot)
+            {
+                responses = problemClient.SendRequests(requests);
+            }
             foreach (var response in responses)
                 messageQueue.Enqueue(response);
         }

@@ -37,18 +37,6 @@ namespace Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("109.243.41.236")]
-        public string Address {
-            get {
-                return ((string)(this["Address"]));
-            }
-            set {
-                this["Address"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("8086")]
         public int Port {
             get {

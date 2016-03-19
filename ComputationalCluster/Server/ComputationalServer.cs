@@ -44,13 +44,15 @@ namespace Server
 
         /// <summary>
         /// List of active components in the system.
+        /// INDEXED by componentId - assigned by server
         /// </summary>
-        private readonly ConcurrentDictionary<int, ActiveComponent> _activeComponents;
+        private ConcurrentDictionary<int, ActiveComponent> _activeComponents;
 
         /// <summary>
         /// List of active problem data sets.
+        /// INDEXED by problemId - assigned by server
         /// </summary>
-        private readonly ConcurrentDictionary<int, ProblemDataSet> _problemDataSets;
+        private ConcurrentDictionary<int, ProblemDataSet> _problemDataSets;
 
         /// <summary>
         /// Object responsible for processing messages.
@@ -67,11 +69,11 @@ namespace Server
             Console.WriteLine("Creating new instance of ComputationalServer.");
             if (listener == null) throw new ArgumentNullException(nameof(listener));
             _clusterListener = listener;
-            State = ServerState.Backup;
+            State = ServerState.Primary;
             _messagesQueue = new ConcurrentQueue<Message>();
             _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
             _problemDataSets= new ConcurrentDictionary<int, ProblemDataSet>();
-            _messageProcessor = new BackupMessageProcessor();
+            _messageProcessor = new PrimaryMessageProcessor();
         }
 
         /// <summary>
@@ -93,6 +95,14 @@ namespace Server
         /// </summary>
         public void Run()
         {
+            //TODO: BACKUP IMPLEMENTATION
+
+            //TODO: if is backup, start status sending and enqueueing things on one thread,
+            //TODO: and dequeueing and updating data set on another
+
+            //TODO: if is primary, start listening and responding on one thread,
+            //TODO: and updating data set on another (just like here below)
+
             Console.WriteLine("Starting listening mechanism.");
             _clusterListener.Start();
             _isWorking = true;
@@ -144,6 +154,7 @@ namespace Server
                     Console.WriteLine("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);
                     foreach (var message in requestsMessages)
                     {
+                        //TODO: not all messages should be enqueued (no SolveRequest, no Register)
                         _messagesQueue.Enqueue(message);
                         Console.WriteLine("Enqueueing {0} message.", message.MessageType);
                         var responseMessages = _messageProcessor.CreateResponseMessages(message, _problemDataSets,

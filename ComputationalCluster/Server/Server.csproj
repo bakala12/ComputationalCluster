@@ -45,6 +45,8 @@
   <ItemGroup>
     <Compile Include="ComputationalServer.cs" />
     <Compile Include="Data\ActiveComponent.cs" />
+    <Compile Include="Data\CaseExtractor.cs" />
+    <Compile Include="Data\PartialSet.cs" />
     <Compile Include="Data\ProblemDataSet.cs" />
     <Compile Include="Data\ServerState.cs" />
     <Compile Include="Extensions\ArgumentParserExtensionsForServer.cs" />

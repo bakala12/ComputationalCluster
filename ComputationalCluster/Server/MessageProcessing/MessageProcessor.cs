@@ -115,6 +115,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: message delivered to backup only - update proper data set
         }
 
         protected virtual void ProcessNoOperationMessage(NoOperation message,
@@ -122,6 +123,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: delete it. nooperation is not enqueued
         }
 
         protected virtual void ProcessSolvePartialProblemMessage(SolvePartialProblems message,
@@ -129,13 +131,15 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: update dataset for given problemId
+            //TODO: message from TM, so set partialSets array
         }
 
         protected virtual void ProcessRegisterMessage(Register message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            
+            //TODO: delete it. register msg is not processed
         }
 
         protected virtual void ProcessRegisterResponseMessage(RegisterResponse message,
@@ -143,6 +147,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: message delivered to backup only - update active components structure
         }
 
         protected virtual void ProcessSolutionsMessage(Solutions message,
@@ -150,6 +155,9 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: message delivered from TM or CN
+            //TODO: in case of TM - it is final solution. adjust dataset for proper problemId
+            //TODO: in case of CN - it is partial solution. adjust partialSet array in proper problemId
         }
 
         protected virtual void ProcessSolutionRequestMessage(SolutionRequest message,
@@ -157,6 +165,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: delete it. this message is not enqueued (response is immediate)
         }
 
         protected virtual void ProcessSolveRequestMessage(SolveRequest message,
@@ -164,6 +173,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: delete it. this message is not enqueued (response is immediate)
         }
 
         protected virtual void ProcessSolveRequestResponseMessage(SolveRequestResponse message,
@@ -171,6 +181,8 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: i don't know, delete it? this message shouldn't be delivered anywhere but to Client node, I think
+            //TODO: not even to backup
         }
 
         protected virtual void ProcessStatusMessage(Status message,
@@ -178,6 +190,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: delete it. status shouldn't be enqueued
         }
 
         protected virtual void ProcessErrorMessage(Error message,
@@ -185,12 +198,14 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: for now, nothing here. specification is not specified yet
         }
 
         protected virtual Message[] RespondDivideProblemMessage(DivideProblem message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: obsolete. divide problem comes to backup server only, and backup doesnt respond
             return null;
         }
 
@@ -198,6 +213,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: delete. noOperation is not enqueued
             return null;
         }
 
@@ -205,6 +221,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: sent by TM. send noOperation only.
             return null;
         }
 
@@ -212,6 +229,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: add new entity to ActiveComponents, create registerResponse message with this id
             return null;
         }
 
@@ -219,6 +237,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: delete it. same reason as RespondDivideProblemMessage
             return null;
         }
 
@@ -226,6 +245,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: sent by CN or TM. send NoOperation only.
             return null;
         }
 
@@ -233,6 +253,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: sent by client node. send NoOperation + CaseExtractor.GetSolutionState
             return null;
         }
 
@@ -240,6 +261,8 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: sent by client node. create new issue in dataset with unique problemId,
+            //TODO: send back NoOp + SolveRequestResponse with proper problemId
             return null;
         }
 
@@ -247,6 +270,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: delete it. same reason as RespondDivideProblemMessage
             return null;
         }
 
@@ -254,6 +278,10 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: (in second stage I think) reset timeout watch for this componentId
+            //TODO: if sent by TM - send NoOp + return from CaseExtractor.GetMessageForTaskManager
+            //TODO: if sent by CN - send NoOp + return from CaseExtractor.GetMessageForCompNode
+            //TODO: if sent by backup - we don't know yet what to send
             return null;
         }
 
@@ -261,6 +289,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: practically nothing to do - specification is not specified yet
             return null;
         }
     }

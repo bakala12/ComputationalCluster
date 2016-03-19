@@ -4,6 +4,7 @@ using Server.Data;
 
 namespace Server.MessageProcessing
 {
+    //TODO: class possibly obsolete (bondyra's opinion) - need to consult it alltogether
     /// <summary>
     /// Message processor for backup server.
     /// Contains implementations for handling different messages that occur in backup server.

@@ -10,10 +10,15 @@ namespace Server.MessageProcessing
     /// </summary>
     public class PrimaryMessageProcessor : MessageProcessor
     {
+        //TODO: this class could be not used, temporarily.
+        //TODO: problem flow implementation will be in MessageProcessor for now.
+        //TODO: so, remove definitions.
+
         protected override Message[] RespondRegisterMessage(Register message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+
             WriteResponseMessageControlInformation(message, MessageType.RegisterMessage);
             return new Message[]
             {

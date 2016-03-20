@@ -18,6 +18,7 @@ namespace Server.MessageProcessing
         /// <param name="message">Instance of message to process</param>
         /// <param name="dataSets">Dictionary of problem data sets (maybe to update one of these or maybe not)</param>
         /// <param name="activeComponents">Dictionary of active components (maybe to update one of these or maybe not)</param>
+        /// <param name="backups">backups list</param>
         public virtual void ProcessMessage(Message message, IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
@@ -67,9 +68,10 @@ namespace Server.MessageProcessing
         /// <param name="message">Instance of message to create response messages for</param>
         /// <param name="dataSets">Dictionary of problem data sets (maybe to update one of these or maybe not)</param>
         /// <param name="activeComponents">Dictionary of active components (maybe to update one of these or maybe not)</param>
+        /// <param name="backups">backups' list</param>
         /// <returns></returns>
         public virtual Message[] CreateResponseMessages(Message message, IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             switch (message.MessageType)
             {
@@ -78,21 +80,21 @@ namespace Server.MessageProcessing
                 case MessageType.NoOperationMessage:
                     return RespondNoOperationMessage(message.Cast<NoOperation>(), dataSets, activeComponents);
                 case MessageType.SolvePartialProblemsMessage:
-                    return RespondSolvePartialProblemMessage(message.Cast<SolvePartialProblems>(), dataSets, activeComponents);
+                    return RespondSolvePartialProblemMessage(message.Cast<SolvePartialProblems>(), dataSets, activeComponents, backups);
                 case MessageType.RegisterMessage:
-                    return RespondRegisterMessage(message.Cast<Register>(), dataSets, activeComponents);
+                    return RespondRegisterMessage(message.Cast<Register>(), dataSets, activeComponents, backups);
                 case MessageType.RegisterResponseMessage:
                     return RespondRegisterResponseMessage(message.Cast<RegisterResponse>(), dataSets, activeComponents);
                 case MessageType.SolutionsMessage:
-                    return RespondSolutionsMessage(message.Cast<Solutions>(), dataSets, activeComponents);
+                    return RespondSolutionsMessage(message.Cast<Solutions>(), dataSets, activeComponents, backups);
                 case MessageType.SolutionRequestMessage:
-                    return RespondSolutionRequestMessage(message.Cast<SolutionRequest>(), dataSets, activeComponents);
+                    return RespondSolutionRequestMessage(message.Cast<SolutionRequest>(), dataSets, activeComponents, backups);
                 case MessageType.SolveRequestMessage:
-                    return RespondSolveRequestMessage(message.Cast<SolveRequest>(), dataSets, activeComponents);
+                    return RespondSolveRequestMessage(message.Cast<SolveRequest>(), dataSets, activeComponents, backups);
                 case MessageType.SolveRequestResponseMessage:
                     return RespondSolveRequestResponseMessage(message.Cast<SolveRequestResponse>(), dataSets, activeComponents);
                 case MessageType.StatusMessage:
-                    return RespondStatusMessage(message.Cast<Status>(), dataSets, activeComponents);
+                    return RespondStatusMessage(message.Cast<Status>(), dataSets, activeComponents, backups);
                 case MessageType.ErrorMessage:
                     return RespondErrorMessage(message.Cast<Error>(), dataSets, activeComponents);
                 default:
@@ -222,7 +224,7 @@ namespace Server.MessageProcessing
 
         protected virtual Message[] RespondSolvePartialProblemMessage(SolvePartialProblems message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             //TODO: sent by TM. send noOperation only.
             return null;
@@ -230,7 +232,7 @@ namespace Server.MessageProcessing
 
         protected virtual Message[] RespondRegisterMessage(Register message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             //TODO: add new entity to ActiveComponents, create immediately registerResponse message with this id
             return null;
@@ -246,7 +248,7 @@ namespace Server.MessageProcessing
 
         protected virtual Message[] RespondSolutionsMessage(Solutions message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             //TODO: sent by CN or TM. send NoOperation only.
             return null;
@@ -254,7 +256,7 @@ namespace Server.MessageProcessing
 
         protected virtual Message[] RespondSolutionRequestMessage(SolutionRequest message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             //TODO: sent by client node. send NoOperation + CaseExtractor.GetSolutionState
             return null;
@@ -262,7 +264,7 @@ namespace Server.MessageProcessing
 
         protected virtual Message[] RespondSolveRequestMessage(SolveRequest message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             //TODO: sent by client node. create new issue in dataset with unique problemId,
             //TODO: send back NoOp + SolveRequestResponse with proper problemId
@@ -279,7 +281,7 @@ namespace Server.MessageProcessing
 
         protected virtual Message[] RespondStatusMessage(Status message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             //TODO: (in second stage I think) reset timeout watch for this componentId
             //TODO: if sent by TM - send NoOp + return from CaseExtractor.GetMessageForTaskManager

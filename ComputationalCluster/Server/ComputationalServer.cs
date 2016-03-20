@@ -45,6 +45,8 @@ namespace Server
         /// </summary>
         private readonly ConcurrentQueue<Message> _messagesQueue;
 
+        private List<BackupServerInfo> _backups;
+
         /// <summary>
         /// Current state of server.
         /// </summary>
@@ -82,6 +84,7 @@ namespace Server
             _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
             _problemDataSets= new ConcurrentDictionary<int, ProblemDataSet>();
             _messageProcessor = new PrimaryMessageProcessor();
+            _backups = new List<BackupServerInfo>();
         }
 
         /// <summary>
@@ -166,7 +169,7 @@ namespace Server
                         _messagesQueue.Enqueue(message);
                         log.Debug(string.Format("Enqueueing {0} message.", message.MessageType));
                         var responseMessages = _messageProcessor.CreateResponseMessages(message, _problemDataSets,
-                            _activeComponents);
+                            _activeComponents, _backups);
                         _clusterListener.SendResponse(responseMessages);
                         log.Debug(string.Format("Response for {0} message has been sent.", message.MessageType));
                     }

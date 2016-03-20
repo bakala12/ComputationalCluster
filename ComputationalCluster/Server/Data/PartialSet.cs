@@ -32,6 +32,7 @@ namespace Server.Data
     {
         /// <summary>
         /// if Ongoing, this is the id of Comp. node computing it
+        /// could be useful in CN's malfunction issue
         /// </summary>
         public int NodeId { get; set; }
         /// <summary>

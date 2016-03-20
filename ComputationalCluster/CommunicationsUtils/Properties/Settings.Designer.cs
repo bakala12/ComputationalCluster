@@ -25,7 +25,7 @@ namespace CommunicationsUtils.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("4000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("16000")]
         public int MaxBufferSize {
             get {
                 return ((int)(this["MaxBufferSize"]));

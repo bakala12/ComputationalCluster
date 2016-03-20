@@ -12,53 +12,54 @@ namespace TaskManager.Core
     /// </summary>
     public class TaskManagerStorage
     {
-        private Dictionary<ulong, ProblemInfo> currentProblems;
+        private readonly Dictionary<ulong, ProblemInfo> _currentProblems;
 
         public TaskManagerStorage()
         {
-            currentProblems = new Dictionary<ulong, ProblemInfo>();
+            _currentProblems = new Dictionary<ulong, ProblemInfo>();
         }
 
         internal void AddIssue(ulong id, ProblemInfo problemInfo)
         {
-            currentProblems.Add(id, problemInfo);
+            _currentProblems.Add(id, problemInfo);
         }
 
         internal bool ContainsIssue(ulong id)
         {
-            return currentProblems.ContainsKey(id);
+            return _currentProblems.ContainsKey(id);
         }
 
         internal bool ExistsTask(ulong id, ulong taskId)
         {
-            return currentProblems.ContainsKey(id) && currentProblems[id].
+            return _currentProblems.ContainsKey(id) && _currentProblems[id].
                 PartialSolutions.ContainsKey(taskId);
         }
 
         internal bool IssueCanBeLinked(ulong id)
         {
-            return currentProblems[id].ProblemsCount == 
-                currentProblems[id].SolutionsCount;
+            return _currentProblems[id].ProblemsCount == 
+                _currentProblems[id].SolutionsCount;
         }
 
         internal void AddTaskToIssue(ulong id, SolvePartialProblemsPartialProblem partialProblem)
         {
-            currentProblems[id].PartialSolutions.Add(partialProblem.TaskId, null);
+            _currentProblems[id].PartialSolutions.Add(partialProblem.TaskId, null);
         }
 
         internal string GetIssueType(ulong problemId)
         {
-            return currentProblems[problemId].ProblemType;
+            return _currentProblems[problemId].ProblemType;
         }
 
         internal void AddSolutionToIssue(ulong id, ulong taskId, SolutionsSolution solution)
         {
-            currentProblems[id].PartialSolutions[taskId] = solution;
+            _currentProblems[id].PartialSolutions[taskId] = solution;
+            _currentProblems[id].SolutionsCount++;
         }
 
         public void RemoveIssue(ulong id)
         {
-            currentProblems.Remove(id);
+            _currentProblems.Remove(id);
         }
     }
 }

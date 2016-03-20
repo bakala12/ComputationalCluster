@@ -34,7 +34,7 @@ namespace Server.MessageProcessing
 
         protected override Message[] RespondRegisterMessage(Register message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups )
         {
             WriteResponseMessageControlInformation(message, MessageType.NoOperationMessage);
             return new Message[]
@@ -118,7 +118,7 @@ namespace Server.MessageProcessing
 
         protected override Message[] RespondSolvePartialProblemMessage(SolvePartialProblems message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             WriteResponseMessageControlInformation(message, MessageType.NoOperationMessage);
             return new Message[]
@@ -139,7 +139,7 @@ namespace Server.MessageProcessing
 
         protected override Message[] RespondSolutionsMessage(Solutions message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             WriteResponseMessageControlInformation(message, MessageType.NoOperationMessage);
             return new Message[]
@@ -160,7 +160,7 @@ namespace Server.MessageProcessing
 
         protected override Message[] RespondStatusMessage(Status message,
            IDictionary<int, ProblemDataSet> dataSets,
-           IDictionary<int, ActiveComponent> activeComponents)
+           IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             WriteResponseMessageControlInformation(message, MessageType.SolutionsMessage);
             return new Message[]
@@ -188,7 +188,7 @@ namespace Server.MessageProcessing
 
         protected override Message[] RespondSolutionRequestMessage(SolutionRequest message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             WriteResponseMessageControlInformation(message, MessageType.SolutionsMessage);
             return new Message[]

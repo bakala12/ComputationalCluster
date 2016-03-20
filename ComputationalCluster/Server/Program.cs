@@ -20,8 +20,12 @@ namespace Server
             var state = Properties.Settings.Default.IsBackup ? ServerState.Backup : ServerState.Primary;
 
             var listener = ClusterListenerFactory.Factory.Create(IPAddress.Any, port);
-            var server = new ComputationalServer(listener, state); 
-            server.Run();
+            var client = ClusterClientFactory.Factory.Create(Properties.Settings.Default.MasterAddress,
+                Properties.Settings.Default.MasterPort);
+            var server = (state == ServerState.Primary)
+                ? new ComputationalServer(listener)
+                : new ComputationalServer(client);
+            server.Run(); //starting server
         }
 
         private static string GetPublicIp()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using System.Threading;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
@@ -33,6 +34,11 @@ namespace Server
         private readonly IClusterListener _clusterListener;
 
         /// <summary>
+        /// A client for backup server requests.
+        /// </summary>
+        private readonly IClusterClient _backupClient;
+
+        /// <summary>
         /// Stores messages in queue
         /// </summary>
         private readonly ConcurrentQueue<Message> _messagesQueue;
@@ -58,36 +64,49 @@ namespace Server
         /// Object responsible for processing messages.
         /// </summary>
         private readonly IMessageProcessor _messageProcessor;
-        
+
+        /// <summary>
+        /// Specifies the time interval between two Status messages.
+        /// </summary>
+        public long BackupServerStatusInterval { get; protected set; }
+
+        /// <summary>
+        /// Private constructor that initializes server subcomponent correctly.
+        /// </summary>
+        /// <param name="state">Deterimenes the starting state of computational server.</param>
+        private ComputationalServer(ServerState state)
+        {
+            State = state;
+            _messagesQueue = new ConcurrentQueue<Message>();
+            _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
+            _problemDataSets = new ConcurrentDictionary<int, ProblemDataSet>();
+            _messageProcessor = (state == ServerState.Primary)
+                ? new PrimaryMessageProcessor() as IMessageProcessor
+                : new BackupMessageProcessor();
+        }
+
         /// <summary>
         /// Initializes a new instance of ComputationalServer with the specified listener.
         /// The default state of server is Backup.
         /// </summary>
         /// <param name="listener">Listener object which handle communication.</param>
-        public ComputationalServer(IClusterListener listener)
+        public ComputationalServer(IClusterListener listener) : this(ServerState.Primary)
         {
-            Console.WriteLine("Creating new instance of ComputationalServer.");
             if (listener == null) throw new ArgumentNullException(nameof(listener));
             _clusterListener = listener;
-            State = ServerState.Primary;
-            _messagesQueue = new ConcurrentQueue<Message>();
-            _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
-            _problemDataSets= new ConcurrentDictionary<int, ProblemDataSet>();
-            _messageProcessor = new PrimaryMessageProcessor();
+            Console.WriteLine("Creating new instance of ComputationalServer (primary).");
         }
 
         /// <summary>
         /// Initializes a new instance of ComputationalServer class withe the specified listener and 
         /// a speciefied server state.
         /// </summary>
-        /// <param name="listener">Listener object which handle communication.</param>
-        /// <param name="state">Server startup state.</param>
-        public ComputationalServer(IClusterListener listener, ServerState state) : this(listener)
+        /// <param name="backupClient"> A client used as BS request sender.</param>
+        public ComputationalServer(IClusterClient backupClient) :this(ServerState.Backup)
         {
-            State = state;
-            if(state == ServerState.Primary)
-                _messageProcessor = new PrimaryMessageProcessor();
-            Console.WriteLine("New instance of ComputationalServer has been created.");
+            if(backupClient == null) throw new ArgumentNullException(nameof(backupClient));
+            _backupClient = backupClient;
+            Console.WriteLine("New instance of ComputationalServer (backup) has been created.");
         }
 
         /// <summary>
@@ -100,6 +119,15 @@ namespace Server
             //TODO: if is backup, start status sending and enqueueing things on one thread,
             //TODO: and dequeueing and updating data set on another
 
+            //sample implemetnation
+            if (State == ServerState.Backup)
+            {
+                _currentlyWorkingThreads.Clear();
+                _isWorking = true;
+                DoBackupWork();
+                return;
+            }
+
             //TODO: if is primary, start listening and responding on one thread,
             //TODO: and updating data set on another (just like here below)
 
@@ -108,7 +136,7 @@ namespace Server
             _isWorking = true;
             _currentlyWorkingThreads.Clear();
             Console.WriteLine("Listening mechanism has been started.");
-            DoWork();
+            DoPrimaryWork();
         }
 
         /// <summary>
@@ -188,7 +216,7 @@ namespace Server
         /// <summary>
         /// Server work function.
         /// </summary>
-        protected virtual void DoWork()
+        protected virtual void DoPrimaryWork()
         {
             Console.WriteLine("Starting new thread for listening, storing messages and sending responses.");
             ProcessInParallel(ListenAndStoreMessagesAndSendResponses);
@@ -196,6 +224,78 @@ namespace Server
             Console.WriteLine("Starting new thread for dequeueing messages and updating additional sets.");
             ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
             Console.WriteLine("Thread for dequeueing messages and updating additional sets has been started.");
+        }
+
+        /// <summary>
+        /// Backup server function work.
+        /// </summary>
+        protected virtual void DoBackupWork()
+        {
+            //TODO: Do this things
+            Console.WriteLine("Starting server as backup");
+            Console.WriteLine("Starting backup client");
+            Console.WriteLine("Registering backup server");
+            RegisterBackupServer();
+            Console.WriteLine("Backup registered successfully");
+            Console.WriteLine("Starting status thread");
+            ProcessInParallel((SendBackupStatusMessages));
+            Console.WriteLine("Starting updating backup thread");
+            ProcessInParallel(UpdateBackupServerState);
+        }
+
+        /// <summary>
+        /// Updates backup server state.
+        /// </summary>
+        private void UpdateBackupServerState()
+        {
+            //TODO: Update backup server state here
+            //TODO: This include updating data sets and updating active components.
+        }
+
+        /// <summary>
+        /// Registers backoup server.
+        /// </summary>
+        private void RegisterBackupServer()
+        {
+            Register register = new Register()
+            {
+                Type = RegisterType.CommunicationServer,
+                SolvableProblems = new string[] {"DVRP"},
+                ParallelThreads = 1,
+                Deregister = false,
+                DeregisterSpecified = false
+            };
+            try
+            {
+                var response = _backupClient.SendRequests(new Message[] {register});
+                //TODO: Set status timeout
+                //TODO: This should be read from RegisterResponse message.
+                BackupServerStatusInterval = 5000; //5sec
+            }
+            catch (SocketException) //probably Exception might be written here
+            {
+                //TODO: Exception caugth. Something went wrong, so we should react here
+                //TODO: Default reaction would be critical ecit here.
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Sends backup server Status messages.
+        /// </summary>
+        private void SendBackupStatusMessages()
+        {
+            while (_isWorking)
+            {
+                Status status = new Status()
+                {
+                    Threads = new StatusThread[1],
+                    Id= 1,
+                    
+                };
+                _backupClient.SendRequests(new Message[] {status});
+                Thread.Sleep((int)BackupServerStatusInterval);
+            }
         }
     }
 }

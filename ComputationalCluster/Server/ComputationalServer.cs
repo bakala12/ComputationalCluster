@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using CommunicationsUtils.Log4Net;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
 using log4net;
 using log4net.Core;
+using CommunicationsUtils.NetworkInterfaces.Factories;
 using Server.Data;
 using Server.Interfaces;
 using Server.MessageProcessing;
 
 namespace Server
 {
-    public class ComputationalServer : IRunnable
+    public class ComputationalServer : IRunnable, IChangeServerState
     {
         /// <summary>
         /// An object used to call log methods
@@ -38,7 +41,12 @@ namespace Server
         /// <summary>
         /// Listener which allows to receive and send messages.
         /// </summary>
-        private readonly IClusterListener _clusterListener;
+        private IClusterListener _clusterListener;
+
+        /// <summary>
+        /// A client for backup server requests.
+        /// </summary>
+        private IClusterClient _backupClient;
 
         /// <summary>
         /// Stores messages in queue
@@ -67,37 +75,50 @@ namespace Server
         /// <summary>
         /// Object responsible for processing messages.
         /// </summary>
-        private readonly IMessageProcessor _messageProcessor;
-        
+        private IMessageProcessor _messageProcessor;
+
+        /// <summary>
+        /// Specifies the time interval between two Status messages.
+        /// </summary>
+        public long BackupServerStatusInterval { get; protected set; }
+
+        /// <summary>
+        /// Private constructor that initializes server subcomponent correctly.
+        /// </summary>
+        /// <param name="state">Deterimenes the starting state of computational server.</param>
+        private ComputationalServer(ServerState state)
+        {
+            State = state;
+            _messagesQueue = new ConcurrentQueue<Message>();
+            _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
+            _problemDataSets = new ConcurrentDictionary<int, ProblemDataSet>();
+            _messageProcessor = (state == ServerState.Primary)
+                ? new PrimaryMessageProcessor() as IMessageProcessor
+                : new BackupMessageProcessor();
+            _backups = new List<BackupServerInfo>();
+        }
+
         /// <summary>
         /// Initializes a new instance of ComputationalServer with the specified listener.
         /// The default state of server is Backup.
         /// </summary>
         /// <param name="listener">Listener object which handle communication.</param>
-        public ComputationalServer(IClusterListener listener)
+        public ComputationalServer(IClusterListener listener) : this(ServerState.Primary)
         {
-            log.Debug("Creating new instance of ComputationalServer.");
             if (listener == null) throw new ArgumentNullException(nameof(listener));
             _clusterListener = listener;
-            State = ServerState.Primary;
-            _messagesQueue = new ConcurrentQueue<Message>();
-            _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
-            _problemDataSets= new ConcurrentDictionary<int, ProblemDataSet>();
-            _messageProcessor = new PrimaryMessageProcessor();
-            _backups = new List<BackupServerInfo>();
+            log.Debug("Creating new instance of ComputationalServer.");
         }
 
         /// <summary>
         /// Initializes a new instance of ComputationalServer class withe the specified listener and 
         /// a speciefied server state.
         /// </summary>
-        /// <param name="listener">Listener object which handle communication.</param>
-        /// <param name="state">Server startup state.</param>
-        public ComputationalServer(IClusterListener listener, ServerState state) : this(listener)
+        /// <param name="backupClient"> A client used as BS request sender.</param>
+        public ComputationalServer(IClusterClient backupClient) :this(ServerState.Backup)
         {
-            State = state;
-            if(state == ServerState.Primary)
-                _messageProcessor = new PrimaryMessageProcessor();
+            if(backupClient == null) throw new ArgumentNullException(nameof(backupClient));
+            _backupClient = backupClient;
             log.Debug("New instance of ComputationalServer has been created.");
         }
 
@@ -106,20 +127,68 @@ namespace Server
         /// </summary>
         public void Run()
         {
-            //TODO: BACKUP IMPLEMENTATION
+            //sample implemetnation
+            if (State == ServerState.Backup)
+                RunAsBackup();
+            else
+                RunAsPrimary();
+        }
 
-            //TODO: if is backup, start status sending and enqueueing things on one thread,
-            //TODO: and dequeueing and updating data set on another
+        /// <summary>
+        /// Runs server as Primary server.
+        /// </summary>
+        public virtual void RunAsPrimary()
+        {
+            //TODO: Primary initialize
+            lock (_syncRoot)
+            {
+                _messageProcessor = new PrimaryMessageProcessor();
+            }
+            _backupClient = null;
+            if (_clusterListener == null)
+                _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
+            //TODO: Maybe reset data sets and list of active components here
 
-            //TODO: if is primary, start listening and responding on one thread,
-            //TODO: and updating data set on another (just like here below)
-
+            //TODO: Primary run !!!
             log.Debug("Starting listening mechanism.");
             _clusterListener.Start();
             _isWorking = true;
             _currentlyWorkingThreads.Clear();
             log.Debug("Listening mechanism has been started.");
-            DoWork();
+            DoPrimaryWork();
+        }
+
+        /// <summary>
+        /// Runs server as Backup server.
+        /// </summary>
+        public virtual void RunAsBackup()
+        {
+            //TODO: Backup initilize here
+            lock(_syncRoot)
+            {
+                _messageProcessor = new BackupMessageProcessor();
+            }
+            _clusterListener = null;
+            if (_backupClient == null)
+                _backupClient = ClusterClientFactory.Factory.Create(Properties.Settings.Default.MasterAddress,
+                    Properties.Settings.Default.MasterPort);
+            //TODO: Maybe reset data sets and list of active components here.
+
+            //TODO: Backup run
+            _currentlyWorkingThreads.Clear();
+            _isWorking = true;
+            DoBackupWork();
+        }
+
+        /// <summary>
+        /// Changes server state for the given one
+        /// </summary>
+        /// <param name="state">New server state.</param>
+        public void ChangeState(ServerState state)
+        {
+            Stop();
+            State = state;
+            Run();
         }
 
         /// <summary>
@@ -135,6 +204,8 @@ namespace Server
                 currentlyWorkingThread?.Join();
             }
             _currentlyWorkingThreads.Clear();
+            _clusterListener = null;
+            _backupClient = null;
             log.Debug("Threads have been stopped.");
         }
 
@@ -199,7 +270,7 @@ namespace Server
         /// <summary>
         /// Server work function.
         /// </summary>
-        protected virtual void DoWork()
+        protected virtual void DoPrimaryWork()
         {
             log.Debug("Starting new thread for listening, storing messages and sending responses.");
             ProcessInParallel(ListenAndStoreMessagesAndSendResponses);
@@ -207,6 +278,78 @@ namespace Server
             log.Debug("Starting new thread for dequeueing messages and updating additional sets.");
             ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
             log.Debug("Thread for dequeueing messages and updating additional sets has been started.");
+        }
+
+        /// <summary>
+        /// Backup server function work.
+        /// </summary>
+        protected virtual void DoBackupWork()
+        {
+            //TODO: Do this things
+            Console.WriteLine("Starting server as backup");
+            Console.WriteLine("Starting backup client");
+            Console.WriteLine("Registering backup server");
+            RegisterBackupServer();
+            Console.WriteLine("Backup registered successfully");
+            Console.WriteLine("Starting status thread");
+            ProcessInParallel((SendBackupStatusMessages));
+            Console.WriteLine("Starting updating backup thread");
+            ProcessInParallel(UpdateBackupServerState);
+        }
+
+        /// <summary>
+        /// Updates backup server state.
+        /// </summary>
+        private void UpdateBackupServerState()
+        {
+            //TODO: Update backup server state here
+            //TODO: This include updating data sets and updating active components.
+        }
+
+        /// <summary>
+        /// Registers backoup server.
+        /// </summary>
+        private void RegisterBackupServer()
+        {
+            Register register = new Register()
+            {
+                Type = RegisterType.CommunicationServer,
+                SolvableProblems = new string[] {"DVRP"},
+                ParallelThreads = 1,
+                Deregister = false,
+                DeregisterSpecified = false
+            };
+            try
+            {
+                var response = _backupClient.SendRequests(new Message[] {register});
+                //TODO: Set status timeout
+                //TODO: This should be read from RegisterResponse message.
+                BackupServerStatusInterval = 5000; //5sec
+            }
+            catch (SocketException) //probably Exception might be written here
+            {
+                //TODO: Exception caugth. Something went wrong, so we should react here
+                //TODO: Default reaction would be critical ecit here.
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Sends backup server Status messages.
+        /// </summary>
+        private void SendBackupStatusMessages()
+        {
+            while (_isWorking)
+            {
+                Status status = new Status()
+                {
+                    Threads = new StatusThread[1],
+                    Id= 1,
+                    
+                };
+                _backupClient.SendRequests(new Message[] {status});
+                Thread.Sleep((int)BackupServerStatusInterval);
+            }
         }
     }
 }

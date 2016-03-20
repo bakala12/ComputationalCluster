@@ -54,6 +54,7 @@
     <Compile Include="Data\ProblemDataSet.cs" />
     <Compile Include="Data\ServerState.cs" />
     <Compile Include="Extensions\ArgumentParserExtensionsForServer.cs" />
+    <Compile Include="Interfaces\IChangeServerState.cs" />
     <Compile Include="Interfaces\IMessageProcessor.cs" />
     <Compile Include="Interfaces\IRunnable.cs" />
     <Compile Include="MessageProcessing\BackupMessageProcessor.cs" />

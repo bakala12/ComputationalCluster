@@ -1,0 +1,28 @@
+Podział i przydział zadań na sprint komunikacji (deadline 24/03) wraz z wyceną czasową ustalony na spotkaniu w dn. 19/03.
+
+1. Logowanie - wpisywanie wiadomości dotyczących systemu komunikacyjnego do 
+	logów (3-4h): Augustyniak
+	
+2. Tryb verbose jako nowy parametr wejściowy dla komponentów - z tym trybem wiadomości mogą 
+	iść nie tylko do logów, ale też na konsolę (3-4h): Duszak
+	
+3. Serwer - tworzenie wiadomości zwrotnych dla komponentów w zadanym kontekście pamięci 
+	serwera, tj. implementacja funkcji GetMessageFor* (4-5h): Bondyra
+	
+4. Implementacja pełnego problem flow - przekazywanie odpowiednich komunikatów przez serwer (4-5h): Augustyniak, Bondyra, Duszak
+	
+4. Kolejka synchronizacyjna - dodawanie do niej wiadomości o danych i wysyłanie jej jako response na wiadomość
+	Status od backupu (4-5h): Bondyra, Bąkała, Duszak
+	
+5. Implementacja serwera w postaci backupu (klient dla serwera głównego, serwer dla niższych backupów) - pozyskiwanie
+	kolejki synchronizacyjnej od serwera, wysyłanie jej do niższych backupów, aktualizacja data setów (4-5h): Bąkała, Duszak
+	
+6. Awaryjność komponentów - aktualizacja data setów w przypadku awarii komponentu, wiadomość derejestracyjna dla backupu (5-6h): Bondyra, Augustyniak
+
+7. Przejmowanie roli serwera głównego przez backup (2-3h): Bąkała, Duszak
+
+7. Dalsze testy jednostkowe (5-12h): wszyscy
+
+8. Poprawki regresyjne w węzłach klienckich (3-4h): Bondyra
+
+9. Fizyczne testowanie komunikacji (?h): wszyscy

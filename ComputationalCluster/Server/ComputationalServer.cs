@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
+using CommunicationsUtils.NetworkInterfaces.Factories;
 using Server.Data;
 using Server.Interfaces;
 using Server.MessageProcessing;
 
 namespace Server
 {
-    public class ComputationalServer : IRunnable
+    public class ComputationalServer : IRunnable, IChangeServerState
     {
         /// <summary>
         /// Indicating whether server threads work.
@@ -31,12 +33,12 @@ namespace Server
         /// <summary>
         /// Listener which allows to receive and send messages.
         /// </summary>
-        private readonly IClusterListener _clusterListener;
+        private IClusterListener _clusterListener;
 
         /// <summary>
         /// A client for backup server requests.
         /// </summary>
-        private readonly IClusterClient _backupClient;
+        private IClusterClient _backupClient;
 
         /// <summary>
         /// Stores messages in queue
@@ -63,7 +65,7 @@ namespace Server
         /// <summary>
         /// Object responsible for processing messages.
         /// </summary>
-        private readonly IMessageProcessor _messageProcessor;
+        private IMessageProcessor _messageProcessor;
 
         /// <summary>
         /// Specifies the time interval between two Status messages.
@@ -114,29 +116,68 @@ namespace Server
         /// </summary>
         public void Run()
         {
-            //TODO: BACKUP IMPLEMENTATION
-
-            //TODO: if is backup, start status sending and enqueueing things on one thread,
-            //TODO: and dequeueing and updating data set on another
-
             //sample implemetnation
             if (State == ServerState.Backup)
+                RunAsBackup();
+            else
+                RunAsPrimary();
+        }
+
+        /// <summary>
+        /// Runs server as Primary server.
+        /// </summary>
+        public virtual void RunAsPrimary()
+        {
+            //TODO: Primary initialize
+            lock (_syncRoot)
             {
-                _currentlyWorkingThreads.Clear();
-                _isWorking = true;
-                DoBackupWork();
-                return;
+                _messageProcessor = new PrimaryMessageProcessor();
             }
+            _backupClient = null;
+            if (_clusterListener == null)
+                _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
+            //TODO: Maybe reset data sets and list of active components here
 
-            //TODO: if is primary, start listening and responding on one thread,
-            //TODO: and updating data set on another (just like here below)
-
+            //TODO: Primary run !!!
             Console.WriteLine("Starting listening mechanism.");
             _clusterListener.Start();
             _isWorking = true;
             _currentlyWorkingThreads.Clear();
             Console.WriteLine("Listening mechanism has been started.");
             DoPrimaryWork();
+        }
+
+        /// <summary>
+        /// Runs server as Backup server.
+        /// </summary>
+        public virtual void RunAsBackup()
+        {
+            //TODO: Backup initilize here
+            lock(_syncRoot)
+            {
+                _messageProcessor = new BackupMessageProcessor();
+            }
+            _clusterListener = null;
+            if (_backupClient == null)
+                _backupClient = ClusterClientFactory.Factory.Create(Properties.Settings.Default.MasterAddress,
+                    Properties.Settings.Default.MasterPort);
+            //TODO: Maybe reset data sets and list of active components here.
+
+            //TODO: Backup run
+            _currentlyWorkingThreads.Clear();
+            _isWorking = true;
+            DoBackupWork();
+        }
+
+        /// <summary>
+        /// Changes server state for the given one
+        /// </summary>
+        /// <param name="state">New server state.</param>
+        public void ChangeState(ServerState state)
+        {
+            Stop();
+            State = state;
+            Run();
         }
 
         /// <summary>
@@ -152,6 +193,8 @@ namespace Server
                 currentlyWorkingThread?.Join();
             }
             _currentlyWorkingThreads.Clear();
+            _clusterListener = null;
+            _backupClient = null;
             Console.WriteLine("Threads have been stopped.");
         }
 

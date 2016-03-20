@@ -12,7 +12,6 @@ namespace Server.Data
     public class ActiveComponent
     {
         //componentId is not necessary, it's the key of a dict
-
         public RegisterType ComponentType { get; set;}
         public string[] SolvableProblems { get; set; }
         //some timeout support - not needed for now, only use of this

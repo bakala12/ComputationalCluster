@@ -132,7 +132,7 @@ namespace Server.MessageProcessing
         {
             WriteControlInformation(message);
             //TODO: update dataset for given problemId
-            //TODO: message from TM, so set partialSets array
+            //TODO: message from TM and only from it, so set partialSets array (it will be enough)
         }
 
         protected virtual void ProcessRegisterMessage(Register message,
@@ -157,7 +157,9 @@ namespace Server.MessageProcessing
             WriteControlInformation(message);
             //TODO: message delivered from TM or CN
             //TODO: in case of TM - it is final solution. adjust dataset for proper problemId
-            //TODO: in case of CN - it is partial solution. adjust partialSet array in proper problemId
+            //TODO: that means, just make only one partialSet with solutions as given from Solutions message
+            //TODO: in case of CN - it is partial solution. adjust partialSet array element (for taskId) 
+            //TODO: in proper problemId
         }
 
         protected virtual void ProcessSolutionRequestMessage(SolutionRequest message,
@@ -205,7 +207,8 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: obsolete. divide problem comes to backup server only, and backup doesnt respond
+            //TODO: obsolete. divide problem comes to backup server only, and backup doesnt respond nodes (only
+            //TODO: other backups)
             return null;
         }
 
@@ -229,7 +232,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: add new entity to ActiveComponents, create registerResponse message with this id
+            //TODO: add new entity to ActiveComponents, create immediately registerResponse message with this id
             return null;
         }
 
@@ -281,7 +284,7 @@ namespace Server.MessageProcessing
             //TODO: (in second stage I think) reset timeout watch for this componentId
             //TODO: if sent by TM - send NoOp + return from CaseExtractor.GetMessageForTaskManager
             //TODO: if sent by CN - send NoOp + return from CaseExtractor.GetMessageForCompNode
-            //TODO: if sent by backup - we don't know yet what to send
+            //TODO: if sent by backup - we don't know yet what to send, probably whole Synchronization Queue
             return null;
         }
 

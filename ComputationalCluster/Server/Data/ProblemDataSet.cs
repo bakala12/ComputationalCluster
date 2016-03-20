@@ -20,10 +20,9 @@ namespace Server.Data
         /// </summary>
         public byte[] CommonData { get; set; }
         /// <summary>
-        /// counter of solutions acquired from CN. this will boost GetMessageFor*
-        /// subroutines' effectiveness (from linear to constant complexity)
+        /// id of task manager that owns this problem (links, divides)
         /// </summary>
-        public int SolutionsCount { get; set; }
+        public int TaskManagerId { get; set; }
         /// <summary>
         /// array of subproblems (and corresponding solutions)
         /// acquired from TM after sending DivideProbllem msg

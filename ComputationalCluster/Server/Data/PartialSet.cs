@@ -8,14 +8,21 @@ using CommunicationsUtils.Messages;
 namespace Server.Data
 {
     /// <summary>
-    /// Fresh - computed by TM, not sent to any CN
-    /// Ongoing - sent to CN or not sent to TM to link
-    /// Sent - sent to TM to link
+    /// next enum
     /// </summary>
     public enum PartialSetStatus
     {
+        /// <summary>
+        /// partial problem is fresh - not sent to any CN
+        /// </summary>
         Fresh,
+        /// <summary>
+        /// partial solution is in computation stage, or is computed but not sent to TM
+        /// </summary>
         Ongoing,
+        /// <summary>
+        /// partial solution is sent to TM. nothing to do (except TM's failure)
+        /// </summary>
         Sent
     }
     /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CommunicationsUtils.Argument_parser;
+using CommunicationsUtils.Log4Net;
 using CommunicationsUtils.Shared;
 
 namespace Server.Extensions
@@ -35,6 +36,11 @@ namespace Server.Extensions
                         break;
                     case "mport=":
                         Properties.Settings.Default.MasterPort = pair.Value.ChangeType<int>();
+                        break;
+                    case "verbose=":
+                        bool enableConsoleLog = pair.Value.ChangeType<bool>();
+                        if (enableConsoleLog)
+                            LogHelper.EnableConsoleLogging();
                         break;
                     default:
                         throw new ArgumentException();

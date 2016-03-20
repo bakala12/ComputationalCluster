@@ -6,10 +6,17 @@ using CommunicationsUtils.NetworkInterfaces.Factories;
 using Server.Extensions;
 using Server.Data;
 
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]
+
 namespace Server
 {
     internal class Program
     {
+        /// <summary>
+        /// Even though we do not use logger in this class, there is a need to instantiate logger to set -verbose logging to console from starting parameters
+        /// </summary>
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private static void Main(string[] args)
         {
             var parser = new ArgumentParser(OptionSetPool.ServerOptionsSet);
@@ -39,7 +46,7 @@ namespace Server
             var first = direction.IndexOf("Address: ", StringComparison.Ordinal) + 9;
             var last = direction.LastIndexOf("</body>", StringComparison.Ordinal);
             direction = direction.Substring(first, last - first);
-            Console.WriteLine("Public ip of this machine is: " + direction);
+            log.Debug("Public ip of this machine is: " + direction);
             return direction;
         }
     }

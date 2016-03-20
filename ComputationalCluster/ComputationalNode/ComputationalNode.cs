@@ -14,6 +14,8 @@ namespace ComputationalNode
 {
     public class ComputationalNode : InternalClientComponent
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private ComputationalNodeMessageProcessor core;
 
         public ComputationalNode(IClusterClient _statusClient, IClusterClient _problemClient,
@@ -30,17 +32,17 @@ namespace ComputationalNode
             handlerThread.Start();
 
             //this thread becomes now status sending thread
-            Console.WriteLine("Registering CN...");
+            log.Debug("Registering CN...");
             RegisterComponent();
-            Console.WriteLine("Registering complete with id={0}", componentId);
+            log.Debug(string.Format("Registering complete with id={0}", componentId));
             core.ComponentId = this.componentId;
             while (true)
             {
-                Console.WriteLine("Sleeping (less than timeout={0})", timeout);
+                log.Debug(string.Format("Sleeping (less than timeout={0})", timeout));
                 Thread.Sleep((int)(0.7 * timeout));
-                Console.WriteLine("Sending status");
+                log.Debug("Sending status");
                 Message[] responses = this.SendStatus();
-                Console.WriteLine("Status sent.");
+                log.Debug("Status sent.");
                 foreach (var response in responses)
                 {
                     messageQueue.Enqueue(response);
@@ -79,18 +81,18 @@ namespace ComputationalNode
                 switch (message.MessageType)
                 {
                     case MessageType.NoOperationMessage:
-                        Console.WriteLine("NoOperation acquired: updating backups");
+                        log.Debug("NoOperation acquired: updating backups");
                         UpdateBackups(message.Cast<NoOperation>());
                         break;
                     case MessageType.SolvePartialProblemsMessage:
-                        Console.WriteLine("SolvePartialProblems acquired: processing...");
+                        log.Debug("SolvePartialProblems acquired: processing...");
                         Thread compThread = new Thread( o =>
                         this.StartLongComputation(() => core.ComputeSubtask
                             (message.Cast<SolvePartialProblems>())));
                         compThread.Start();
                         break;
                     case MessageType.ErrorMessage:
-                        Console.WriteLine("Error message acquired:{0}", message.Cast<Error>().ErrorMessage);
+                        log.Debug(string.Format("Error message acquired:{0}", message.Cast<Error>().ErrorMessage));
                         break;
                     default:
                         throw new Exception("Wrong message delivered to CN: " + message.ToString());

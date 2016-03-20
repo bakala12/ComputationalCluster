@@ -8,11 +8,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]
+
 namespace CommunicationsUtils.ClientComponentCommon
 {
     //common things for cluster's internal client components (TM and CN, not comp. client)
     public abstract class InternalClientComponent: ExternalClientComponent
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         //external:
         //run defined in inheriting classes
         //updateBackups defined in inherited class
@@ -122,11 +125,11 @@ namespace CommunicationsUtils.ClientComponentCommon
                     case MessageType.RegisterResponseMessage:
                         if (registerResponse != null)
                             throw new Exception("Multiple register responses");
-                        Console.WriteLine("RegisterResponse acquired: updating fields...");
+                        log.Debug("RegisterResponse acquired: updating fields...");
                         registerResponse = response.Cast<RegisterResponse>();
                         break;
                     case MessageType.NoOperationMessage:
-                        Console.WriteLine("NoOperation acquired: updating backups");
+                        log.Debug("NoOperation acquired: updating backups");
                         UpdateBackups(response.Cast<NoOperation>());
                         break;
                     default:

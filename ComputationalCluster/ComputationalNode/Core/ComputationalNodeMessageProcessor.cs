@@ -13,6 +13,8 @@ namespace ComputationalNode.Core
     /// </summary>
     public class ComputationalNodeMessageProcessor: ClientMessageProcessor
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public ComputationalNodeMessageProcessor(List<string> problems ): base (problems)
         {
             //enough for this stage:
@@ -38,7 +40,7 @@ namespace ComputationalNode.Core
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
             }
-            Console.WriteLine("Computation started & finished.");
+            log.Debug("Computation started & finished.");
             //implementation in second stage, now mocked:
             if (!SolvableProblems.Contains(solvePartialProblems.ProblemType))
                 return new Error()

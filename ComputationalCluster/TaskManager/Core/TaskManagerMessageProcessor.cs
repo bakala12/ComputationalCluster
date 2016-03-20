@@ -13,6 +13,8 @@ namespace TaskManager.Core
     /// </summary>
     public class TaskManagerMessageProcessor: ClientMessageProcessor
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// current problems in TM indexed by problem id in cluster (given by CS)
         /// </summary>
@@ -48,14 +50,14 @@ namespace TaskManager.Core
             //implementation in second stage, this is mocked
             if (!SolvableProblems.Contains(divideProblem.ProblemType))
             {
-                Console.WriteLine("Not supported problem type.");
+                log.Debug("Not supported problem type.");
                 return new Error()
                 {
                     ErrorMessage = "not supported problem type",
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
             }
-            Console.WriteLine("Division of problem has started.");
+            log.Debug("Division of problem has started.");
             var partialProblem = new SolvePartialProblemsPartialProblem()
             {
                 TaskId = 0,
@@ -86,7 +88,7 @@ namespace TaskManager.Core
                     partialProblem
                 }
             };
-            Console.WriteLine("Success. Problem divided");
+            log.Debug("Success. Problem divided");
             return partialProblems;
         }
 
@@ -99,7 +101,7 @@ namespace TaskManager.Core
         {
             if (solutions.Solutions1 == null)
                 return null;
-            Console.WriteLine("Adding partial solutions to TM's memory.");
+            log.Debug("Adding partial solutions to TM's memory.");
             foreach (var solution in solutions.Solutions1)
             {
                 if (!storage.ContainsIssue(solutions.Id) || storage.ExistsTask(solutions.Id,solution.TaskId))
@@ -114,7 +116,7 @@ namespace TaskManager.Core
             //can be linked, because all of partial problems were solved & delivered
             if (storage.IssueCanBeLinked(solutions.Id))
             {
-                Console.WriteLine("Linking solutions (id:{0})", solutions.Id);
+                log.Debug(string.Format("Linking solutions (id:{0})", solutions.Id));
                 Solutions finalSolution = LinkSolutions(solutions.Id);
                 storage.RemoveIssue(solutions.Id);
                 return finalSolution;

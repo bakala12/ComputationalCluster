@@ -14,6 +14,8 @@ namespace Client
 {
     public class ClientNode : ExternalClientComponent
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private Stopwatch solvingWatch;
         private ClientNodeProcessingModule core;
         private IMessageArrayCreator creator;
@@ -42,7 +44,7 @@ namespace Client
                 core.GetProblem();
                 //could be in another thread:
                 solvingWatch.Reset();
-                Console.WriteLine("Sending problem");
+                log.Debug("Sending problem");
                 SolveRequestResponse response = SendProblem();
                 ulong problemId = response.Id;
                 solvingWatch.Start();
@@ -55,11 +57,11 @@ namespace Client
                 SolutionsSolution solution = this.WorkProblem(request);
                 if (solution == null)
                 {
-                    Console.WriteLine("Solving timeout. Aborting.");
+                    log.Debug("Solving timeout. Aborting.");
                     continue;
                 }
                 else
-                    Console.WriteLine("Solution found.");
+                    log.Debug("Solution found.");
 
             core.DoSomethingWithSolution(solution);
             }
@@ -88,7 +90,7 @@ namespace Client
                     break;
                 }
                 // ~~ else continue
-                Console.WriteLine("No solution yet");
+                log.Debug("No solution yet");
             }
 
             return null;
@@ -113,13 +115,13 @@ namespace Client
                 switch (response.MessageType)
                 {
                     case MessageType.SolveRequestResponseMessage:
-                        Console.WriteLine("SolveRequestResponse acquired: handling");
+                        log.Debug("SolveRequestResponse acquired: handling");
                         if (solveResponse != null)
                             throw new Exception("Multiple SolveRequestResponse messages in CC");
                         solveResponse = response.Cast<SolveRequestResponse>();
                         break;
                     case MessageType.NoOperationMessage:
-                        Console.WriteLine("NoOperation acquired: updating backups");
+                        log.Debug("NoOperation acquired: updating backups");
                         UpdateBackups(response.Cast<NoOperation>());
                         break;
                     default:
@@ -141,7 +143,7 @@ namespace Client
         public virtual Solutions CheckComputations(SolutionRequest request)
         {
             Message[] requests = creator.Create(request);
-            Console.WriteLine("Sending solution request...");
+            log.Debug("Sending solution request...");
             Message[] responses = this.SendMessages(clusterClient, requests);
             Solutions solutionReponse = null;
 
@@ -150,11 +152,11 @@ namespace Client
                 switch (response.MessageType)
                 {
                     case MessageType.NoOperationMessage:
-                        Console.WriteLine("NoOperation acquired: updating backups");
+                        log.Debug("NoOperation acquired: updating backups");
                         this.UpdateBackups(response.Cast<NoOperation>());
                         break;
                     case MessageType.SolutionsMessage:
-                        Console.WriteLine("Solutions acquired: checking...");
+                        log.Debug("Solutions acquired: checking...");
                         if (solutionReponse != null)
                         {
                             throw new Exception("Multiple solutions msg from CS to CC");

@@ -12,6 +12,9 @@ namespace Server.MessageProcessing
     /// </summary>
     public abstract class MessageProcessor : IMessageProcessor
     {
+
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// Processes message.
         /// </summary>
@@ -102,12 +105,12 @@ namespace Server.MessageProcessing
 
         private static void WriteControlInformation(Message message)
         {
-            Console.WriteLine("Message is dequeued and is being processed. Message type: " + message.MessageType);
+            log.Debug(string.Format("Message is dequeued and is being processed. Message type: " + message.MessageType));
         }
 
         protected static void WriteResponseMessageControlInformation(Message message, MessageType type)
         {
-            Console.WriteLine("Responding {0} message. Returning new {1} message in response.", message.MessageType, type);
+            log.Debug(string.Format("Responding {0} message. Returning new {1} message in response.", message.MessageType, type));
         }
 
         protected virtual void ProcessDivideProblemMessage(DivideProblem message,

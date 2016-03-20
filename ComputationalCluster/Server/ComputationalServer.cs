@@ -2,8 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using CommunicationsUtils.Log4Net;
 using CommunicationsUtils.Messages;
 using CommunicationsUtils.NetworkInterfaces;
+using log4net;
+using log4net.Core;
 using Server.Data;
 using Server.Interfaces;
 using Server.MessageProcessing;
@@ -12,6 +15,11 @@ namespace Server
 {
     public class ComputationalServer : IRunnable
     {
+        /// <summary>
+        /// An object used to call log methods
+        /// </summary>
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// Indicating whether server threads work.
         /// </summary>
@@ -66,7 +74,7 @@ namespace Server
         /// <param name="listener">Listener object which handle communication.</param>
         public ComputationalServer(IClusterListener listener)
         {
-            Console.WriteLine("Creating new instance of ComputationalServer.");
+            log.Debug("Creating new instance of ComputationalServer.");
             if (listener == null) throw new ArgumentNullException(nameof(listener));
             _clusterListener = listener;
             State = ServerState.Primary;
@@ -87,7 +95,7 @@ namespace Server
             State = state;
             if(state == ServerState.Primary)
                 _messageProcessor = new PrimaryMessageProcessor();
-            Console.WriteLine("New instance of ComputationalServer has been created.");
+            log.Debug("New instance of ComputationalServer has been created.");
         }
 
         /// <summary>
@@ -103,11 +111,11 @@ namespace Server
             //TODO: if is primary, start listening and responding on one thread,
             //TODO: and updating data set on another (just like here below)
 
-            Console.WriteLine("Starting listening mechanism.");
+            log.Debug("Starting listening mechanism.");
             _clusterListener.Start();
             _isWorking = true;
             _currentlyWorkingThreads.Clear();
-            Console.WriteLine("Listening mechanism has been started.");
+            log.Debug("Listening mechanism has been started.");
             DoWork();
         }
 
@@ -116,7 +124,7 @@ namespace Server
         /// </summary>
         public void Stop()
         {
-            Console.WriteLine("Stopping threads.");
+            log.Debug("Stopping threads.");
             _clusterListener.Stop();
             _isWorking = false;
             foreach (var currentlyWorkingThread in _currentlyWorkingThreads)
@@ -124,7 +132,7 @@ namespace Server
                 currentlyWorkingThread?.Join();
             }
             _currentlyWorkingThreads.Clear();
-            Console.WriteLine("Threads have been stopped.");
+            log.Debug("Threads have been stopped.");
         }
 
         /// <summary>
@@ -147,20 +155,20 @@ namespace Server
             {
                 lock (_syncRoot)
                 {
-                    Console.WriteLine("Waiting for request messages.");
+                    log.Debug("Waiting for request messages.");
                     var requestsMessages = _clusterListener.WaitForRequest();
-                    if(requestsMessages==null) Console.WriteLine("No request messages detected.");
+                    if(requestsMessages==null) log.Debug("No request messages detected.");
                     // ReSharper disable once PossibleNullReferenceException
-                    Console.WriteLine("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);
+                    log.Debug("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);
                     foreach (var message in requestsMessages)
                     {
                         //TODO: not all messages should be enqueued (no SolveRequest, no Register)
                         _messagesQueue.Enqueue(message);
-                        Console.WriteLine("Enqueueing {0} message.", message.MessageType);
+                        log.Debug(string.Format("Enqueueing {0} message.", message.MessageType));
                         var responseMessages = _messageProcessor.CreateResponseMessages(message, _problemDataSets,
                             _activeComponents);
                         _clusterListener.SendResponse(responseMessages);
-                        Console.WriteLine("Response for {0} message has been sent.", message.MessageType);
+                        log.Debug(string.Format("Response for {0} message has been sent.", message.MessageType));
                     }
                 }
             }
@@ -178,9 +186,9 @@ namespace Server
                     Message message;
                     var result = _messagesQueue.TryDequeue(out message);
                     if (!result) continue;
-                    Console.WriteLine("Dequeueing {0} message.", message.MessageType);
+                    log.Debug(string.Format("Dequeueing {0} message.", message.MessageType));
                     _messageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
-                    Console.WriteLine("Message {0} has been proccessed.", message.MessageType);
+                    log.Debug(string.Format("Message {0} has been proccessed.", message.MessageType));
                 }
             }
         }
@@ -190,12 +198,12 @@ namespace Server
         /// </summary>
         protected virtual void DoWork()
         {
-            Console.WriteLine("Starting new thread for listening, storing messages and sending responses.");
+            log.Debug("Starting new thread for listening, storing messages and sending responses.");
             ProcessInParallel(ListenAndStoreMessagesAndSendResponses);
-            Console.WriteLine("Thread for listening, storing messages and sending responses has been started.");
-            Console.WriteLine("Starting new thread for dequeueing messages and updating additional sets.");
+            log.Debug("Thread for listening, storing messages and sending responses has been started.");
+            log.Debug("Starting new thread for dequeueing messages and updating additional sets.");
             ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
-            Console.WriteLine("Thread for dequeueing messages and updating additional sets has been started.");
+            log.Debug("Thread for dequeueing messages and updating additional sets has been started.");
         }
     }
 }

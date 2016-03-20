@@ -36,7 +36,6 @@ namespace ComputationalNode
             core.ComponentId = this.componentId;
             while (true)
             {
-                Console.WriteLine("Sleeping (less than timeout={0})", timeout);
                 Thread.Sleep((int)(0.7 * timeout));
                 Console.WriteLine("Sending status");
                 Message[] responses = this.SendStatus();

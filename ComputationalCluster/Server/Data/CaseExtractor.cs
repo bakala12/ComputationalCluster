@@ -23,8 +23,8 @@ namespace Server.Data
         /// <param name="dataSets">current server problem memory</param>
         /// <returns>message for TM</returns>
         public static Message GetMessageForTaskManager
-            (ConcurrentDictionary<int, ActiveComponent> components, int componentId,
-                ConcurrentDictionary<int, ProblemDataSet> dataSets)
+            (IDictionary<int, ActiveComponent> components, int componentId,
+                IDictionary<int, ProblemDataSet> dataSets)
         {
             //TODO: get message for TM - implementation
             Message response = null;
@@ -58,7 +58,7 @@ namespace Server.Data
                 if (dataSet.Value.TaskManagerId == componentId)
                 {
                     //problem is not divided yet, so nothing
-                    if (dataSet.Value.PartialSets == null)
+                    if (dataSet.Value.PartialSets == null || dataSet.Value.PartialSets.Length == 0)
                     {
                         break;
                     }
@@ -77,18 +77,17 @@ namespace Server.Data
                     //if can be linked, then make a message and break
                     if (solutionsToSend.Count > 0)
                     {
-                        response = new Solutions()
+                        return new Solutions()
                         {
                             CommonData = dataSet.Value.CommonData,
                             Id = (ulong) dataSet.Key,
                             ProblemType = dataSet.Value.ProblemType,
                             Solutions1 = solutionsToSend.ToArray()
                         };
-                        break;
                     }
                 }
             }
-            return response;
+            return null;
         }
 
         /// <summary>
@@ -99,8 +98,8 @@ namespace Server.Data
         /// <param name="dataSets">memory context</param>
         /// <returns>SolvePartialProblem message - null if there is nothing to do</returns>
         public static SolvePartialProblems GetMessageForCompNode
-            (ConcurrentDictionary<int, ActiveComponent> components, int componentId,
-                ConcurrentDictionary<int, ProblemDataSet> dataSets)
+            (IDictionary<int, ActiveComponent> components, int componentId,
+                IDictionary<int, ProblemDataSet> dataSets)
         {
             SolvePartialProblems response = null;
 
@@ -128,6 +127,7 @@ namespace Server.Data
                                 SolvingTimeoutSpecified = false //we'll worry about this later
                             };
                             partialSet.Status = PartialSetStatus.Ongoing;
+                            partialSet.NodeId = componentId;
                             break;
                         }
                     }
@@ -146,7 +146,7 @@ namespace Server.Data
         /// <param name="dataSets">data sets in server's memory</param>
         /// <returns></returns>
         public static Solutions GetSolutionState
-            (SolutionRequest request, ConcurrentDictionary<int, ProblemDataSet> dataSets)
+            (SolutionRequest request, IDictionary<int, ProblemDataSet> dataSets)
         {
 
             int key = (int) request.Id;

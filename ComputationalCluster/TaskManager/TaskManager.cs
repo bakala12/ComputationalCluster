@@ -43,7 +43,6 @@ namespace TaskManager
             Console.WriteLine("Registering complete with id={0}", componentId);
             while(true)
             {
-                Console.WriteLine("Sleeping (less than timeout={0}",timeout);
                 Thread.Sleep((int)(0.7 * timeout));
                 Console.WriteLine("Sending status");
                 Message[] responses = this.SendStatus();

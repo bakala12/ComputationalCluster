@@ -59,7 +59,8 @@ namespace ComputationalNode.Core
                     {
                         Data = null,
                         ComputationsTime = 1,
-                        TaskIdSpecified = false,
+                        TaskIdSpecified = true,
+                        TaskId = solvePartialProblems.PartialProblems[0].TaskId,
                         Type = SolutionsSolutionType.Partial
                     }
                 }

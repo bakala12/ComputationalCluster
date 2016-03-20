@@ -45,6 +45,7 @@ namespace Client
                 Console.WriteLine("Sending problem");
                 SolveRequestResponse response = SendProblem();
                 ulong problemId = response.Id;
+                Console.WriteLine("Response received. Id of the problem in cluster: {0}", problemId);
                 solvingWatch.Start();
 
                 SolutionRequest request = new SolutionRequest()
@@ -167,7 +168,7 @@ namespace Client
             }
             if (solutionReponse == null)
             {
-                throw new Exception("No Solutions message from server delivered (it always should do it)");
+                throw new Exception("No Solutions message from server delivered (it always should do that)");
             }
             //could (or couldn't?) be null:
             return solutionReponse;

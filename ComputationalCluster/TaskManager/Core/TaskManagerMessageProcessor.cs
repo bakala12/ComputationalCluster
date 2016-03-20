@@ -102,7 +102,7 @@ namespace TaskManager.Core
             Console.WriteLine("Adding partial solutions to TM's memory.");
             foreach (var solution in solutions.Solutions1)
             {
-                if (!storage.ContainsIssue(solutions.Id) || storage.ExistsTask(solutions.Id,solution.TaskId))
+                if (!storage.ContainsIssue(solutions.Id) || !storage.ExistsTask(solutions.Id,solution.TaskId))
                 {
                     throw new Exception("Invalid solutions message delivered to TM");
                 }

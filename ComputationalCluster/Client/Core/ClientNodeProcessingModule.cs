@@ -52,7 +52,7 @@ namespace Client.Core
         public void GetProblem()
         {
             data = new byte[] { 123 };
-            type = "EXAMPLE";
+            type = "DVRP";
         }
 
         /// <summary>

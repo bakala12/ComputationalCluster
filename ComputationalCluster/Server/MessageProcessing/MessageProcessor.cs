@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CommunicationsUtils.Messages;
 using Server.Data;
 using Server.Interfaces;
@@ -125,7 +126,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: delete it. nooperation is not enqueued
+            //TODO: delete it or leave it like this. nooperation is not enqueued
         }
 
         protected virtual void ProcessSolvePartialProblemMessage(SolvePartialProblems message,
@@ -133,15 +134,29 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: update dataset for given problemId
-            //TODO: message from TM and only from it, so set partialSets array (it will be enough)
+            //update dataset for given problemId
+            //message from TM and only from it, so set partialSets array (it will be enough)
+            if (!dataSets.ContainsKey((int)message.Id))
+                return;
+            int id = (int) message.Id;
+            dataSets[id].PartialSets = new PartialSet[message.PartialProblems.Length];
+            for (int i = 0; i < message.PartialProblems.Length; i++)
+            {
+                dataSets[id].PartialSets[i] = new PartialSet()
+                {
+                    NodeId = 0,
+                    PartialSolution = null,
+                    PartialProblem = message.PartialProblems[i],
+                    Status = PartialSetStatus.Fresh
+                };
+            }
         }
 
         protected virtual void ProcessRegisterMessage(Register message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: delete it. register msg is not processed
+            //TODO: delete or leave it like this. register msg is not processed
         }
 
         protected virtual void ProcessRegisterResponseMessage(RegisterResponse message,
@@ -157,11 +172,46 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: message delivered from TM or CN
-            //TODO: in case of TM - it is final solution. adjust dataset for proper problemId
-            //TODO: that means, just make only one partialSet with solutions as given from Solutions message
-            //TODO: in case of CN - it is partial solution. adjust partialSet array element (for taskId) 
-            //TODO: in proper problemId
+            //message delivered from TM or CN
+            //in case of TM - it is final solution. adjust dataset for proper problemId
+            //that means, just make only one partialSet with solutions as given from Solutions message
+            //in case of CN - it is partial solution. adjust partialSet array element (for taskId) 
+            //in proper problemId
+            if (message.Solutions1 == null || message.Solutions1.Length == 0)
+                return;
+
+            int key = (int)message.Id;
+            if (!dataSets.ContainsKey(key))
+                return;
+            //this is from TM:
+            if (message.Solutions1.Length == 1 && message.Solutions1[0].Type == SolutionsSolutionType.Final)
+            {
+                dataSets[key].PartialSets = new PartialSet[1];
+                dataSets[key].PartialSets[0] = new PartialSet()
+                {
+                    NodeId = 0,
+                    PartialProblem = null,
+                    PartialSolution = message.Solutions1[0],
+                    Status = PartialSetStatus.Sent
+                };
+            }
+            //this is from CN
+            else
+            {
+                //only one solution is delivered by CN at a time
+                if (message.Solutions1.Length != 1)
+                    return;
+                var taskId = message.Solutions1[0].TaskId;
+                foreach (var partialSet in dataSets[key].PartialSets)
+                {
+                    if (partialSet.PartialProblem.TaskId == taskId)
+                    {
+                        partialSet.PartialSolution = message.Solutions1[0];
+                        partialSet.Status = PartialSetStatus.Ongoing;
+                        break;
+                    }
+                }
+            }
         }
 
         protected virtual void ProcessSolutionRequestMessage(SolutionRequest message,
@@ -210,7 +260,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             //TODO: obsolete. divide problem comes to backup server only, and backup doesnt respond nodes (only
-            //TODO: other backups)
+            //TODO: other backups, but this shit concerns synchronization queue)
             return null;
         }
 
@@ -226,16 +276,40 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
-            //TODO: sent by TM. send noOperation only.
-            return null;
+            //sent by TM. send noOperation only.
+            return new Message[] { new NoOperation()
+            {
+                BackupServersInfo = backups.ToArray()
+            }
+            };
         }
 
         protected virtual Message[] RespondRegisterMessage(Register message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
-            //TODO: add new entity to ActiveComponents, create immediately registerResponse message with this id
-            return null;
+            //add new entity to ActiveComponents, create immediately registerResponse message
+            //with this id
+            int maxId = activeComponents.Count== 0 ? 1 : activeComponents.Keys.Max() + 1;
+            var newComponent = new ActiveComponent()
+            {
+                ComponentType = message.Type,
+                SolvableProblems = message.SolvableProblems
+            };
+            activeComponents.Add(maxId, newComponent);
+            return new Message[]
+            {
+                new RegisterResponse()
+                {
+                    Id = (ulong) maxId,
+                    Timeout = Properties.Settings.Default.Timeout
+                    //backups is obsolete. schema has already changed
+                },
+                new NoOperation()
+                {
+                    BackupServersInfo = backups.ToArray()
+                }
+            };
         }
 
         protected virtual Message[] RespondRegisterResponseMessage(RegisterResponse message,
@@ -250,8 +324,12 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
-            //TODO: sent by CN or TM. send NoOperation only.
-            return null;
+            //sent by CN or TM. send NoOperation only.
+            return new Message[] { new NoOperation()
+            {
+                BackupServersInfo = backups.ToArray()
+            }
+            };
         }
 
         protected virtual Message[] RespondSolutionRequestMessage(SolutionRequest message,
@@ -259,16 +337,48 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             //TODO: sent by client node. send NoOperation + CaseExtractor.GetSolutionState
-            return null;
+            var solutionState = CaseExtractor.GetSolutionState(message, dataSets);
+            if (solutionState == null)
+            {
+                return new Message[] { new NoOperation()
+                    {
+                        BackupServersInfo = backups.ToArray()
+                    }
+                };
+            }
+
+            return new Message[] {solutionState, new NoOperation()
+                    {
+                        BackupServersInfo = backups.ToArray()
+                    }};
         }
 
         protected virtual Message[] RespondSolveRequestMessage(SolveRequest message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
-            //TODO: sent by client node. create new issue in dataset with unique problemId,
-            //TODO: send back NoOp + SolveRequestResponse with proper problemId
-            return null;
+            //sent by client node. create new issue in dataset with unique problemId,
+            //send back NoOp + SolveRequestResponse with proper problemId
+            int maxProblemId = dataSets.Count == 0 ? 1 : dataSets.Keys.Max() + 1;
+            var newSet = new ProblemDataSet()
+            {
+                CommonData = message.Data,
+                PartialSets = null,
+                ProblemType = message.ProblemType,
+                TaskManagerId = 0
+            };
+            dataSets.Add(maxProblemId, newSet);
+            return new Message[]
+            {
+                new NoOperation()
+                {
+                    BackupServersInfo = backups.ToArray()
+                },
+                new SolveRequestResponse()
+                {
+                    Id = (ulong) maxProblemId
+                }
+            };
         }
 
         protected virtual Message[] RespondSolveRequestResponseMessage(SolveRequestResponse message,
@@ -284,10 +394,49 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             //TODO: (in second stage I think) reset timeout watch for this componentId
-            //TODO: if sent by TM - send NoOp + return from CaseExtractor.GetMessageForTaskManager
-            //TODO: if sent by CN - send NoOp + return from CaseExtractor.GetMessageForCompNode
-            //TODO: if sent by backup - we don't know yet what to send, probably whole Synchronization Queue
-            return null;
+            //if sent by TM - send NoOp + return from CaseExtractor.GetMessageForTaskManager
+            //if sent by CN - send NoOp + return from CaseExtractor.GetMessageForCompNode
+            int who = (int)message.Id;
+            if (!activeComponents.ContainsKey(who))
+                return new Message[] {new Error() {ErrorMessage = "who are you?",
+                    ErrorType = ErrorErrorType.UnknownSender} };
+
+            Message whatToDo = null;
+
+            switch (activeComponents[who].ComponentType)
+            {
+                case RegisterType.ComputationalNode:
+                    whatToDo = CaseExtractor.GetMessageForCompNode(activeComponents, who, dataSets);
+                    break;
+                    case RegisterType.TaskManager:
+                    whatToDo = CaseExtractor.GetMessageForTaskManager(activeComponents, who, dataSets);
+                    break;
+                    case RegisterType.CommunicationServer:
+                    //TODO: sent by backup - we don't know yet what 
+                    //TODO: to send, probably whole Synchronization Queue
+                    break;
+            }
+            if (whatToDo == null)
+            {
+                Console.WriteLine("PROBLEM FLOW: No ADDITIONAL OPERATION FOR NODE FOUND");
+                return new Message[]
+                {
+                    new NoOperation()
+                    {
+                        BackupServersInfo = backups.ToArray()
+                    }
+                };
+            }
+            Console.WriteLine("PROBLEM FLOW: SENDING ADDITIONAL " +
+                              "{0} FOR THIS NODE", whatToDo.ToString());
+            return new Message[]
+            {
+                whatToDo, 
+                new NoOperation()
+                {
+                    BackupServersInfo = backups.ToArray()
+                }
+            };
         }
 
         protected virtual Message[] RespondErrorMessage(Error message,
@@ -295,6 +444,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             //TODO: practically nothing to do - specification is not specified yet
+            //TODO: imo: warn logger, print something on console if verbose
             return null;
         }
     }

@@ -32,15 +32,6 @@ namespace ComputationalNode.Core
 
         public Message ComputeSubtask(SolvePartialProblems solvePartialProblems)
         {
-            //some error handling:
-            if (!this.SolvableProblems.Contains(solvePartialProblems.ProblemType))
-            {
-                return new Error()
-                {
-                    ErrorMessage = "Invalid type of problem delivered",
-                    ErrorType = ErrorErrorType.InvalidOperation
-                };
-            }
             log.DebugFormat("Computation started. ({0})", solvePartialProblems.Id);
             Console.WriteLine("Computation started. ({0})", solvePartialProblems.Id);
             Thread.Sleep(10000);
@@ -48,7 +39,7 @@ namespace ComputationalNode.Core
             if (!SolvableProblems.Contains(solvePartialProblems.ProblemType))
                 return new Error()
                 {
-                    ErrorMessage = "not supported problem type",
+                    ErrorMessage = "Not supported problem type",
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
 

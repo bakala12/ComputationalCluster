@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Messages;
+using log4net;
 
 namespace ComputationalNode.Core
 {
@@ -14,7 +15,7 @@ namespace ComputationalNode.Core
     /// </summary>
     public class ComputationalNodeMessageProcessor: ClientMessageProcessor
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public ComputationalNodeMessageProcessor(List<string> problems ): base (problems)
         {
@@ -33,7 +34,6 @@ namespace ComputationalNode.Core
         public Message ComputeSubtask(SolvePartialProblems solvePartialProblems)
         {
             log.DebugFormat("Computation started. ({0})", solvePartialProblems.Id);
-            Console.WriteLine("Computation started. ({0})", solvePartialProblems.Id);
             Thread.Sleep(10000);
             //implementation in second stage, now mocked (thread sleep)
             if (!SolvableProblems.Contains(solvePartialProblems.ProblemType))
@@ -44,7 +44,6 @@ namespace ComputationalNode.Core
                 };
 
             log.DebugFormat("Computation finished. ({0})", solvePartialProblems.Id);
-            Console.WriteLine("Computation finished. ({0})", solvePartialProblems.Id);
 
             return new Solutions()
             {

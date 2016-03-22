@@ -97,7 +97,7 @@ namespace CommunicationsUtils.ClientComponentCommon
         public void SendProblemRelatedMessage(Message request)
         {
             Message[] requests = creator.Create(request);
-            Console.WriteLine("Sending after computations: {0}", request.ToString());
+            log.DebugFormat("Sending after computations: {0}", request.ToString());
             Message[] responses;
             lock (SyncRoot)
             {

@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using CommunicationsUtils.Argument_parser;
 using CommunicationsUtils.NetworkInterfaces.Factories;
+using log4net;
 using Server.Extensions;
 using Server.Data;
 
@@ -15,7 +16,7 @@ namespace Server
         /// <summary>
         /// Even though we do not use logger in this class, there is a need to instantiate logger to set -verbose logging to console from starting parameters
         /// </summary>
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private static void Main(string[] args)
         {

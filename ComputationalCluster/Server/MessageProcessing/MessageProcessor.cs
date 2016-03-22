@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using CommunicationsUtils.Messages;
+using log4net;
 using Server.Data;
 using Server.Interfaces;
 
@@ -19,7 +20,7 @@ namespace Server.MessageProcessing
     public abstract class MessageProcessor : IMessageProcessor
     {
 
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private List<Thread> _currentlyWorkingThreads;
 
         public MessageProcessor(List<Thread> currentlyWorkingThreads)
@@ -36,7 +37,7 @@ namespace Server.MessageProcessing
                 if (elapsed > Properties.Settings.Default.Timeout)
                 {
                     //TODO: make register with deregister=true message, add to synchronization queue
-                    Console.WriteLine("TIMEOUT of {0}. Deregistering.", activeComponents[who].ComponentType);
+                    log.DebugFormat("TIMEOUT of {0}. Deregistering.", activeComponents[who].ComponentType);
                     DataSetOps.HandleClientMalfunction(activeComponents, who, dataSets);
                     activeComponents.Remove(who);
                     return;
@@ -150,7 +151,7 @@ namespace Server.MessageProcessing
 
         protected static void WriteResponseMessageControlInformation(Message message, MessageType type)
         {
-            log.Debug(string.Format("Responding {0} message. Returning new {1} message in response.", message.MessageType, type));
+            log.DebugFormat("Responding {0} message. Returning new {1} message in response.", message.MessageType, type);
         }
 
         protected virtual void ProcessDivideProblemMessage(DivideProblem message,
@@ -341,7 +342,7 @@ namespace Server.MessageProcessing
                 SolvableProblems = message.SolvableProblems
             };
             activeComponents.Add(maxId, newComponent);
-            Console.WriteLine("New component: {0}, assigned id: {1}", message.Type, maxId);
+            log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
             log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
             //add new watcher of timeout
             RunStatusThread(maxId, activeComponents, dataSets);
@@ -417,7 +418,7 @@ namespace Server.MessageProcessing
                 TaskManagerId = 0
             };
             dataSets.Add(maxProblemId, newSet);
-            Console.WriteLine("New problem, ProblemType={0}. Assigned id: {1}", 
+            log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}", 
                 message.ProblemType, maxProblemId);
             log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}",
                 message.ProblemType, maxProblemId);
@@ -459,7 +460,7 @@ namespace Server.MessageProcessing
             activeComponents[who].StatusWatch.Restart();
 
             Message whatToDo = null;
-            Console.WriteLine("Handling status message of {0}(id={1}). Searching for problems.",
+            log.DebugFormat("Handling status message of {0}(id={1}). Searching for problems.",
                 activeComponents[who].ComponentType, who);
             log.DebugFormat("Handling status message of {0}(id={1}).",
                 activeComponents[who].ComponentType, who);
@@ -478,7 +479,7 @@ namespace Server.MessageProcessing
             }
             if (whatToDo == null)
             {
-                Console.WriteLine("Nothing additional found for {0} (id={1})", 
+                log.DebugFormat("Nothing additional found for {0} (id={1})", 
                     activeComponents[who].ComponentType, who);
                 log.DebugFormat("Nothing additional found for {0} (id={1})",
                     activeComponents[who].ComponentType, who);
@@ -490,7 +491,7 @@ namespace Server.MessageProcessing
                     }
                 };
             }
-            Console.WriteLine("Found problem ({0}) for {1} (id={2})", 
+            log.DebugFormat("Found problem ({0}) for {1} (id={2})", 
                 whatToDo.MessageType, activeComponents[who].ComponentType, who);
             log.DebugFormat("Found problem ({0}) for {1} (id={2})",
                 whatToDo.MessageType, activeComponents[who].ComponentType, who);
@@ -513,7 +514,7 @@ namespace Server.MessageProcessing
             //warn logger, print something on console if verbose
             log.DebugFormat("Error message acquired. Type={0}, Message={1}",
                 message.ErrorType, message.ErrorMessage);
-            Console.WriteLine("Error message acquired. Type={0}, Message={1}",
+            log.DebugFormat("Error message acquired. Type={0}, Message={1}",
                 message.ErrorType, message.ErrorMessage);
             return null;
         }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 
 namespace TaskManager.Core
 {
@@ -14,7 +15,7 @@ namespace TaskManager.Core
     /// </summary>
     public class TaskManagerMessageProcessor: ClientMessageProcessor
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// current problems in TM indexed by problem id in cluster (given by CS)
@@ -48,8 +49,7 @@ namespace TaskManager.Core
 
         public Message DivideProblem(DivideProblem divideProblem)
         {
-            log.Debug("Division of problem has started.");
-            Console.WriteLine("Division of problem has started. ({0})", divideProblem.Id);
+            log.DebugFormat("Division of problem has started. ({0})", divideProblem.Id);
             //implementation in second stage
             if (!SolvableProblems.Contains(divideProblem.ProblemType))
             {
@@ -86,7 +86,6 @@ namespace TaskManager.Core
             //end of implementation
             //mock (thread sleep)
             Thread.Sleep(7000);
-            Console.WriteLine("Division finished. ({0})", divideProblem.Id);
             log.DebugFormat("Division finished. ({0})", divideProblem.Id);
             //creating msg
             SolvePartialProblems partialProblems = new SolvePartialProblems()
@@ -112,7 +111,6 @@ namespace TaskManager.Core
             if (solutions.Solutions1 == null)
                 return null;
             log.DebugFormat("Adding partial solutions to TM's memory. ({0})", solutions.Id);
-            Console.WriteLine("Adding partial solutions to TM's memory. ({0})", solutions.Id);
             foreach (var solution in solutions.Solutions1)
             {
                 if (!storage.ContainsIssue(solutions.Id) || !storage.ExistsTask(solutions.Id,solution.TaskId))
@@ -127,8 +125,7 @@ namespace TaskManager.Core
             //can be linked, because all of partial problems were solved & delivered
             if (storage.IssueCanBeLinked(solutions.Id))
             {
-                log.Debug(string.Format("Linking solutions (id:{0})", solutions.Id));
-                Console.WriteLine("Linking solutions (id:{0})", solutions.Id);
+                log.DebugFormat("Linking solutions (id:{0})", solutions.Id);
                 Solutions finalSolution = LinkSolutions(solutions.Id);
                 storage.RemoveIssue(solutions.Id);
                 return finalSolution;
@@ -144,7 +141,6 @@ namespace TaskManager.Core
             //get SolutionsSolution from them and do something amazing
             //mock (thread sleep)
             Thread.Sleep(4000);
-            Console.WriteLine("Solutions have been linked ({0})", problemId);
             log.DebugFormat("Solutions have been linked ({0})", problemId);
             //return final solution (this one is mocked)
             return new Solutions()

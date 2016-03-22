@@ -21,7 +21,7 @@ namespace Server
         /// <summary>
         /// An object used to call log methods
         /// </summary>
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Indicating whether server threads work.
@@ -286,14 +286,14 @@ namespace Server
         protected virtual void DoBackupWork()
         {
             //TODO: Do this things
-            Console.WriteLine("Starting server as backup");
-            Console.WriteLine("Starting backup client");
-            Console.WriteLine("Registering backup server");
+            log.Debug("Starting server as backup");
+            log.Debug("Starting backup client");
+            log.Debug("Registering backup server");
             RegisterBackupServer();
-            Console.WriteLine("Backup registered successfully");
-            Console.WriteLine("Starting status thread");
+            log.Debug("Backup registered successfully");
+            log.Debug("Starting status thread");
             ProcessInParallel((SendBackupStatusMessages));
-            Console.WriteLine("Starting updating backup thread");
+            log.Debug("Starting updating backup thread");
             ProcessInParallel(UpdateBackupServerState);
         }
 

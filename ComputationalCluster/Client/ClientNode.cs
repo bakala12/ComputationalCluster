@@ -9,12 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 
 namespace Client
 {
     public class ClientNode : ExternalClientComponent
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private Stopwatch solvingWatch;
         private ClientNodeProcessingModule core;
@@ -45,11 +46,9 @@ namespace Client
                 //could be in another thread:
                 solvingWatch.Reset();
                 log.Debug("Sending problem");
-                Console.WriteLine("Sending problem");
                 SolveRequestResponse response = SendProblem();
                 ulong problemId = response.Id;
                 log.DebugFormat("Response received. Id of the problem in cluster: {0}", problemId);
-                Console.WriteLine("Response received. Id of the problem in cluster: {0}", problemId);
                 solvingWatch.Start();
 
                 SolutionRequest request = new SolutionRequest()
@@ -65,7 +64,6 @@ namespace Client
                 }
                 else
                 {
-                    Console.WriteLine("Solution found. ({0})", problemId);
                     log.DebugFormat("Solution found. ({0})", problemId);
                 }
 
@@ -82,7 +80,6 @@ namespace Client
             while (true)
             {
                 Thread.Sleep((int)Properties.Settings.Default.SolutionCheckingInterval);
-                Console.WriteLine("Sending solutionRequest ({0})", request.Id);
                 log.DebugFormat("Sending solutionRequest ({0})", request.Id);
                 Solutions solution = CheckComputations(request);
 
@@ -97,8 +94,7 @@ namespace Client
                     break;
                 }
                 // ~~ else continue
-                Console.WriteLine("No solution yet ({0})", request.Id);
-                log.Debug("No solution yet");
+                log.DebugFormat("No solution yet ({0})", request.Id);
             }
 
             return null;
@@ -129,7 +125,6 @@ namespace Client
                         break;
                     case MessageType.NoOperationMessage:
                         log.Debug("NoOperation acquired: updating backups");
-                        Console.WriteLine("NoOperation acquired: updating backups");
                         UpdateBackups(response.Cast<NoOperation>());
                         break;
                     default:
@@ -160,7 +155,6 @@ namespace Client
                 {
                     case MessageType.NoOperationMessage:
                         log.Debug("NoOperation acquired: updating backups");
-                        Console.WriteLine("NoOperation acquired: updating backups");
                         this.UpdateBackups(response.Cast<NoOperation>());
                         break;
                     case MessageType.SolutionsMessage:

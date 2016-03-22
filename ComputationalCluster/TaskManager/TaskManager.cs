@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using log4net;
 using TaskManager.Core;
 
 namespace TaskManager
@@ -20,7 +21,7 @@ namespace TaskManager
     /// </summary>
     public class TaskManager : InternalClientComponent
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         //task manager non-communication context
         private TaskManagerMessageProcessor core;
@@ -40,20 +41,16 @@ namespace TaskManager
 
             //this thread becomes now status sending thread
             log.Debug("Registering TM...");
-            Console.WriteLine("Registering TM...");
             RegisterComponent();
             core.ComponentId = this.componentId;
-            log.Debug(string.Format("Registering complete with id={0}", componentId));
-            Console.WriteLine("Registering complete with id={0}", componentId);
+            log.DebugFormat("Registering complete with id={0}", componentId);
             while(true)
             {
-                log.Debug(string.Format("Sleeping (less than timeout={0}",timeout));
+                log.DebugFormat("Sleeping (less than timeout={0})",timeout);
                 Thread.Sleep((int)(0.7 * timeout));
                 log.Debug("Sending status");
-                Console.WriteLine("Sending status");
                 Message[] responses = this.SendStatus();
                 log.Debug("Status sent");
-                Console.WriteLine("Status sent");
                 foreach (var response in responses)
                 {
                     messageQueue.Enqueue(response);
@@ -109,7 +106,6 @@ namespace TaskManager
                 {
                     case MessageType.NoOperationMessage:
                         log.Debug("NoOperation acquired: updating backups");
-                        Console.WriteLine("NoOperation acquired: updating backups");
                         UpdateBackups(message.Cast<NoOperation>());
                         break;
                     case MessageType.DivideProblemMessage:
@@ -132,7 +128,7 @@ namespace TaskManager
                         solThread.Start();
                         break;
                     case MessageType.ErrorMessage:
-                        log.Debug(string.Format("Error message acquired:{0}",message.Cast<Error>().ErrorMessage));
+                        log.DebugFormat("Error message acquired:{0}",message.Cast<Error>().ErrorMessage);
                         break;
                     default:
                         throw new Exception("Wrong message delivered to TM: " + message.ToString());

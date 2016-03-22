@@ -25,7 +25,7 @@ namespace ComputationalNode.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.14")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.33")]
         public string Address {
             get {
                 return ((string)(this["Address"]));

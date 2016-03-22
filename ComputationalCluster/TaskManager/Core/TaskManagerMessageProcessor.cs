@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TaskManager.Core
@@ -47,7 +48,9 @@ namespace TaskManager.Core
 
         public Message DivideProblem(DivideProblem divideProblem)
         {
-            //implementation in second stage, this is mocked
+            log.Debug("Division of problem has started.");
+            Console.WriteLine("Division of problem has started. ({0})", divideProblem.Id);
+            //implementation in second stage
             if (!SolvableProblems.Contains(divideProblem.ProblemType))
             {
                 log.Debug("Not supported problem type.");
@@ -57,26 +60,34 @@ namespace TaskManager.Core
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
             }
-            log.Debug("Division of problem has started.");
             var partialProblem = new SolvePartialProblemsPartialProblem()
             {
                 TaskId = 0,
                 Data = new byte[] { 0 },
                 NodeID = componentId
             };
-
+            var partialProblem2 = new SolvePartialProblemsPartialProblem()
+            {
+                TaskId = 1,
+                Data = new byte[] { 0 },
+                NodeID = componentId
+            };
             //adding info about partial problems, their task ids, and partialProblem
             //some things can be temporary (partialProblems?)
             storage.AddIssue(divideProblem.Id, new ProblemInfo()
             {
-                ProblemsCount = 1,
+                ProblemsCount = 2,
                 ProblemType = divideProblem.ProblemType,
                 SolutionsCount = 0
             });
 
             storage.AddTaskToIssue(divideProblem.Id, partialProblem);
+            storage.AddTaskToIssue(divideProblem.Id, partialProblem2);
             //end of implementation
-
+            //mock (thread sleep)
+            Thread.Sleep(7000);
+            Console.WriteLine("Division finished. ({0})", divideProblem.Id);
+            log.DebugFormat("Division finished. ({0})", divideProblem.Id);
             //creating msg
             SolvePartialProblems partialProblems = new SolvePartialProblems()
             {
@@ -85,10 +96,9 @@ namespace TaskManager.Core
                 CommonData = divideProblem.Data,
                 PartialProblems = new SolvePartialProblemsPartialProblem[]
                 {
-                    partialProblem
+                    partialProblem, partialProblem2
                 }
             };
-            log.Debug("Success. Problem divided");
             return partialProblems;
         }
 
@@ -101,7 +111,8 @@ namespace TaskManager.Core
         {
             if (solutions.Solutions1 == null)
                 return null;
-            log.Debug("Adding partial solutions to TM's memory.");
+            log.DebugFormat("Adding partial solutions to TM's memory. ({0})", solutions.Id);
+            Console.WriteLine("Adding partial solutions to TM's memory. ({0})", solutions.Id);
             foreach (var solution in solutions.Solutions1)
             {
                 if (!storage.ContainsIssue(solutions.Id) || !storage.ExistsTask(solutions.Id,solution.TaskId))
@@ -117,6 +128,7 @@ namespace TaskManager.Core
             if (storage.IssueCanBeLinked(solutions.Id))
             {
                 log.Debug(string.Format("Linking solutions (id:{0})", solutions.Id));
+                Console.WriteLine("Linking solutions (id:{0})", solutions.Id);
                 Solutions finalSolution = LinkSolutions(solutions.Id);
                 storage.RemoveIssue(solutions.Id);
                 return finalSolution;
@@ -130,7 +142,10 @@ namespace TaskManager.Core
         {
             //for issue in storage (by problemId) - get all tasks
             //get SolutionsSolution from them and do something amazing
-
+            //mock (thread sleep)
+            Thread.Sleep(4000);
+            Console.WriteLine("Solutions have been linked ({0})", problemId);
+            log.DebugFormat("Solutions have been linked ({0})", problemId);
             //return final solution (this one is mocked)
             return new Solutions()
             {

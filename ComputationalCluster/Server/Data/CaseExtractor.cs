@@ -101,14 +101,13 @@ namespace Server.Data
             (IDictionary<int, ActiveComponent> components, int componentId,
                 IDictionary<int, ProblemDataSet> dataSets)
         {
-            SolvePartialProblems response = null;
 
             foreach (var dataSet in dataSets)
             {
                 //checking only problems that this CN can handle
                 if (components[componentId].SolvableProblems.Contains(dataSet.Value.ProblemType))
                 {
-                    //no partial problems for this problem yet
+                    //no partial problems for this problem yet (not divided yet)
                     if (dataSet.Value.PartialSets == null)
                         continue;
                     //check if there is some problem to send
@@ -118,7 +117,7 @@ namespace Server.Data
                         //we send only one partial problem to CN at a time
                         if (partialSet.Status == PartialSetStatus.Fresh)
                         {
-                            response = new SolvePartialProblems()
+                            var response = new SolvePartialProblems()
                             {
                                 CommonData = dataSet.Value.CommonData,
                                 Id = (ulong) dataSet.Key,
@@ -128,15 +127,12 @@ namespace Server.Data
                             };
                             partialSet.Status = PartialSetStatus.Ongoing;
                             partialSet.NodeId = componentId;
-                            break;
+                            return response;
                         }
                     }
                 }
-                //found a message, can jump out
-                if (response != null)
-                    break;
             }
-            return response;
+            return null;
         }
 
         /// <summary>
@@ -175,7 +171,8 @@ namespace Server.Data
                 }
             };
 
-            if (dataSets[key].PartialSets == null || dataSets[key].PartialSets.Length == 0)
+            if (dataSets[key].PartialSets == null || dataSets[key].PartialSets.Length == 0
+                || dataSets[key].PartialSets[0].PartialSolution == null)
                 return response;
 
             //response will be the status of first partial solution in problem memory (will be final

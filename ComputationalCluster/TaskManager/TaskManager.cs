@@ -40,16 +40,20 @@ namespace TaskManager
 
             //this thread becomes now status sending thread
             log.Debug("Registering TM...");
+            Console.WriteLine("Registering TM...");
             RegisterComponent();
             core.ComponentId = this.componentId;
             log.Debug(string.Format("Registering complete with id={0}", componentId));
+            Console.WriteLine("Registering complete with id={0}", componentId);
             while(true)
             {
                 log.Debug(string.Format("Sleeping (less than timeout={0}",timeout));
                 Thread.Sleep((int)(0.7 * timeout));
                 log.Debug("Sending status");
+                Console.WriteLine("Sending status");
                 Message[] responses = this.SendStatus();
                 log.Debug("Status sent");
+                Console.WriteLine("Status sent");
                 foreach (var response in responses)
                 {
                     messageQueue.Enqueue(response);
@@ -105,6 +109,7 @@ namespace TaskManager
                 {
                     case MessageType.NoOperationMessage:
                         log.Debug("NoOperation acquired: updating backups");
+                        Console.WriteLine("NoOperation acquired: updating backups");
                         UpdateBackups(message.Cast<NoOperation>());
                         break;
                     case MessageType.DivideProblemMessage:

@@ -7,6 +7,9 @@ using Server.Interfaces;
 
 namespace Server.MessageProcessing
 {
+    //TODO: if methods of primary and backup are the same, let them stay here
+    //TODO: some of methods must be redefined in BackupMessageProcessor
+    //TODO: some are unique for PrimaryServer
     /// <summary>
     /// Message processor for component.
     /// Contains implementations for handling different messages that occur in component.
@@ -222,7 +225,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: delete it. this message is not enqueued (response is immediate)
+            //TODO: nothing (or delete it). this message is not enqueued (response is immediate)
         }
 
         protected virtual void ProcessSolveRequestMessage(SolveRequest message,
@@ -230,7 +233,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: delete it. this message is not enqueued (response is immediate)
+            //TODO: nothing (or delete it). this message is not enqueued (response is immediate)
         }
 
         protected virtual void ProcessSolveRequestResponseMessage(SolveRequestResponse message,
@@ -238,7 +241,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: i don't know, delete it? this message shouldn't be delivered anywhere but to Client node, I think
+            //TODO: i don't know. this message shouldn't be delivered anywhere but to Client node, I think
             //TODO: not even to backup
         }
 
@@ -247,7 +250,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: delete it. status shouldn't be enqueued
+            //TODO: nothing (or delete it). status shouldn't be enqueued
         }
 
         protected virtual void ProcessErrorMessage(Error message,
@@ -271,7 +274,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: delete. noOperation is not enqueued
+            //TODO: nothing (or delete it). noOperation is not enqueued
             return null;
         }
 
@@ -300,6 +303,8 @@ namespace Server.MessageProcessing
                 SolvableProblems = message.SolvableProblems
             };
             activeComponents.Add(maxId, newComponent);
+            Console.WriteLine("New component: {0}, assigned id: {1}", message.Type, maxId);
+            log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
             return new Message[]
             {
                 new RegisterResponse()
@@ -319,7 +324,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: delete it. same reason as RespondDivideProblemMessage
+            //TODO: nothing (or delete it). same reason as RespondDivideProblemMessage
             return null;
         }
 
@@ -371,6 +376,10 @@ namespace Server.MessageProcessing
                 TaskManagerId = 0
             };
             dataSets.Add(maxProblemId, newSet);
+            Console.WriteLine("New problem, ProblemType={0}. Assigned id: {1}", 
+                message.ProblemType, maxProblemId);
+            log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}",
+                message.ProblemType, maxProblemId);
             return new Message[]
             {
                 new NoOperation()
@@ -388,7 +397,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: delete it. same reason as RespondDivideProblemMessage
+            //TODO: nothing (or delete it). same reason as RespondDivideProblemMessage
             return null;
         }
 
@@ -396,7 +405,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
-            //TODO: (in second stage I think) reset timeout watch for this componentId
+            //TODO: reset timeout watch for this componentId
             //if sent by TM - send NoOp + return from CaseExtractor.GetMessageForTaskManager
             //if sent by CN - send NoOp + return from CaseExtractor.GetMessageForCompNode
             int who = (int)message.Id;
@@ -405,7 +414,10 @@ namespace Server.MessageProcessing
                     ErrorType = ErrorErrorType.UnknownSender} };
 
             Message whatToDo = null;
-
+            Console.WriteLine("Handling status message of {0}(id={1}). Searching for problems.",
+                activeComponents[who].ComponentType, who);
+            log.DebugFormat("Handling status message of {0}(id={1}).",
+                activeComponents[who].ComponentType, who);
             switch (activeComponents[who].ComponentType)
             {
                 case RegisterType.ComputationalNode:
@@ -421,7 +433,10 @@ namespace Server.MessageProcessing
             }
             if (whatToDo == null)
             {
-                Console.WriteLine("PROBLEM FLOW: No ADDITIONAL OPERATION FOR NODE FOUND");
+                Console.WriteLine("Nothing additional found for {0} (id={1})", 
+                    activeComponents[who].ComponentType, who);
+                log.DebugFormat("Nothing additional found for {0} (id={1})",
+                    activeComponents[who].ComponentType, who);
                 return new Message[]
                 {
                     new NoOperation()
@@ -430,8 +445,11 @@ namespace Server.MessageProcessing
                     }
                 };
             }
-            Console.WriteLine("PROBLEM FLOW: SENDING ADDITIONAL " +
-                              "{0} FOR THIS NODE", whatToDo.ToString());
+            Console.WriteLine("Found problem ({0}) for {1} (id={2})", 
+                whatToDo.MessageType, activeComponents[who].ComponentType, who);
+            log.DebugFormat("Found problem ({0}) for {1} (id={2})",
+                whatToDo.MessageType, activeComponents[who].ComponentType, who);
+
             return new Message[]
             {
                 whatToDo, 

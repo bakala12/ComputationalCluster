@@ -45,8 +45,10 @@ namespace Client
                 //could be in another thread:
                 solvingWatch.Reset();
                 log.Debug("Sending problem");
+                Console.WriteLine("Sending problem");
                 SolveRequestResponse response = SendProblem();
                 ulong problemId = response.Id;
+                log.DebugFormat("Response received. Id of the problem in cluster: {0}", problemId);
                 Console.WriteLine("Response received. Id of the problem in cluster: {0}", problemId);
                 solvingWatch.Start();
 
@@ -62,9 +64,12 @@ namespace Client
                     continue;
                 }
                 else
-                    log.Debug("Solution found.");
+                {
+                    Console.WriteLine("Solution found. ({0})", problemId);
+                    log.DebugFormat("Solution found. ({0})", problemId);
+                }
 
-            core.DoSomethingWithSolution(solution);
+                core.DoSomethingWithSolution(solution);
             }
         }
 
@@ -77,7 +82,8 @@ namespace Client
             while (true)
             {
                 Thread.Sleep((int)Properties.Settings.Default.SolutionCheckingInterval);
-
+                Console.WriteLine("Sending solutionRequest ({0})", request.Id);
+                log.DebugFormat("Sending solutionRequest ({0})", request.Id);
                 Solutions solution = CheckComputations(request);
 
                 //assuming that final solution has one element with type==final
@@ -91,6 +97,7 @@ namespace Client
                     break;
                 }
                 // ~~ else continue
+                Console.WriteLine("No solution yet ({0})", request.Id);
                 log.Debug("No solution yet");
             }
 
@@ -100,7 +107,6 @@ namespace Client
         /// <summary>
         /// sends problem to cluster, returns unique problem id
         /// </summary>
-        /// <param name="byteData"></param>
         /// <returns></returns>
         public virtual SolveRequestResponse SendProblem()
         {
@@ -123,6 +129,7 @@ namespace Client
                         break;
                     case MessageType.NoOperationMessage:
                         log.Debug("NoOperation acquired: updating backups");
+                        Console.WriteLine("NoOperation acquired: updating backups");
                         UpdateBackups(response.Cast<NoOperation>());
                         break;
                     default:
@@ -144,7 +151,6 @@ namespace Client
         public virtual Solutions CheckComputations(SolutionRequest request)
         {
             Message[] requests = creator.Create(request);
-            log.Debug("Sending solution request...");
             Message[] responses = this.SendMessages(clusterClient, requests);
             Solutions solutionReponse = null;
 
@@ -154,6 +160,7 @@ namespace Client
                 {
                     case MessageType.NoOperationMessage:
                         log.Debug("NoOperation acquired: updating backups");
+                        Console.WriteLine("NoOperation acquired: updating backups");
                         this.UpdateBackups(response.Cast<NoOperation>());
                         break;
                     case MessageType.SolutionsMessage:

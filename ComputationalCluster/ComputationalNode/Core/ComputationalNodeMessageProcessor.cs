@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Messages;
@@ -40,8 +41,10 @@ namespace ComputationalNode.Core
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
             }
-            log.Debug("Computation started & finished.");
-            //implementation in second stage, now mocked:
+            log.DebugFormat("Computation started. ({0})", solvePartialProblems.Id);
+            Console.WriteLine("Computation started. ({0})", solvePartialProblems.Id);
+            Thread.Sleep(10000);
+            //implementation in second stage, now mocked (thread sleep)
             if (!SolvableProblems.Contains(solvePartialProblems.ProblemType))
                 return new Error()
                 {
@@ -49,6 +52,8 @@ namespace ComputationalNode.Core
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
 
+            log.DebugFormat("Computation finished. ({0})", solvePartialProblems.Id);
+            Console.WriteLine("Computation finished. ({0})", solvePartialProblems.Id);
 
             return new Solutions()
             {

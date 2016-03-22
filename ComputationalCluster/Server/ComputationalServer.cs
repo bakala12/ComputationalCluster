@@ -75,7 +75,7 @@ namespace Server
         /// <summary>
         /// Object responsible for processing messages.
         /// </summary>
-        private IMessageProcessor _messageProcessor;
+        private MessageProcessor _messageProcessor;
 
         /// <summary>
         /// Specifies the time interval between two Status messages.
@@ -93,8 +93,8 @@ namespace Server
             _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
             _problemDataSets = new ConcurrentDictionary<int, ProblemDataSet>();
             _messageProcessor = (state == ServerState.Primary)
-                ? new PrimaryMessageProcessor() as IMessageProcessor
-                : new BackupMessageProcessor();
+                ? new PrimaryMessageProcessor(_currentlyWorkingThreads) as MessageProcessor
+                : new BackupMessageProcessor(_currentlyWorkingThreads);
             _backups = new List<BackupServerInfo>();
         }
 
@@ -142,7 +142,7 @@ namespace Server
             //TODO: Primary initialize
             lock (_syncRoot)
             {
-                _messageProcessor = new PrimaryMessageProcessor();
+                _messageProcessor = new PrimaryMessageProcessor(_currentlyWorkingThreads);
             }
             _backupClient = null;
             if (_clusterListener == null)
@@ -166,7 +166,7 @@ namespace Server
             //TODO: Backup initilize here
             lock(_syncRoot)
             {
-                _messageProcessor = new BackupMessageProcessor();
+                _messageProcessor = new BackupMessageProcessor(_currentlyWorkingThreads);
             }
             _clusterListener = null;
             if (_backupClient == null)

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using CommunicationsUtils.Messages;
 using Server.Data;
 
@@ -11,6 +12,10 @@ namespace Server.MessageProcessing
     /// </summary>
     public class BackupMessageProcessor : MessageProcessor
     {
+        public BackupMessageProcessor(List<Thread> currentlyWorkingThreads) : 
+            base (currentlyWorkingThreads)
+        { }
+
         protected override Message[] RespondRegisterResponseMessage(RegisterResponse message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)

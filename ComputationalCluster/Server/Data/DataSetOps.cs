@@ -13,7 +13,7 @@ namespace Server.Data
     /// <summary>
     /// simple static class for extracting proper messages from DataSet
     /// </summary>
-    public static class CaseExtractor
+    public static class DataSetOps
     {
         /// <summary>
         /// gets proper problem to solve as response for status msg request from TM
@@ -189,6 +189,74 @@ namespace Server.Data
             }
 
             return response;
+        }
+
+
+        public static void HandleClientMalfunction (IDictionary<int, ActiveComponent> components, 
+            int componentId, IDictionary<int, ProblemDataSet> dataSets)
+        {
+            switch (components[componentId].ComponentType)
+            {
+                case RegisterType.CommunicationServer:
+                    //TODO: backup has broken. do something
+                    break;
+                case RegisterType.ComputationalNode:
+                    ResetProblems(componentId, components[componentId], dataSets);
+                    break;
+                case RegisterType.TaskManager:
+                    ResetDataSet(componentId, dataSets);
+                    break;
+            }
+
+        }
+
+        /// <summary>
+        /// removes task manager id mark from problems in data sets
+        /// linear complexity
+        /// </summary>
+        /// <param name="taskManagerId"></param>
+        /// <param name="dataSets"></param>
+        private static void ResetDataSet(int taskManagerId, IDictionary<int, ProblemDataSet> dataSets)
+        {
+            foreach (var dataSet in dataSets)
+            {
+                if (dataSet.Value.TaskManagerId == taskManagerId)
+                {
+                    dataSet.Value.TaskManagerId = 0;
+                    dataSet.Value.PartialSets = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// reset all partial problems that this comp. node is computing
+        /// TODO: square complexity. should be boosted.
+        /// </summary>
+        /// <param name="compNodeId"></param>
+        /// <param name="compNode"></param>
+        /// <param name="dataSets"></param>
+        private static void ResetProblems(int compNodeId, ActiveComponent compNode, 
+            IDictionary<int, ProblemDataSet> dataSets)
+        {
+            //search for all problems that this compNode is computing
+            foreach (var dataSet in dataSets)
+            {
+                if (compNode.SolvableProblems.Contains(dataSet.Value.ProblemType))
+                {
+                    if (dataSet.Value.PartialSets == null)
+                        continue;
+                    foreach (var partialSet in dataSet.Value.PartialSets)
+                    {
+                        if (partialSet.NodeId == compNodeId)
+                        {
+                            partialSet.NodeId = 0;
+                            partialSet.Status = PartialSetStatus.Fresh;
+                            partialSet.PartialSolution = null;
+                        }
+                    }
+                }
+
+            }
         }
     }
 }

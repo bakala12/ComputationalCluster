@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using CommunicationsUtils.Messages;
 using Server.Data;
 using Server.Interfaces;
@@ -18,6 +20,38 @@ namespace Server.MessageProcessing
     {
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private List<Thread> _currentlyWorkingThreads;
+
+        public MessageProcessor(List<Thread> currentlyWorkingThreads)
+        {
+            _currentlyWorkingThreads = currentlyWorkingThreads;
+        }
+
+        private static void StatusThreadWork (int who, 
+            IDictionary<int, ActiveComponent> activeComponents, IDictionary<int, ProblemDataSet> dataSets)
+        {
+            while (true)
+            {
+                var elapsed = activeComponents[who].StatusWatch.ElapsedMilliseconds;
+                if (elapsed > Properties.Settings.Default.Timeout)
+                {
+                    //TODO: make register with deregister=true message, add to synchronization queue
+                    Console.WriteLine("TIMEOUT of {0}. Deregistering.", activeComponents[who].ComponentType);
+                    DataSetOps.HandleClientMalfunction(activeComponents, who, dataSets);
+                    activeComponents.Remove(who);
+                    return;
+                }
+                Thread.Sleep((int) Properties.Settings.Default.Timeout);
+            }
+        }
+
+        private void RunStatusThread(int who, 
+            IDictionary<int, ActiveComponent> activeComponents, IDictionary<int, ProblemDataSet> dataSets)
+        {
+            var t = new Thread(() => StatusThreadWork(who, activeComponents, dataSets));
+            t.Start();
+            _currentlyWorkingThreads.Add(t);
+        }
 
         /// <summary>
         /// Processes message.
@@ -305,6 +339,9 @@ namespace Server.MessageProcessing
             activeComponents.Add(maxId, newComponent);
             Console.WriteLine("New component: {0}, assigned id: {1}", message.Type, maxId);
             log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
+            //add new watcher of timeout
+            RunStatusThread(maxId, activeComponents, dataSets);
+
             return new Message[]
             {
                 new RegisterResponse()
@@ -345,7 +382,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             //TODO: sent by client node. send NoOperation + CaseExtractor.GetSolutionState
-            var solutionState = CaseExtractor.GetSolutionState(message, dataSets);
+            var solutionState = DataSetOps.GetSolutionState(message, dataSets);
             if (solutionState == null)
             {
                 return new Message[] { new NoOperation()
@@ -405,13 +442,14 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
-            //TODO: reset timeout watch for this componentId
             //if sent by TM - send NoOp + return from CaseExtractor.GetMessageForTaskManager
             //if sent by CN - send NoOp + return from CaseExtractor.GetMessageForCompNode
             int who = (int)message.Id;
             if (!activeComponents.ContainsKey(who))
                 return new Message[] {new Error() {ErrorMessage = "who are you?",
                     ErrorType = ErrorErrorType.UnknownSender} };
+
+            activeComponents[who].StatusWatch.Restart();
 
             Message whatToDo = null;
             Console.WriteLine("Handling status message of {0}(id={1}). Searching for problems.",
@@ -421,10 +459,10 @@ namespace Server.MessageProcessing
             switch (activeComponents[who].ComponentType)
             {
                 case RegisterType.ComputationalNode:
-                    whatToDo = CaseExtractor.GetMessageForCompNode(activeComponents, who, dataSets);
+                    whatToDo = DataSetOps.GetMessageForCompNode(activeComponents, who, dataSets);
                     break;
                     case RegisterType.TaskManager:
-                    whatToDo = CaseExtractor.GetMessageForTaskManager(activeComponents, who, dataSets);
+                    whatToDo = DataSetOps.GetMessageForTaskManager(activeComponents, who, dataSets);
                     break;
                     case RegisterType.CommunicationServer:
                     //TODO: sent by backup - we don't know yet what 

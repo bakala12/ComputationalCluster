@@ -107,15 +107,10 @@ namespace Tests
                 MessagesFactory.CreateEmptyMessage(MessageType.RegisterResponseMessage).Cast<RegisterResponse>();
             response.Id = 1234;
             response.Timeout = 12345;
-            response.BackupCommunicationServers = new RegisterResponseBackupCommunicationServer[1];
-            response.BackupCommunicationServers[0] = new RegisterResponseBackupCommunicationServer();
-            response.BackupCommunicationServers[0].port = 123;
             string xml = _serializer.ToXmlString(response);
             RegisterResponse responseDeserialized = _serializer.FromXmlString(xml).Cast<RegisterResponse>();
             Assert.AreEqual(response.Id, responseDeserialized.Id);
             Assert.AreEqual(response.Timeout, responseDeserialized.Timeout);
-            Assert.AreEqual(response.BackupCommunicationServers[0].port,
-                responseDeserialized.BackupCommunicationServers[0].port);
         }
 
         [TestMethod]

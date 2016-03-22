@@ -30,8 +30,6 @@ namespace CommunicationsUtils.Messages
 
         private uint timeoutField;
 
-        private RegisterResponseBackupCommunicationServer[] backupCommunicationServersField;
-
         /// <remarks/>
         public ulong Id
         {
@@ -44,44 +42,6 @@ namespace CommunicationsUtils.Messages
         {
             get { return this.timeoutField; }
             set { this.timeoutField = value; }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlArrayItemAttribute("BackupCommunicationServer", IsNullable = false)]
-        public RegisterResponseBackupCommunicationServer[] BackupCommunicationServers
-        {
-            get { return this.backupCommunicationServersField; }
-            set { this.backupCommunicationServersField = value; }
-        }
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    public partial class RegisterResponseBackupCommunicationServer
-    {
-
-        private string addressField;
-
-        private ushort portField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "anyURI")]
-        public string address
-        {
-            get { return this.addressField; }
-            set { this.addressField = value; }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public ushort port
-        {
-            get { return this.portField; }
-            set { this.portField = value; }
         }
     }
 }

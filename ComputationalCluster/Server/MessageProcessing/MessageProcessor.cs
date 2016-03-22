@@ -166,7 +166,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: delete it or leave it like this. nooperation is not enqueued
+            //nothing. noOperation is not enqueued anywhere
         }
 
         protected virtual void ProcessSolvePartialProblemMessage(SolvePartialProblems message,
@@ -174,6 +174,8 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
+            //TODO: add to synchronization queue
+            //TODO: implement it on backup side
             //update dataset for given problemId
             //message from TM and only from it, so set partialSets array (it will be enough)
             if (!dataSets.ContainsKey((int)message.Id))
@@ -196,7 +198,8 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: delete or leave it like this. register msg is not processed
+            //TODO: message delivered to backup - update active components structure
+            //TODO: can also be deregister message
         }
 
         protected virtual void ProcessRegisterResponseMessage(RegisterResponse message,
@@ -204,13 +207,15 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: message delivered to backup only - update active components structure
+            //nothing. it is not enqueued
         }
 
         protected virtual void ProcessSolutionsMessage(Solutions message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
+            //TODO: add to synchronization queue
+            //TODO: implement it on backup side
             WriteControlInformation(message);
             //message delivered from TM or CN
             //in case of TM - it is final solution. adjust dataset for proper problemId
@@ -259,7 +264,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: nothing (or delete it). this message is not enqueued (response is immediate)
+            //nothing. this message is not enqueued (response is immediate)
         }
 
         protected virtual void ProcessSolveRequestMessage(SolveRequest message,
@@ -267,7 +272,8 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: nothing (or delete it). this message is not enqueued (response is immediate)
+            //TODO: add to synchronization queue
+            //TODO: implement it on backup side (with id specified)
         }
 
         protected virtual void ProcessSolveRequestResponseMessage(SolveRequestResponse message,
@@ -275,8 +281,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: i don't know. this message shouldn't be delivered anywhere but to Client node, I think
-            //TODO: not even to backup
+            //nothing. not processed anywhere
         }
 
         protected virtual void ProcessStatusMessage(Status message,
@@ -284,7 +289,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: nothing (or delete it). status shouldn't be enqueued
+            //nothing. status is not enqueued
         }
 
         protected virtual void ProcessErrorMessage(Error message,
@@ -292,15 +297,14 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: for now, nothing here. specification is not specified yet
+            //error shouldn't be enqueued, so nothing
         }
 
         protected virtual Message[] RespondDivideProblemMessage(DivideProblem message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: obsolete. divide problem comes to backup server only, and backup doesnt respond nodes (only
-            //TODO: other backups, but this shit concerns synchronization queue)
+            //nothing. msg delivered to TM. to backup too, but it only processes it
             return null;
         }
 
@@ -308,7 +312,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: nothing (or delete it). noOperation is not enqueued
+            //nothing. noOperation is not enqueued
             return null;
         }
 
@@ -341,7 +345,7 @@ namespace Server.MessageProcessing
             log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
             //add new watcher of timeout
             RunStatusThread(maxId, activeComponents, dataSets);
-
+            //TODO: add register message to synchronization queue (with id specified)
             return new Message[]
             {
                 new RegisterResponse()
@@ -361,7 +365,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: nothing (or delete it). same reason as RespondDivideProblemMessage
+            //nothing. same reason as RespondDivideProblemMessage
             return null;
         }
 
@@ -381,7 +385,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
-            //TODO: sent by client node. send NoOperation + CaseExtractor.GetSolutionState
+            //sent by client node. send NoOperation + CaseExtractor.GetSolutionState
             var solutionState = DataSetOps.GetSolutionState(message, dataSets);
             if (solutionState == null)
             {
@@ -417,6 +421,8 @@ namespace Server.MessageProcessing
                 message.ProblemType, maxProblemId);
             log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}",
                 message.ProblemType, maxProblemId);
+            //TODO: add proper solveRequest message to synchronization queue
+
             return new Message[]
             {
                 new NoOperation()
@@ -434,7 +440,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: nothing (or delete it). same reason as RespondDivideProblemMessage
+            //nothing. delivered to client node only. nowhere else
             return null;
         }
 
@@ -442,6 +448,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
+            //TODO: implementation on backup side
             //if sent by TM - send NoOp + return from CaseExtractor.GetMessageForTaskManager
             //if sent by CN - send NoOp + return from CaseExtractor.GetMessageForCompNode
             int who = (int)message.Id;
@@ -487,7 +494,7 @@ namespace Server.MessageProcessing
                 whatToDo.MessageType, activeComponents[who].ComponentType, who);
             log.DebugFormat("Found problem ({0}) for {1} (id={2})",
                 whatToDo.MessageType, activeComponents[who].ComponentType, who);
-
+            //TODO: add whatToDo to synchronization queue
             return new Message[]
             {
                 whatToDo, 
@@ -502,8 +509,12 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: practically nothing to do - specification is not specified yet
-            //TODO: imo: warn logger, print something on console if verbose
+            //practically nothing to do
+            //warn logger, print something on console if verbose
+            log.DebugFormat("Error message acquired. Type={0}, Message={1}",
+                message.ErrorType, message.ErrorMessage);
+            Console.WriteLine("Error message acquired. Type={0}, Message={1}",
+                message.ErrorType, message.ErrorMessage);
             return null;
         }
     }

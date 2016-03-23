@@ -43,61 +43,161 @@ namespace CommunicationsUtils.Messages
         /// <remarks/>
         public RegisterType Type
         {
-            get { return this.typeField; }
-            set { this.typeField = value; }
+            get
+            {
+                return this.typeField;
+            }
+            set
+            {
+                this.typeField = value;
+            }
         }
 
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayItemAttribute("ProblemName", IsNullable = false)]
         public string[] SolvableProblems
         {
-            get { return this.solvableProblemsField; }
-            set { this.solvableProblemsField = value; }
+            get
+            {
+                return this.solvableProblemsField;
+            }
+            set
+            {
+                this.solvableProblemsField = value;
+            }
         }
 
         /// <remarks/>
         public byte ParallelThreads
         {
-            get { return this.parallelThreadsField; }
-            set { this.parallelThreadsField = value; }
+            get
+            {
+                return this.parallelThreadsField;
+            }
+            set
+            {
+                this.parallelThreadsField = value;
+            }
         }
 
         /// <remarks/>
         public bool Deregister
         {
-            get { return this.deregisterField; }
-            set { this.deregisterField = value; }
+            get
+            {
+                return this.deregisterField;
+            }
+            set
+            {
+                this.deregisterField = value;
+            }
         }
 
         /// <remarks/>
         [System.Xml.Serialization.XmlIgnoreAttribute()]
         public bool DeregisterSpecified
         {
-            get { return this.deregisterFieldSpecified; }
-            set { this.deregisterFieldSpecified = value; }
+            get
+            {
+                return this.deregisterFieldSpecified;
+            }
+            set
+            {
+                this.deregisterFieldSpecified = value;
+            }
         }
 
         /// <remarks/>
         public ulong Id
         {
-            get { return this.idField; }
-            set { this.idField = value; }
+            get
+            {
+                return this.idField;
+            }
+            set
+            {
+                this.idField = value;
+            }
         }
 
         /// <remarks/>
         [System.Xml.Serialization.XmlIgnoreAttribute()]
         public bool IdSpecified
         {
-            get { return this.idFieldSpecified; }
-            set { this.idFieldSpecified = value; }
+            get
+            {
+                return this.idFieldSpecified;
+            }
+            set
+            {
+                this.idFieldSpecified = value;
+            }
         }
     }
 
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
     [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.mini.pw.edu.pl/ucc/")]
-    public enum RegisterType
+    public partial class RegisterType
+    {
+
+        private ushort portField;
+
+        private bool portFieldSpecified;
+
+        private ComponentType valueField;
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public ushort port
+        {
+            get
+            {
+                return this.portField;
+            }
+            set
+            {
+                this.portField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool portSpecified
+        {
+            get
+            {
+                return this.portFieldSpecified;
+            }
+            set
+            {
+                this.portFieldSpecified = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlTextAttribute()]
+        public ComponentType Value
+        {
+            get
+            {
+                return this.valueField;
+            }
+            set
+            {
+                this.valueField = value;
+            }
+        }
+    }
+
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mini.pw.edu.pl/ucc/")]
+    public enum ComponentType
     {
 
         /// <remarks/>

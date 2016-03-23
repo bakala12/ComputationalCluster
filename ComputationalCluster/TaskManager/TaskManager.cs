@@ -80,7 +80,10 @@ namespace TaskManager
             {
                 ParallelThreads = 1,
                 SolvableProblems = new[] { "DVRP" },
-                Type = RegisterType.TaskManager,
+                Type = new RegisterType()
+                {
+                    Value = ComponentType.TaskManager
+                },
                 DeregisterSpecified = false,
                 IdSpecified = false
             };

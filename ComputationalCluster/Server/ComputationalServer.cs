@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -54,11 +55,14 @@ namespace Server
         private readonly ConcurrentQueue<Message> _messagesQueue;
 
         /// <summary>
+        /// List of currently available backups servers.
+        /// </summary>
+        private List<BackupServerInfo> _backups;
+
+        /// <summary>
         /// Queue used by servers to synchronize data
         /// </summary>
         private readonly ConcurrentQueue<Message> _synchronizationQueue;
-
-        private List<BackupServerInfo> _backups;
 
         /// <summary>
         /// Current state of server.
@@ -217,13 +221,15 @@ namespace Server
             _isWorking = false;
             foreach (var currentlyWorkingThread in _currentlyWorkingThreads)
             {
+                if(currentlyWorkingThread != Thread.CurrentThread) //that's weird...
                 currentlyWorkingThread?.Join();
             }
             _currentlyWorkingThreads.Clear();
             _clusterListener = null;
             _backupClient = null;
-            if (State == ServerState.Backup)
-                _messageProcessor?.StatusThread?.Join();
+            //TODO: Stop that thread. Not in this way, because it probabely does nothing.
+            //if (State == ServerState.Backup)
+              //  _messageProcessor?.StatusThread?.Join();
             log.Debug("Threads have been stopped.");
         }
 
@@ -339,7 +345,12 @@ namespace Server
         {
             Register register = new Register()
             {
-                Type = RegisterType.CommunicationServer,
+                Type = new RegisterType()
+                {
+                    Value = ComponentType.CommunicationServer,
+                    port = (ushort)Properties.Settings.Default.Port,
+                    portSpecified = true
+                },
                 SolvableProblems = new string[] {"DVRP"},
                 ParallelThreads = 1,
                 Deregister = false,
@@ -357,7 +368,13 @@ namespace Server
                         BackupServerStatusInterval = registerResponse.Timeout;
                         BackupServerId = registerResponse.Id;
                     }
+                    if (message.MessageType == MessageType.NoOperationMessage)
+                    {
+                        NoOperation nop = message.Cast<NoOperation>();
+                        int n = nop.BackupServersInfo.Length;
+
                 }
+            }
             }
             catch (SocketException) //probably Exception might be written here
             {
@@ -381,13 +398,52 @@ namespace Server
                     Id= 1,
                     
                 };
-                var responseMessages = _backupClient.SendRequests(new Message[] {status});
-                foreach (var msg in responseMessages)
+                try
                 {
-                    _synchronizationQueue.Enqueue(msg);
+                    var response = _backupClient.SendRequests(new Message[] {status});
+                    foreach (var message in response)
+                    {
+                        //TODO: Process all response messages in backup.
+                        //TODO: Update backup list!
+                        if (message.MessageType == MessageType.NoOperationMessage)
+                        {
+                            NoOperation nop = message.Cast<NoOperation>();
+                            _backups = nop.BackupServersInfo.ToList();
+                        } 
+                        //TODO: Update components. 
+                        //TODO: Call synchronization functions here.
+                    }
+                }
+                catch (Exception)
+                {
+                    //TODO: Switching context to primary server or rearrange backup list.
+                    //TODO: Assuming _backups field contains current list of available backups. 
+                    if (BackupProblem())
+                    {
+                        ChangeState(ServerState.Primary);
+                        //TODO: Watch out on threads!!!
+                    }
                 }
                 Thread.Sleep((int)(BackupServerStatusInterval ?? 0));
             }
+        }
+
+        /// <summary>
+        /// Invoked when backup server cannot connect to primary server. 
+        /// Checks whether the invoking backup is the first backup server. 
+        /// </summary>
+        /// <returns>True if the invoking backup is the first backup server, otherwise false.</returns>
+        private bool BackupProblem()
+        {
+            if(_backups == null || _backups.Count ==0)
+                throw new Exception("Backup has empty backup list!!!");
+            foreach (var backupServerInfo in _backups)
+            {
+                //TODO: Check whether i'm the first backup server.
+                if(true /*change this*/) //TODO: Single backup implementation.
+                    return true;
+            }
+            return false;
         }
     }
 }

@@ -57,7 +57,7 @@ namespace Server.MessageProcessing
             {
                 activeComponents.Add((int) message.Id, new ActiveComponent()
                 {
-                    ComponentType = message.Type,
+                    ComponentType = message.Type.Value,
                     SolvableProblems = message.SolvableProblems,
                     StatusWatch = new Stopwatch()
                 });

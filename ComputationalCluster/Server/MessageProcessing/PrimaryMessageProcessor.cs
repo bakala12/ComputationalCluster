@@ -34,7 +34,7 @@ namespace Server.MessageProcessing
             int maxId = activeComponents.Count == 0 ? 1 : activeComponents.Keys.Max() + 1;
             var newComponent = new ActiveComponent()
             {
-                ComponentType = message.Type,
+                ComponentType = message.Type.Value,
                 SolvableProblems = message.SolvableProblems
             };
             activeComponents.Add(maxId, newComponent);
@@ -115,13 +115,13 @@ namespace Server.MessageProcessing
                 activeComponents[who].ComponentType, who);
             switch (activeComponents[who].ComponentType)
             {
-                case RegisterType.ComputationalNode:
+                case ComponentType.ComputationalNode:
                     whatToDo = DataSetOps.GetMessageForCompNode(activeComponents, who, dataSets);
                     break;
-                case RegisterType.TaskManager:
+                case ComponentType.TaskManager:
                     whatToDo = DataSetOps.GetMessageForTaskManager(activeComponents, who, dataSets);
                     break;
-                case RegisterType.CommunicationServer:
+                case ComponentType.CommunicationServer:
                     Message[] msgs = _synchronizationQueue.ToArray();
                     _synchronizationQueue = new ConcurrentQueue<Message>();
                     return msgs;

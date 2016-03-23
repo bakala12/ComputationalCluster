@@ -199,21 +199,21 @@ namespace Server.MessageProcessing
             //that means, just make only one partialSet with solutions as given from Solutions message
             //in case of CN - it is partial solution. adjust partialSet array element (for taskId) 
             //in proper problemId
-            if (message.Solutions1 == null || message.Solutions1.Length == 0)
+            if (message.SolutionsList == null || message.SolutionsList.Length == 0)
                 return;
 
             int key = (int)message.Id;
             if (!dataSets.ContainsKey(key))
                 return;
             //this is from TM:
-            if (message.Solutions1.Length == 1 && message.Solutions1[0].Type == SolutionsSolutionType.Final)
+            if (message.SolutionsList.Length == 1 && message.SolutionsList[0].Type == SolutionsSolutionType.Final)
             {
                 dataSets[key].PartialSets = new PartialSet[1];
                 dataSets[key].PartialSets[0] = new PartialSet()
                 {
                     NodeId = 0,
                     PartialProblem = null,
-                    PartialSolution = message.Solutions1[0],
+                    PartialSolution = message.SolutionsList[0],
                     Status = PartialSetStatus.Sent
                 };
             }
@@ -221,14 +221,14 @@ namespace Server.MessageProcessing
             else
             {
                 //only one solution is delivered by CN at a time
-                if (message.Solutions1.Length != 1)
+                if (message.SolutionsList.Length != 1)
                     return;
-                var taskId = message.Solutions1[0].TaskId;
+                var taskId = message.SolutionsList[0].TaskId;
                 foreach (var partialSet in dataSets[key].PartialSets)
                 {
                     if (partialSet.PartialProblem.TaskId == taskId)
                     {
-                        partialSet.PartialSolution = message.Solutions1[0];
+                        partialSet.PartialSolution = message.SolutionsList[0];
                         partialSet.Status = PartialSetStatus.Ongoing;
                         break;
                     }
@@ -330,7 +330,6 @@ namespace Server.MessageProcessing
         protected abstract Message[] RespondStatusMessage(Status message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups);
-
 
         protected virtual Message[] RespondErrorMessage(Error message,
             IDictionary<int, ProblemDataSet> dataSets,

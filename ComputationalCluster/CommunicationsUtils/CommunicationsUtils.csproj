@@ -63,7 +63,7 @@
     <Compile Include="Messages\PartialProblems.cs" />
     <Compile Include="Messages\Register.cs" />
     <Compile Include="Messages\RegisterResponse.cs" />
-    <Compile Include="Messages\Solution.cs" />
+    <Compile Include="Messages\Solutions.cs" />
     <Compile Include="Messages\SolutionRequest.cs" />
     <Compile Include="Messages\SolveRequest.cs" />
     <Compile Include="Messages\SolveRequestResponse.cs" />

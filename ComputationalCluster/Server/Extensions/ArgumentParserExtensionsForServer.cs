@@ -29,7 +29,7 @@ namespace Server.Extensions
                         Properties.Settings.Default.Timeout = pair.Value.ChangeType<uint>();
                         break;
                     case "backup":
-                        Properties.Settings.Default.IsBackup = pair.Value.ChangeType<bool>();
+                        Properties.Settings.Default.IsBackup = true;
                         break;
                     case "maddress=":
                         Properties.Settings.Default.MasterAddress = pair.Value;

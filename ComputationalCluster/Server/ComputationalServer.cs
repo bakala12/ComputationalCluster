@@ -325,8 +325,10 @@ namespace Server
             log.Debug("Backup registered successfully");
             log.Debug("Starting status thread");
             ProcessInParallel((SendBackupStatusMessages));
-            log.Debug("Starting updating backup thread");
-            ProcessInParallel(UpdateBackupServerState);
+            //log.Debug("Starting updating backup thread");
+            //ProcessInParallel(UpdateBackupServerState);
+            log.Debug("Starting new thread for dequeueing messages and updating additional sets.");
+            ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
         }
 
         /// <summary>
@@ -405,6 +407,9 @@ namespace Server
                     {
                         //TODO: Process all response messages in backup.
                         //TODO: Update backup list!
+                        _synchronizationQueue.Enqueue(message);
+                        _messagesQueue.Enqueue(message);
+
                         if (message.MessageType == MessageType.NoOperationMessage)
                         {
                             NoOperation nop = message.Cast<NoOperation>();

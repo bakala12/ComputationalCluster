@@ -14,8 +14,8 @@ namespace Server.MessageProcessing
     public class PrimaryMessageProcessor : MessageProcessor
     {
 
-        public PrimaryMessageProcessor(ConcurrentQueue<Message> _synchornizationQueue) :
-            base(_synchornizationQueue)
+        public PrimaryMessageProcessor(ConcurrentQueue<Message> _synchronizationQueue) :
+            base(_synchronizationQueue)
         { }
         protected override Message[] RespondRegisterResponseMessage(RegisterResponse message,
               IDictionary<int, ProblemDataSet> dataSets,
@@ -46,6 +46,8 @@ namespace Server.MessageProcessing
             message.Id = (ulong)maxId;
             message.IdSpecified = true;
             _synchronizationQueue.Enqueue(message);
+            // TODO: adding backups to backups array
+            AddBackupAddressToBackupList(backups);
             return new Message[]
             {
                 new RegisterResponse()
@@ -59,6 +61,15 @@ namespace Server.MessageProcessing
                     BackupServersInfo = backups.ToArray()
                 }
             };
+        }
+
+        private void AddBackupAddressToBackupList(List<BackupServerInfo> backups)
+        {
+           backups.Add(new BackupServerInfo()
+           {
+               address = "192.168.56.1",
+               port = 8086
+           });
         }
 
         protected override Message[] RespondNoOperationMessage(NoOperation message,

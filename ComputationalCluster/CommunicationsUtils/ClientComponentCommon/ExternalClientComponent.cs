@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunicationsUtils.NetworkInterfaces;
 
@@ -63,6 +64,7 @@ namespace CommunicationsUtils.ClientComponentCommon
                 try
                 {
                     client.ChangeListenerParameters(backups[0].address, backups[0].port);
+                    Thread.Sleep(5000);
                     responses = client.SendRequests(requests);
                 }
                 catch (Exception)

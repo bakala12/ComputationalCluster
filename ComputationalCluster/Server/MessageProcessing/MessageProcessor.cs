@@ -97,7 +97,7 @@ namespace Server.MessageProcessing
                     ProcessSolveRequestMessage(message.Cast<SolveRequest>(), dataSets, activeComponents);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    return;
             }
         }
 

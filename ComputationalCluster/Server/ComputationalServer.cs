@@ -369,7 +369,21 @@ namespace Server
                     Id= 1,
                     
                 };
-                _backupClient.SendRequests(new Message[] {status});
+                try
+                {
+                    var response = _backupClient.SendRequests(new Message[] {status});
+                    foreach (var message in response)
+                    {
+                        //TODO: Process all response messages in backup.
+                        //TODO: Update backup list! Update components. 
+                        //TODO: Call synchronization functions here.
+                    }
+                }
+                catch (Exception)
+                {
+                    //TODO: Switching context to primary server or rearrange backup list.
+                    ChangeState(ServerState.Primary);
+                }
                 Thread.Sleep((int)(BackupServerStatusInterval ?? 0));
             }
         }

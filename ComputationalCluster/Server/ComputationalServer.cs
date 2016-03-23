@@ -56,7 +56,7 @@ namespace Server
         /// <summary>
         /// Queue used by servers to synchronize data
         /// </summary>
-        private readonly ConcurrentQueue<Message> _synchornizationQueue;
+        private readonly ConcurrentQueue<Message> _synchronizationQueue;
 
         private List<BackupServerInfo> _backups;
 
@@ -103,10 +103,10 @@ namespace Server
             _messagesQueue = new ConcurrentQueue<Message>();
             _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
             _problemDataSets = new ConcurrentDictionary<int, ProblemDataSet>();
-            _synchornizationQueue = new ConcurrentQueue<Message>();
+            _synchronizationQueue = new ConcurrentQueue<Message>();
             _messageProcessor = (state == ServerState.Primary)
-                ? new PrimaryMessageProcessor(_synchornizationQueue) as MessageProcessor
-                : new BackupMessageProcessor(_synchornizationQueue);
+                ? new PrimaryMessageProcessor(_synchronizationQueue) as MessageProcessor
+                : new BackupMessageProcessor(_synchronizationQueue);
             _backups = new List<BackupServerInfo>();
         }
 
@@ -156,7 +156,7 @@ namespace Server
             //TODO: Primary initialize
             lock (_syncRoot)
             {
-                _messageProcessor = new PrimaryMessageProcessor(_synchornizationQueue);
+                _messageProcessor = new PrimaryMessageProcessor(_synchronizationQueue);
             }
             _backupClient = null;
             if (_clusterListener == null)
@@ -182,7 +182,7 @@ namespace Server
             //TODO: Backup initilize here
             lock(_syncRoot)
             {
-                _messageProcessor = new BackupMessageProcessor(_synchornizationQueue);
+                _messageProcessor = new BackupMessageProcessor(_synchronizationQueue);
             }
             _clusterListener = null;
             if (_backupClient == null)
@@ -381,7 +381,11 @@ namespace Server
                     Id= 1,
                     
                 };
-                _backupClient.SendRequests(new Message[] {status});
+                var responseMessages = _backupClient.SendRequests(new Message[] {status});
+                foreach (var msg in responseMessages)
+                {
+                    _synchronizationQueue.Enqueue(msg);
+                }
                 Thread.Sleep((int)(BackupServerStatusInterval ?? 0));
             }
         }

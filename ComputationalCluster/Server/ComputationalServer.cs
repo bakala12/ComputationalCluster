@@ -193,10 +193,11 @@ namespace Server
                 address = Properties.Settings.Default.MasterAddress,
                 port = (ushort)Properties.Settings.Default.Port,
             });
-            _clusterListener = null;
             if (_backupClient == null)
                 _backupClient = ClusterClientFactory.Factory.Create(Properties.Settings.Default.MasterAddress,
                     Properties.Settings.Default.MasterPort);
+            if (_clusterListener == null)
+                _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
             //TODO: Maybe reset data sets and list of active components here.
 
             //TODO: Backup run
@@ -230,7 +231,7 @@ namespace Server
                 currentlyWorkingThread?.Join();
             }
             _currentlyWorkingThreads.Clear();
-            _clusterListener = null;
+
             _backupClient = null;
             //TODO: Stop that thread. Not in this way, because it probabely does nothing.
             //if (State == ServerState.Backup)
@@ -309,12 +310,11 @@ namespace Server
         /// </summary>
         protected virtual void DoPrimaryWork()
         {
-            log.Debug("Starting new thread for listening, storing messages and sending responses.");
-            ProcessInParallel(ListenAndStoreMessagesAndSendResponses);
-            log.Debug("Thread for listening, storing messages and sending responses has been started.");
             log.Debug("Starting new thread for dequeueing messages and updating additional sets.");
             ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
             log.Debug("Thread for dequeueing messages and updating additional sets has been started.");
+            log.Debug("Initializing listening module in main thread");
+            ListenAndStoreMessagesAndSendResponses();
         }
 
         /// <summary>
@@ -378,8 +378,7 @@ namespace Server
                     if (message.MessageType == MessageType.NoOperationMessage)
                     {
                         NoOperation nop = message.Cast<NoOperation>();
-                        int n = nop.BackupServersInfo.Length;
-
+                        _backups = nop.BackupServersInfo.ToList();
                 }
             }
             }

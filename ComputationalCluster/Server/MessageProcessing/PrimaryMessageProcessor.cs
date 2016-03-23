@@ -37,14 +37,14 @@ namespace Server.MessageProcessing
                 SolvableProblems = message.SolvableProblems
             };
             activeComponents.Add(maxId, newComponent);
-            log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
-            log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
+            Log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
+            Log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
             //add new watcher of timeout
             RunStatusThread(maxId, activeComponents, dataSets);
             //add register message to synchronization queue
             message.Id = (ulong)maxId;
             message.IdSpecified = true;
-            _synchronizationQueue.Enqueue(message);
+            SynchronizationQueue.Enqueue(message);
             if(message.Type.Value==ComponentType.CommunicationServer)
                 AddBackupAddressToBackupList(backups);
             return new Message[]
@@ -83,7 +83,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
-            _synchronizationQueue.Enqueue(message);
+            SynchronizationQueue.Enqueue(message);
             //sent by TM. send noOperation only.
             return new Message[] { new NoOperation()
                 {
@@ -96,7 +96,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
-            _synchronizationQueue.Enqueue(message);
+            SynchronizationQueue.Enqueue(message);
             //sent by CN or TM. send NoOperation only.
             return new Message[] { new NoOperation()
             {
@@ -119,9 +119,9 @@ namespace Server.MessageProcessing
             activeComponents[who].StatusWatch.Restart();
 
             Message whatToDo = null;
-            log.DebugFormat("Handling status message of {0}(id={1}). Searching for problems.",
+            Log.DebugFormat("Handling status message of {0}(id={1}). Searching for problems.",
                 activeComponents[who].ComponentType, who);
-            log.DebugFormat("Handling status message of {0}(id={1}).",
+            Log.DebugFormat("Handling status message of {0}(id={1}).",
                 activeComponents[who].ComponentType, who);
             switch (activeComponents[who].ComponentType)
             {
@@ -132,15 +132,15 @@ namespace Server.MessageProcessing
                     whatToDo = DataSetOps.GetMessageForTaskManager(activeComponents, who, dataSets);
                     break;
                 case ComponentType.CommunicationServer:
-                    var msgs = _synchronizationQueue.ToArray();
-                    _synchronizationQueue = new ConcurrentQueue<Message>();
+                    var msgs = SynchronizationQueue.ToArray();
+                    SynchronizationQueue = new ConcurrentQueue<Message>();
                     return msgs;
             }
             if (whatToDo == null)
             {
-                log.DebugFormat("Nothing additional found for {0} (id={1})",
+                Log.DebugFormat("Nothing additional found for {0} (id={1})",
                     activeComponents[who].ComponentType, who);
-                log.DebugFormat("Nothing additional found for {0} (id={1})",
+                Log.DebugFormat("Nothing additional found for {0} (id={1})",
                     activeComponents[who].ComponentType, who);
                 return new Message[]
                 {
@@ -150,12 +150,12 @@ namespace Server.MessageProcessing
                     }
                 };
             }
-            log.DebugFormat("Found problem ({0}) for {1} (id={2})",
+            Log.DebugFormat("Found problem ({0}) for {1} (id={2})",
                 whatToDo.MessageType, activeComponents[who].ComponentType, who);
-            log.DebugFormat("Found problem ({0}) for {1} (id={2})",
+            Log.DebugFormat("Found problem ({0}) for {1} (id={2})",
                 whatToDo.MessageType, activeComponents[who].ComponentType, who);
 
-            _synchronizationQueue.Enqueue(whatToDo);
+            SynchronizationQueue.Enqueue(whatToDo);
             return new[]
             {
                 whatToDo,

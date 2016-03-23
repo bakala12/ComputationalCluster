@@ -188,6 +188,11 @@ namespace Server
             {
                 _messageProcessor = new BackupMessageProcessor(_synchronizationQueue);
             }
+            _backups.Add(new BackupServerInfo()
+            {
+                address = Properties.Settings.Default.MasterAddress,
+                port = (ushort)Properties.Settings.Default.Port,
+            });
             _clusterListener = null;
             if (_backupClient == null)
                 _backupClient = ClusterClientFactory.Factory.Create(Properties.Settings.Default.MasterAddress,

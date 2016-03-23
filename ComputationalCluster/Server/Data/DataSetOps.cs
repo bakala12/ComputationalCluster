@@ -197,13 +197,13 @@ namespace Server.Data
         {
             switch (components[componentId].ComponentType)
             {
-                case RegisterType.CommunicationServer:
+                case ComponentType.CommunicationServer:
                     //TODO: backup has broken. do something
                     break;
-                case RegisterType.ComputationalNode:
+                case ComponentType.ComputationalNode:
                     ResetProblems(componentId, components[componentId], dataSets);
                     break;
-                case RegisterType.TaskManager:
+                case ComponentType.TaskManager:
                     ResetDataSet(componentId, dataSets);
                     break;
             }

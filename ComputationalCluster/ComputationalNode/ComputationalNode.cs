@@ -61,7 +61,10 @@ namespace ComputationalNode
             {
                 ParallelThreads = 1,
                 SolvableProblems = new[] { "DVRP" },
-                Type = RegisterType.ComputationalNode,
+                Type = new RegisterType()
+                {
+                    Value = ComponentType.ComputationalNode
+                },
                 DeregisterSpecified = false,
                 IdSpecified = false
             };

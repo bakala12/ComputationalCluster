@@ -13,7 +13,7 @@ namespace Server.Data
     public class ActiveComponent
     {
         //componentId is not necessary, it's the key of a dict
-        public RegisterType ComponentType { get; set;}
+        public ComponentType ComponentType { get; set;}
         public string[] SolvableProblems { get; set; }
         public Stopwatch StatusWatch { get; set; }
 

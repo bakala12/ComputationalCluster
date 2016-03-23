@@ -316,7 +316,7 @@ namespace Server
                 Type = new RegisterType()
                 {
                     Value = ComponentType.CommunicationServer,
-                    port = 8086, //fix
+                    port = (ushort)Properties.Settings.Default.Port, //fix
                     portSpecified = true
                 },
                 SolvableProblems = new string[] {"DVRP"},

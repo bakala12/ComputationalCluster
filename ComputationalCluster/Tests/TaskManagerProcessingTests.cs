@@ -40,7 +40,7 @@ namespace Tests
             Solutions sol = new Solutions()
             {
                 Id = 123,
-                Solutions1 = new SolutionsSolution [] {
+                SolutionsList = new SolutionsSolution [] {
                 new SolutionsSolution () { TaskId=777 } }
             };
 

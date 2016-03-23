@@ -223,21 +223,21 @@ namespace Server.MessageProcessing
             //that means, just make only one partialSet with solutions as given from Solutions message
             //in case of CN - it is partial solution. adjust partialSet array element (for taskId) 
             //in proper problemId
-            if (message.Solutions1 == null || message.Solutions1.Length == 0)
+            if (message.SolutionsList == null || message.SolutionsList.Length == 0)
                 return;
 
             int key = (int)message.Id;
             if (!dataSets.ContainsKey(key))
                 return;
             //this is from TM:
-            if (message.Solutions1.Length == 1 && message.Solutions1[0].Type == SolutionsSolutionType.Final)
+            if (message.SolutionsList.Length == 1 && message.SolutionsList[0].Type == SolutionsSolutionType.Final)
             {
                 dataSets[key].PartialSets = new PartialSet[1];
                 dataSets[key].PartialSets[0] = new PartialSet()
                 {
                     NodeId = 0,
                     PartialProblem = null,
-                    PartialSolution = message.Solutions1[0],
+                    PartialSolution = message.SolutionsList[0],
                     Status = PartialSetStatus.Sent
                 };
             }
@@ -245,14 +245,14 @@ namespace Server.MessageProcessing
             else
             {
                 //only one solution is delivered by CN at a time
-                if (message.Solutions1.Length != 1)
+                if (message.SolutionsList.Length != 1)
                     return;
-                var taskId = message.Solutions1[0].TaskId;
+                var taskId = message.SolutionsList[0].TaskId;
                 foreach (var partialSet in dataSets[key].PartialSets)
                 {
                     if (partialSet.PartialProblem.TaskId == taskId)
                     {
-                        partialSet.PartialSolution = message.Solutions1[0];
+                        partialSet.PartialSolution = message.SolutionsList[0];
                         partialSet.Status = PartialSetStatus.Ongoing;
                         break;
                     }
@@ -338,7 +338,7 @@ namespace Server.MessageProcessing
             int maxId = activeComponents.Count== 0 ? 1 : activeComponents.Keys.Max() + 1;
             var newComponent = new ActiveComponent()
             {
-                ComponentType = message.Type,
+                ComponentType = message.Type.Value,
                 SolvableProblems = message.SolvableProblems
             };
             activeComponents.Add(maxId, newComponent);
@@ -466,13 +466,13 @@ namespace Server.MessageProcessing
                 activeComponents[who].ComponentType, who);
             switch (activeComponents[who].ComponentType)
             {
-                case RegisterType.ComputationalNode:
+                case ComponentType.ComputationalNode:
                     whatToDo = DataSetOps.GetMessageForCompNode(activeComponents, who, dataSets);
                     break;
-                    case RegisterType.TaskManager:
+                    case ComponentType.TaskManager:
                     whatToDo = DataSetOps.GetMessageForTaskManager(activeComponents, who, dataSets);
                     break;
-                    case RegisterType.CommunicationServer:
+                    case ComponentType.CommunicationServer:
                     //TODO: sent by backup - we don't know yet what 
                     //TODO: to send, probably whole Synchronization Queue
                     break;

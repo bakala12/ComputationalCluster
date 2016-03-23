@@ -13,7 +13,7 @@ namespace TaskManager.Core
     /// <summary>
     /// TM's message handling utilities
     /// </summary>
-    public class TaskManagerMessageProcessor: ClientMessageProcessor
+    public class TaskManagerMessageProcessor : ClientMessageProcessor
     {
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -108,12 +108,12 @@ namespace TaskManager.Core
         /// <param name="solutions"></param>
         public Solutions HandleSolutions(Solutions solutions)
         {
-            if (solutions.Solutions1 == null)
+            if (solutions.SolutionsList == null)
                 return null;
             log.DebugFormat("Adding partial solutions to TM's memory. ({0})", solutions.Id);
-            foreach (var solution in solutions.Solutions1)
+            foreach (var solution in solutions.SolutionsList)
             {
-                if (!storage.ContainsIssue(solutions.Id) || !storage.ExistsTask(solutions.Id,solution.TaskId))
+                if (!storage.ContainsIssue(solutions.Id) || !storage.ExistsTask(solutions.Id, solution.TaskId))
                 {
                     throw new Exception("Invalid solutions message delivered to TM");
                 }
@@ -148,9 +148,16 @@ namespace TaskManager.Core
                 CommonData = new byte[] { 0 },
                 Id = problemId,
                 ProblemType = storage.GetIssueType(problemId),
-                Solutions1
-            = new[] { new SolutionsSolution() { Data = null, ComputationsTime = 1, TaskIdSpecified = false,
-            Type = SolutionsSolutionType.Final} }
+                SolutionsList = new[]
+                {
+                    new SolutionsSolution()
+                    {
+                        Data = null,
+                        ComputationsTime = 1,
+                        TaskIdSpecified = false,
+                        Type = SolutionsSolutionType.Final
+                    }
+                }
             };
         }
     }

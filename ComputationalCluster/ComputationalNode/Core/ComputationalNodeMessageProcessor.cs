@@ -50,7 +50,7 @@ namespace ComputationalNode.Core
                 CommonData = new byte[] {0},
                 Id = solvePartialProblems.Id,
                 ProblemType = solvePartialProblems.ProblemType,
-                Solutions1 = new[]
+                SolutionsList = new[]
                 {
                     new SolutionsSolution()
                     {

@@ -173,7 +173,7 @@ namespace Server.MessageProcessing
                 new Solutions
                 {
                     Id = 1,
-                    Solutions1 = new []
+                    SolutionsList = new []
                     {
                         new SolutionsSolution
                         {
@@ -201,7 +201,7 @@ namespace Server.MessageProcessing
                 new Solutions
                 {
                     Id = 1,
-                    Solutions1 = new []
+                    SolutionsList = new []
                     {
                         new SolutionsSolution
                         {

@@ -313,7 +313,12 @@ namespace Server
         {
             Register register = new Register()
             {
-                Type = RegisterType.CommunicationServer,
+                Type = new RegisterType()
+                {
+                    Value = ComponentType.CommunicationServer,
+                    port = 8086, //fix
+                    portSpecified = true
+                },
                 SolvableProblems = new string[] {"DVRP"},
                 ParallelThreads = 1,
                 Deregister = false,

@@ -62,16 +62,16 @@ namespace Server.MessageProcessing
         }
 
         protected override Message[] RespondNoOperationMessage(NoOperation message,
-    IDictionary<int, ProblemDataSet> dataSets,
-    IDictionary<int, ActiveComponent> activeComponents)
+            IDictionary<int, ProblemDataSet> dataSets,
+            IDictionary<int, ActiveComponent> activeComponents)
         {
             //nothing. noOperation is not enqueued
             return null;
         }
 
         protected override Message[] RespondSolvePartialProblemMessage(SolvePartialProblems message,
-    IDictionary<int, ProblemDataSet> dataSets,
-    IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
+            IDictionary<int, ProblemDataSet> dataSets,
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             _synchronizationQueue.Enqueue(message);
             //sent by TM. send noOperation only.
@@ -83,8 +83,8 @@ namespace Server.MessageProcessing
         }
 
         protected override Message[] RespondSolutionsMessage(Solutions message,
-    IDictionary<int, ProblemDataSet> dataSets,
-    IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
+            IDictionary<int, ProblemDataSet> dataSets,
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             _synchronizationQueue.Enqueue(message);
             //sent by CN or TM. send NoOperation only.

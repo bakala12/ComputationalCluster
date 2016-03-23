@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using CommunicationsUtils.Messages;
 using Server.Data;
@@ -13,190 +14,67 @@ namespace Server.MessageProcessing
     /// </summary>
     public class BackupMessageProcessor : MessageProcessor
     {
-        public BackupMessageProcessor(ConcurrentQueue<Message> _synchronizationQueu) : 
-            base (_synchronizationQueu)
+        public BackupMessageProcessor(ConcurrentQueue<Message> _synchronizationQueue) : 
+            base (_synchronizationQueue)
         { }
-
-        protected override Message[] RespondRegisterResponseMessage(RegisterResponse message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteResponseMessageControlInformation(message, MessageType.NoOperationMessage);
-            return new Message[]
-            {
-                new NoOperation
-                {
-                    BackupServersInfo = new[]
-                    {
-                        new BackupServerInfo()
-                        {
-                            address = "0.0.0.0",
-                            port = 8086
-                        }
-                    }
-                }
-            };
-        }
-
-        protected override Message[] RespondRegisterMessage(Register message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups )
-        {
-            WriteResponseMessageControlInformation(message, MessageType.NoOperationMessage);
-            return new Message[]
-            {
-                new NoOperation
-                {
-                    BackupServersInfo = new[]
-                    {
-                        new BackupServerInfo()
-                        {
-                            address = "0.0.0.0",
-                            port = 8086
-                        }
-                    }
-                }
-            };
-        }
-
-        protected override Message[] RespondNoOperationMessage(NoOperation message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteResponseMessageControlInformation(message, MessageType.NoOperationMessage);
-            return new Message[]
-            {
-                new NoOperation
-                {
-                    BackupServersInfo = new[]
-                    {
-                        new BackupServerInfo()
-                        {
-                            address = "0.0.0.0",
-                            port = 8086
-                        }
-                    }
-                }
-            };
-        }
-
-        protected override Message[] RespondDivideProblemMessage(DivideProblem message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteResponseMessageControlInformation(message, MessageType.NoOperationMessage);
-            return new Message[]
-            {
-                new NoOperation
-                {
-                    BackupServersInfo = new[]
-                    {
-                        new BackupServerInfo()
-                        {
-                            address = "0.0.0.0",
-                            port = 8086
-                        }
-                    }
-                }
-            };
-        }
-
-        protected override Message[] RespondSolvePartialProblemMessage(SolvePartialProblems message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
-        {
-            WriteResponseMessageControlInformation(message, MessageType.NoOperationMessage);
-            return new Message[]
-            {
-                new NoOperation
-                {
-                    BackupServersInfo = new[]
-                    {
-                        new BackupServerInfo()
-                        {
-                            address = "0.0.0.0",
-                            port = 8086
-                        }
-                    }
-                }
-            };
-        }
-
-        protected override Message[] RespondSolutionsMessage(Solutions message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
-        {
-            WriteResponseMessageControlInformation(message, MessageType.NoOperationMessage);
-            return new Message[]
-            {
-                new NoOperation
-                {
-                    BackupServersInfo = new[]
-                    {
-                        new BackupServerInfo()
-                        {
-                            address = "0.0.0.0",
-                            port = 8086
-                        }
-                    }
-                }
-            };
-        }
 
         protected override Message[] RespondStatusMessage(Status message,
            IDictionary<int, ProblemDataSet> dataSets,
            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             WriteResponseMessageControlInformation(message, MessageType.SolutionsMessage);
-            return new Message[]
-            {
-                new Solutions
-                {
-                    Id = 1,
-                    Solutions1 = new []
-                    {
-                        new SolutionsSolution
-                        {
-                            Type = SolutionsSolutionType.Final,
-                            TaskId = 1,
-                            Data = null,
-                            TaskIdSpecified = false,
-                            ComputationsTime = 50000,
-                            TimeoutOccured = false
-                        }
-                    },
-                    CommonData = null,
-                    ProblemType = "DVRP"
-                }
-            };
+            Message[] msgs = _synchronizationQueue.ToArray();
+            _synchronizationQueue = new ConcurrentQueue<Message>();
+            return msgs;
         }
 
-        protected override Message[] RespondSolutionRequestMessage(SolutionRequest message,
+
+        protected override void ProcessDivideProblemMessage(DivideProblem message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
+            IDictionary<int, ActiveComponent> activeComponents)
         {
-            WriteResponseMessageControlInformation(message, MessageType.SolutionsMessage);
-            return new Message[]
+            WriteControlInformation(message);
+            DataSetOps.HandleDivideProblem(message, dataSets);
+        }
+
+        protected override void ProcessNoOperationMessage(NoOperation message,
+        IDictionary<int, ProblemDataSet> dataSets,
+        IDictionary<int, ActiveComponent> activeComponents)
+        {
+            WriteControlInformation(message);
+            // TODO: ewentualnie aktualizacja listy backupow 
+        }
+
+        protected override void ProcessRegisterMessage(Register message,
+            IDictionary<int, ProblemDataSet> dataSets,
+            IDictionary<int, ActiveComponent> activeComponents)
+        {
+            if (message.Deregister)
             {
-                new Solutions
+                activeComponents.Remove((int) message.Id);
+            }
+            else
+            {
+                activeComponents.Add((int) message.Id, new ActiveComponent()
                 {
-                    Id = 1,
-                    Solutions1 = new []
-                    {
-                        new SolutionsSolution
-                        {
-                            Type = SolutionsSolutionType.Final,
-                            TaskId = 1,
-                            Data = null,
-                            TaskIdSpecified = false,
-                            ComputationsTime = 50000,
-                            TimeoutOccured = false
-                        }
-                    },
-                    CommonData = null,
-                    ProblemType = "DVRP"
-                }
-            };
+                    ComponentType = message.Type,
+                    SolvableProblems = message.SolvableProblems,
+                    StatusWatch = new Stopwatch()
+                });
+            }
+        }
+        protected override void ProcessSolveRequestMessage(SolveRequest message,
+            IDictionary<int, ProblemDataSet> dataSets,
+            IDictionary<int, ActiveComponent> activeComponents)
+        {
+            WriteControlInformation(message);
+            dataSets.Add((int) message.Id, new ProblemDataSet()
+            {
+                CommonData = message.Data,
+                PartialSets = null,
+                ProblemType = message.ProblemType,
+                TaskManagerId = 0
+            });
         }
     }
 }

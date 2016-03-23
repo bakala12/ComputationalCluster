@@ -22,7 +22,9 @@ namespace Server.MessageProcessing
 
         protected ConcurrentQueue<Message> _synchronizationQueue;
 
-        protected static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        protected static readonly ILog log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public Thread StatusThread { get; protected set; }
 
 
@@ -31,7 +33,7 @@ namespace Server.MessageProcessing
             _synchronizationQueue = synchronizationQueue;
         }
 
-        private void StatusThreadWork (int who, 
+        private void StatusThreadWork(int who,
             IDictionary<int, ActiveComponent> activeComponents, IDictionary<int, ProblemDataSet> dataSets)
         {
             while (true)
@@ -40,10 +42,10 @@ namespace Server.MessageProcessing
                 if (elapsed > Properties.Settings.Default.Timeout)
                 {
                     Message deregister = new Register()
-                    {                 
+                    {
                         Deregister = true,
                         DeregisterSpecified = true,
-                        Id = (ulong) who,
+                        Id = (ulong)who,
                         IdSpecified = true
                     };
                     _synchronizationQueue.Enqueue(deregister);
@@ -52,11 +54,11 @@ namespace Server.MessageProcessing
                     activeComponents.Remove(who);
                     return;
                 }
-                Thread.Sleep((int) Properties.Settings.Default.Timeout);
+                Thread.Sleep((int)Properties.Settings.Default.Timeout);
             }
         }
 
-        protected void RunStatusThread(int who, 
+        protected void RunStatusThread(int who,
             IDictionary<int, ActiveComponent> activeComponents, IDictionary<int, ProblemDataSet> dataSets)
         {
             var t = new Thread(() => StatusThreadWork(who, activeComponents, dataSets));
@@ -88,26 +90,11 @@ namespace Server.MessageProcessing
                 case MessageType.RegisterMessage:
                     ProcessRegisterMessage(message.Cast<Register>(), dataSets, activeComponents);
                     break;
-                case MessageType.RegisterResponseMessage:
-                    ProcessRegisterResponseMessage(message.Cast<RegisterResponse>(), dataSets, activeComponents);
-                    break;
                 case MessageType.SolutionsMessage:
                     ProcessSolutionsMessage(message.Cast<Solutions>(), dataSets, activeComponents);
                     break;
-                case MessageType.SolutionRequestMessage:
-                    ProcessSolutionRequestMessage(message.Cast<SolutionRequest>(), dataSets, activeComponents);
-                    break;
                 case MessageType.SolveRequestMessage:
                     ProcessSolveRequestMessage(message.Cast<SolveRequest>(), dataSets, activeComponents);
-                    break;
-                case MessageType.SolveRequestResponseMessage:
-                    ProcessSolveRequestResponseMessage(message.Cast<SolveRequestResponse>(), dataSets, activeComponents);
-                    break;
-                case MessageType.StatusMessage:
-                    ProcessStatusMessage(message.Cast<Status>(), dataSets, activeComponents);
-                    break;
-                case MessageType.ErrorMessage:
-                    ProcessErrorMessage(message.Cast<Error>(), dataSets, activeComponents);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -132,7 +119,8 @@ namespace Server.MessageProcessing
                 case MessageType.NoOperationMessage:
                     return RespondNoOperationMessage(message.Cast<NoOperation>(), dataSets, activeComponents);
                 case MessageType.SolvePartialProblemsMessage:
-                    return RespondSolvePartialProblemMessage(message.Cast<SolvePartialProblems>(), dataSets, activeComponents, backups);
+                    return RespondSolvePartialProblemMessage(message.Cast<SolvePartialProblems>(), dataSets,
+                        activeComponents, backups);
                 case MessageType.RegisterMessage:
                     return RespondRegisterMessage(message.Cast<Register>(), dataSets, activeComponents, backups);
                 case MessageType.RegisterResponseMessage:
@@ -140,7 +128,8 @@ namespace Server.MessageProcessing
                 case MessageType.SolutionsMessage:
                     return RespondSolutionsMessage(message.Cast<Solutions>(), dataSets, activeComponents, backups);
                 case MessageType.SolutionRequestMessage:
-                    return RespondSolutionRequestMessage(message.Cast<SolutionRequest>(), dataSets, activeComponents, backups);
+                    return RespondSolutionRequestMessage(message.Cast<SolutionRequest>(), dataSets, activeComponents,
+                        backups);
                 case MessageType.SolveRequestMessage:
                     return RespondSolveRequestMessage(message.Cast<SolveRequest>(), dataSets, activeComponents, backups);
                 case MessageType.StatusMessage:
@@ -152,7 +141,7 @@ namespace Server.MessageProcessing
             }
         }
 
-        private static void WriteControlInformation(Message message)
+        protected static void WriteControlInformation(Message message)
         {
             log.DebugFormat("Message is dequeued and is being processed. Message type: " + message.MessageType);
         }
@@ -165,31 +154,23 @@ namespace Server.MessageProcessing
         protected virtual void ProcessDivideProblemMessage(DivideProblem message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteControlInformation(message);
-            //TODO: message delivered to backup only - update proper data set
-        }
+        { }
 
         protected virtual void ProcessNoOperationMessage(NoOperation message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteControlInformation(message);
-            //nothing. noOperation is not enqueued anywhere
-            //TODO: Update Backup list on server!
-        }
+        { }
 
         protected virtual void ProcessSolvePartialProblemMessage(SolvePartialProblems message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: implement it on backup side
             //update dataset for given problemId
             //message from TM and only from it, so set partialSets array (it will be enough)
             if (!dataSets.ContainsKey((int)message.Id))
                 return;
-            int id = (int) message.Id;
+            int id = (int)message.Id;
             dataSets[id].PartialSets = new PartialSet[message.PartialProblems.Length];
             for (int i = 0; i < message.PartialProblems.Length; i++)
             {
@@ -206,24 +187,12 @@ namespace Server.MessageProcessing
         protected virtual void ProcessRegisterMessage(Register message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
-        {
-            //TODO: message delivered to backup - update active components structure
-            //TODO: can also be deregister message
-        }
-
-        protected virtual void ProcessRegisterResponseMessage(RegisterResponse message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteControlInformation(message);
-            //nothing. it is not enqueued
-        }
+        { }
 
         protected virtual void ProcessSolutionsMessage(Solutions message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: implement it on backup side
             WriteControlInformation(message);
             //message delivered from TM or CN
             //in case of TM - it is final solution. adjust dataset for proper problemId
@@ -267,45 +236,10 @@ namespace Server.MessageProcessing
             }
         }
 
-        protected virtual void ProcessSolutionRequestMessage(SolutionRequest message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteControlInformation(message);
-            //nothing. this message is not enqueued (response is immediate)
-        }
-
         protected virtual void ProcessSolveRequestMessage(SolveRequest message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteControlInformation(message);
-            //TODO: implement it on backup side (with id specified)
-        }
-
-        protected virtual void ProcessSolveRequestResponseMessage(SolveRequestResponse message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteControlInformation(message);
-            //nothing. not processed anywhere
-        }
-
-        protected virtual void ProcessStatusMessage(Status message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteControlInformation(message);
-            //nothing. status is not enqueued
-        }
-
-        protected virtual void ProcessErrorMessage(Error message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteControlInformation(message);
-            //error shouldn't be enqueued, so nothing
-        }
+        { }
 
         protected virtual Message[] RespondDivideProblemMessage(DivideProblem message,
             IDictionary<int, ProblemDataSet> dataSets,
@@ -314,29 +248,47 @@ namespace Server.MessageProcessing
             return null;
         }
 
-        protected abstract Message[] RespondNoOperationMessage(NoOperation message,
+        protected virtual Message[] RespondNoOperationMessage(NoOperation message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents);
+            IDictionary<int, ActiveComponent> activeComponents)
+        {
+            return null;
+        }
 
-        protected abstract Message[] RespondSolvePartialProblemMessage(SolvePartialProblems message,
+        protected virtual Message[] RespondSolvePartialProblemMessage(SolvePartialProblems message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups);
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
+        {
+            return null;
+        }
 
-        protected abstract Message[] RespondRegisterMessage(Register message,
+        protected virtual Message[] RespondRegisterMessage(Register message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups);
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
+        {
+            return null;
+        }
 
-        protected abstract Message[] RespondRegisterResponseMessage(RegisterResponse message,
+        protected virtual Message[] RespondRegisterResponseMessage(RegisterResponse message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents);
+            IDictionary<int, ActiveComponent> activeComponents)
+        {
+            return null;
+        }
 
-        protected abstract Message[] RespondSolutionsMessage(Solutions message,
+        protected virtual Message[] RespondSolutionsMessage(Solutions message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups);
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
+        {
+            return null;
+        }
 
-        protected abstract Message[] RespondSolutionRequestMessage(SolutionRequest message,
+        protected virtual Message[] RespondSolutionRequestMessage(SolutionRequest message,
             IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups);
+            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
+        {
+            return null;
+        }
 
         protected virtual Message[] RespondSolveRequestMessage(SolveRequest message,
             IDictionary<int, ProblemDataSet> dataSets,
@@ -353,12 +305,12 @@ namespace Server.MessageProcessing
                 TaskManagerId = 0
             };
             dataSets.Add(maxProblemId, newSet);
-            log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}", 
+            log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}",
                 message.ProblemType, maxProblemId);
             log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}",
                 message.ProblemType, maxProblemId);
 
-            message.Id = (ulong) maxProblemId;
+            message.Id = (ulong)maxProblemId;
             message.IdSpecified = true;
             _synchronizationQueue.Enqueue(message);
 
@@ -378,7 +330,7 @@ namespace Server.MessageProcessing
         protected abstract Message[] RespondStatusMessage(Status message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups);
-            
+
 
         protected virtual Message[] RespondErrorMessage(Error message,
             IDictionary<int, ProblemDataSet> dataSets,

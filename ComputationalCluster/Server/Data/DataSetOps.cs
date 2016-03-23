@@ -258,5 +258,10 @@ namespace Server.Data
 
             }
         }
+
+        public static void HandleDivideProblem(DivideProblem message, IDictionary<int, ProblemDataSet> dataSets)
+        {
+            dataSets[(int) message.Id].TaskManagerId = (int) message.NodeID;
+        }
     }
 }

@@ -259,8 +259,8 @@ namespace Server
                             message.MessageType != MessageType.NoOperationMessage &&
                             message.MessageType != MessageType.SolutionRequestMessage &&
                             message.MessageType != MessageType.SolveRequestMessage &&
-                            message.MessageType != MessageType.RegisterMessage &&
-                            message.MessageType != MessageType.ErrorMessage)
+                            message.MessageType != MessageType.ErrorMessage &&
+                            message.MessageType != MessageType.StatusMessage)
                         {
                             _messagesQueue.Enqueue(message);
                         }

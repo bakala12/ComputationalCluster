@@ -2,8 +2,12 @@
 using System.Collections.Concurrent;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using CommunicationsUtils.Messages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Server.Data;
+using Server.MessageProcessing;
 
 namespace Tests
 {
@@ -21,6 +25,47 @@ namespace Tests
             var tab = queue.ToArray();
             queue = new ConcurrentQueue<Message>();
             Assert.AreNotEqual(tab[0], null);
+        }
+
+        [TestMethod]
+        public void BackupRegisteringTest1()
+        {
+            var backup = new List<BackupServerInfo>();
+            MessageProcessor processor = new PrimaryMessageProcessor(new ConcurrentQueue<Message>());
+            var register = new Register()
+            {
+                Type = new RegisterType()
+                {
+                    Value = ComponentType.CommunicationServer,
+                    port = 8086,
+                    portSpecified = true
+                },
+            };
+            Message[] response = processor.CreateResponseMessages(register, new Dictionary<int, ProblemDataSet>(),
+                new Dictionary<int, ActiveComponent>(), backup);
+            NoOperation nop = response.OfType<NoOperation>().FirstOrDefault();
+            Assert.AreEqual(1,backup.Count);
+            Assert.AreEqual(1,nop.BackupServersInfo.Length);
+        }
+
+        [TestMethod]
+        public void ComponentRegisteringTest1()
+        {
+            var backup = new List<BackupServerInfo>();
+            MessageProcessor processor = new PrimaryMessageProcessor(new ConcurrentQueue<Message>());
+            var register = new Register()
+            {
+                Type = new RegisterType()
+                {
+                    Value = ComponentType.ComputationalNode,
+                },
+                ParallelThreads = 1
+            };
+            Message[] response = processor.CreateResponseMessages(register, new Dictionary<int, ProblemDataSet>(),
+                new Dictionary<int, ActiveComponent>(), backup);
+            NoOperation nop = response.OfType<NoOperation>().FirstOrDefault();
+            Assert.AreEqual(0,backup.Count);
+            Assert.AreEqual(0, nop.BackupServersInfo.Length);
         }
     }
 }

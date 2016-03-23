@@ -25,12 +25,12 @@ namespace Server.MessageProcessing
         protected static readonly ILog log =
             LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public Thread StatusThread { get; protected set; }
-
+        public List<Thread> StatusThreads { get; protected set; }
 
         protected MessageProcessor(ConcurrentQueue<Message> synchronizationQueue)
         {
             _synchronizationQueue = synchronizationQueue;
+            StatusThreads = new List<Thread>();
         }
 
         private void StatusThreadWork(int who,
@@ -63,7 +63,7 @@ namespace Server.MessageProcessing
         {
             var t = new Thread(() => StatusThreadWork(who, activeComponents, dataSets));
             t.Start();
-            StatusThread = t;
+            StatusThreads.Add(t);
         }
 
         /// <summary>

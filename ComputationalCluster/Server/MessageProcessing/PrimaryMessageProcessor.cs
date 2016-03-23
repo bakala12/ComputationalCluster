@@ -47,7 +47,9 @@ namespace Server.MessageProcessing
             message.IdSpecified = true;
             _synchronizationQueue.Enqueue(message);
             // TODO: adding backups to backups array
-            AddBackupAddressToBackupList(backups);
+            if(message.Type.Value==ComponentType.CommunicationServer)
+                AddBackupAddressToBackupList(backups);
+            // TODO: backup added
             return new Message[]
             {
                 new RegisterResponse()

@@ -1,21 +1,19 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using CommunicationsUtils.Messages;
 using Server.Data;
 
 namespace Server.MessageProcessing
 {
-    //TODO: implementation.
     /// <summary>
     /// Message processor for backup server.
     /// Contains implementations for handling different messages that occur in backup server.
     /// </summary>
     public class BackupMessageProcessor : MessageProcessor
     {
-        public BackupMessageProcessor(ConcurrentQueue<Message> _synchronizationQueue) : 
-            base (_synchronizationQueue)
+        public BackupMessageProcessor(ConcurrentQueue<Message> synchronizationQueue) : 
+            base (synchronizationQueue)
         { }
 
         protected override Message[] RespondStatusMessage(Status message,
@@ -23,8 +21,8 @@ namespace Server.MessageProcessing
            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
             WriteResponseMessageControlInformation(message, MessageType.SolutionsMessage);
-            Message[] msgs = _synchronizationQueue.ToArray();
-            _synchronizationQueue = new ConcurrentQueue<Message>();
+            var msgs = SynchronizationQueue.ToArray();
+            SynchronizationQueue = new ConcurrentQueue<Message>();
             return msgs;
         }
 

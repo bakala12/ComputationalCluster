@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 
 namespace Server.Data
@@ -29,23 +25,18 @@ namespace Server.Data
             //TODO: get message for TM - implementation
             Message response = null;
             //checking divide problem posibilities
-            foreach (var dataSet in dataSets)
+            foreach (var dataSet in dataSets.Where(dataSet => components[componentId].SolvableProblems.Contains(dataSet.Value.ProblemType) && dataSet.Value.TaskManagerId == 0))
             {
-                //no division yet, and problem type is supported
-                if (components[componentId].SolvableProblems.Contains(dataSet.Value.ProblemType) &&
-                    dataSet.Value.TaskManagerId == 0)
+                response = new DivideProblem()
                 {
-                    response = new DivideProblem()
-                    {
-                        ComputationalNodes = 1, //we'll worry about this later
-                        Data = dataSet.Value.CommonData,
-                        Id = (ulong) dataSet.Key,
-                        NodeID = (ulong) componentId,
-                        ProblemType = dataSet.Value.ProblemType
-                    };
-                    dataSet.Value.TaskManagerId = componentId;
-                    break;
-                }
+                    ComputationalNodes = 1, //we'll worry about this later
+                    Data = dataSet.Value.CommonData,
+                    Id = (ulong) dataSet.Key,
+                    NodeID = (ulong) componentId,
+                    ProblemType = dataSet.Value.ProblemType
+                };
+                dataSet.Value.TaskManagerId = componentId;
+                break;
             }
             //if divide problem is here, we can send it:
             if (response != null)
@@ -55,36 +46,30 @@ namespace Server.Data
             foreach (var dataSet in dataSets)
             {
                 //check only in your own problem assignments
-                if (dataSet.Value.TaskManagerId == componentId)
+                if (dataSet.Value.TaskManagerId != componentId) continue;
+                //problem is not divided yet, so nothing
+                if (dataSet.Value.PartialSets == null || dataSet.Value.PartialSets.Length == 0)
                 {
-                    //problem is not divided yet, so nothing
-                    if (dataSet.Value.PartialSets == null || dataSet.Value.PartialSets.Length == 0)
+                    break;
+                }
+                //check potential solutions-to-link
+                var solutionsToSend = new List<SolutionsSolution>();
+                foreach (var partialSet in dataSet.Value.PartialSets.Where(partialSet => partialSet.Status == PartialSetStatus.Ongoing &&
+                                                                                         partialSet.PartialSolution != null))
+                {
+                    solutionsToSend.Add(partialSet.PartialSolution);
+                    partialSet.Status = PartialSetStatus.Sent;
+                }
+                //if can be linked, then make a message and break
+                if (solutionsToSend.Count > 0)
+                {
+                    return new Solutions()
                     {
-                        break;
-                    }
-                    //check potential solutions-to-link
-                    List<SolutionsSolution> solutionsToSend = new List<SolutionsSolution>();
-                    foreach (var partialSet in dataSet.Value.PartialSets)
-                    {
-                        //there is solution from CN, can be sent
-                        if (partialSet.Status == PartialSetStatus.Ongoing &&
-                            partialSet.PartialSolution != null)
-                        {
-                            solutionsToSend.Add(partialSet.PartialSolution);
-                            partialSet.Status = PartialSetStatus.Sent;
-                        }
-                    }
-                    //if can be linked, then make a message and break
-                    if (solutionsToSend.Count > 0)
-                    {
-                        return new Solutions()
-                        {
-                            CommonData = dataSet.Value.CommonData,
-                            Id = (ulong) dataSet.Key,
-                            ProblemType = dataSet.Value.ProblemType,
-                            SolutionsList = solutionsToSend.ToArray()
-                        };
-                    }
+                        CommonData = dataSet.Value.CommonData,
+                        Id = (ulong) dataSet.Key,
+                        ProblemType = dataSet.Value.ProblemType,
+                        SolutionsList = solutionsToSend.ToArray()
+                    };
                 }
             }
             return null;
@@ -105,31 +90,27 @@ namespace Server.Data
             foreach (var dataSet in dataSets)
             {
                 //checking only problems that this CN can handle
-                if (components[componentId].SolvableProblems.Contains(dataSet.Value.ProblemType))
+                if (!components[componentId].SolvableProblems.Contains(dataSet.Value.ProblemType)) continue;
+                //no partial problems for this problem yet (not divided yet)
+                if (dataSet.Value.PartialSets == null)
+                    continue;
+                //check if there is some problem to send
+                foreach (var partialSet in dataSet.Value.PartialSets)
                 {
-                    //no partial problems for this problem yet (not divided yet)
-                    if (dataSet.Value.PartialSets == null)
-                        continue;
-                    //check if there is some problem to send
-                    foreach (var partialSet in dataSet.Value.PartialSets)
+                    //problem can be sent - because its fresh
+                    //we send only one partial problem to CN at a time
+                    if (partialSet.Status != PartialSetStatus.Fresh) continue;
+                    var response = new SolvePartialProblems()
                     {
-                        //problem can be sent - because its fresh
-                        //we send only one partial problem to CN at a time
-                        if (partialSet.Status == PartialSetStatus.Fresh)
-                        {
-                            var response = new SolvePartialProblems()
-                            {
-                                CommonData = dataSet.Value.CommonData,
-                                Id = (ulong) dataSet.Key,
-                                PartialProblems = new[] {partialSet.PartialProblem},
-                                ProblemType = dataSet.Value.ProblemType,
-                                SolvingTimeoutSpecified = false //we'll worry about this later
-                            };
-                            partialSet.Status = PartialSetStatus.Ongoing;
-                            partialSet.NodeId = componentId;
-                            return response;
-                        }
-                    }
+                        CommonData = dataSet.Value.CommonData,
+                        Id = (ulong) dataSet.Key,
+                        PartialProblems = new[] {partialSet.PartialProblem},
+                        ProblemType = dataSet.Value.ProblemType,
+                        SolvingTimeoutSpecified = false //we'll worry about this later
+                    };
+                    partialSet.Status = PartialSetStatus.Ongoing;
+                    partialSet.NodeId = componentId;
+                    return response;
                 }
             }
             return null;
@@ -145,7 +126,7 @@ namespace Server.Data
             (SolutionRequest request, IDictionary<int, ProblemDataSet> dataSets)
         {
 
-            int key = (int) request.Id;
+            var key = (int) request.Id;
             //something can go very very wrong:
             if (!dataSets.ContainsKey(key))
             {
@@ -154,7 +135,7 @@ namespace Server.Data
 
             //template of response indicating that the problem is "ongoing"
             //this is very inconsistent, but i did not write the specification
-            Solutions response = new Solutions()
+            var response = new Solutions()
             {
                 CommonData = dataSets[key].CommonData,
                 Id = (ulong) key,
@@ -218,13 +199,10 @@ namespace Server.Data
         /// <param name="dataSets"></param>
         private static void ResetDataSet(int taskManagerId, IDictionary<int, ProblemDataSet> dataSets)
         {
-            foreach (var dataSet in dataSets)
+            foreach (var dataSet in dataSets.Where(dataSet => dataSet.Value.TaskManagerId == taskManagerId))
             {
-                if (dataSet.Value.TaskManagerId == taskManagerId)
-                {
-                    dataSet.Value.TaskManagerId = 0;
-                    dataSet.Value.PartialSets = null;
-                }
+                dataSet.Value.TaskManagerId = 0;
+                dataSet.Value.PartialSets = null;
             }
         }
 
@@ -239,23 +217,11 @@ namespace Server.Data
             IDictionary<int, ProblemDataSet> dataSets)
         {
             //search for all problems that this compNode is computing
-            foreach (var dataSet in dataSets)
+            foreach (var partialSet in from dataSet in dataSets where compNode.SolvableProblems.Contains(dataSet.Value.ProblemType) where dataSet.Value.PartialSets != null from partialSet in dataSet.Value.PartialSets.Where(partialSet => partialSet.NodeId == compNodeId) select partialSet)
             {
-                if (compNode.SolvableProblems.Contains(dataSet.Value.ProblemType))
-                {
-                    if (dataSet.Value.PartialSets == null)
-                        continue;
-                    foreach (var partialSet in dataSet.Value.PartialSets)
-                    {
-                        if (partialSet.NodeId == compNodeId)
-                        {
-                            partialSet.NodeId = 0;
-                            partialSet.Status = PartialSetStatus.Fresh;
-                            partialSet.PartialSolution = null;
-                        }
-                    }
-                }
-
+                partialSet.NodeId = 0;
+                partialSet.Status = PartialSetStatus.Fresh;
+                partialSet.PartialSolution = null;
             }
         }
 

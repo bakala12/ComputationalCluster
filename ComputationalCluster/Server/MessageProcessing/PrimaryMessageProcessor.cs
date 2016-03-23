@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using CommunicationsUtils.Messages;
 using Server.Data;
 
@@ -14,8 +13,8 @@ namespace Server.MessageProcessing
     public class PrimaryMessageProcessor : MessageProcessor
     {
 
-        public PrimaryMessageProcessor(ConcurrentQueue<Message> _synchronizationQueue) :
-            base(_synchronizationQueue)
+        public PrimaryMessageProcessor(ConcurrentQueue<Message> synchronizationQueue) :
+            base(synchronizationQueue)
         { }
         protected override Message[] RespondRegisterResponseMessage(RegisterResponse message,
               IDictionary<int, ProblemDataSet> dataSets,
@@ -31,7 +30,7 @@ namespace Server.MessageProcessing
         {
             //add new entity to ActiveComponents, create immediately registerResponse message
             //with this id
-            int maxId = activeComponents.Count == 0 ? 1 : activeComponents.Keys.Max() + 1;
+            var maxId = activeComponents.Count == 0 ? 1 : activeComponents.Keys.Max() + 1;
             var newComponent = new ActiveComponent()
             {
                 ComponentType = message.Type.Value,
@@ -46,10 +45,8 @@ namespace Server.MessageProcessing
             message.Id = (ulong)maxId;
             message.IdSpecified = true;
             _synchronizationQueue.Enqueue(message);
-            // TODO: adding backups to backups array
             if(message.Type.Value==ComponentType.CommunicationServer)
                 AddBackupAddressToBackupList(backups);
-            // TODO: backup added
             return new Message[]
             {
                 new RegisterResponse()
@@ -65,7 +62,7 @@ namespace Server.MessageProcessing
             };
         }
 
-        private void AddBackupAddressToBackupList(List<BackupServerInfo> backups)
+        private void AddBackupAddressToBackupList(ICollection<BackupServerInfo> backups)
         {
            backups.Add(new BackupServerInfo()
            {
@@ -114,7 +111,7 @@ namespace Server.MessageProcessing
         {
             //if sent by TM - send NoOp + return from CaseExtractor.GetMessageForTaskManager
             //if sent by CN - send NoOp + return from CaseExtractor.GetMessageForCompNode
-            int who = (int)message.Id;
+            var who = (int)message.Id;
             if (!activeComponents.ContainsKey(who))
                 return new Message[] {new Error() {ErrorMessage = "who are you?",
                     ErrorType = ErrorErrorType.UnknownSender} };
@@ -135,7 +132,7 @@ namespace Server.MessageProcessing
                     whatToDo = DataSetOps.GetMessageForTaskManager(activeComponents, who, dataSets);
                     break;
                 case ComponentType.CommunicationServer:
-                    Message[] msgs = _synchronizationQueue.ToArray();
+                    var msgs = _synchronizationQueue.ToArray();
                     _synchronizationQueue = new ConcurrentQueue<Message>();
                     return msgs;
             }
@@ -159,7 +156,7 @@ namespace Server.MessageProcessing
                 whatToDo.MessageType, activeComponents[who].ComponentType, who);
 
             _synchronizationQueue.Enqueue(whatToDo);
-            return new Message[]
+            return new[]
             {
                 whatToDo,
                 new NoOperation()

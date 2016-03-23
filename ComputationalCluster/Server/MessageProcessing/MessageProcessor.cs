@@ -20,16 +20,16 @@ namespace Server.MessageProcessing
     public abstract class MessageProcessor : IMessageProcessor
     {
 
-        protected ConcurrentQueue<Message> _synchronizationQueue;
+        protected ConcurrentQueue<Message> SynchronizationQueue;
 
-        protected static readonly ILog log =
+        protected static readonly ILog Log =
             LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public List<Thread> StatusThreads { get; protected set; }
 
         protected MessageProcessor(ConcurrentQueue<Message> synchronizationQueue)
         {
-            _synchronizationQueue = synchronizationQueue;
+            SynchronizationQueue = synchronizationQueue;
             StatusThreads = new List<Thread>();
         }
 
@@ -48,8 +48,8 @@ namespace Server.MessageProcessing
                         Id = (ulong)who,
                         IdSpecified = true
                     };
-                    _synchronizationQueue.Enqueue(deregister);
-                    log.DebugFormat("TIMEOUT of {0}. Deregistering.", activeComponents[who].ComponentType);
+                    SynchronizationQueue.Enqueue(deregister);
+                    Log.DebugFormat("TIMEOUT of {0}. Deregistering.", activeComponents[who].ComponentType);
                     DataSetOps.HandleClientMalfunction(activeComponents, who, dataSets);
                     activeComponents.Remove(who);
                     return;
@@ -72,7 +72,6 @@ namespace Server.MessageProcessing
         /// <param name="message">Instance of message to process</param>
         /// <param name="dataSets">Dictionary of problem data sets (maybe to update one of these or maybe not)</param>
         /// <param name="activeComponents">Dictionary of active components (maybe to update one of these or maybe not)</param>
-        /// <param name="backups">backups list</param>
         public virtual void ProcessMessage(Message message, IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
@@ -143,12 +142,12 @@ namespace Server.MessageProcessing
 
         protected static void WriteControlInformation(Message message)
         {
-            log.DebugFormat("Message is dequeued and is being processed. Message type: " + message.MessageType);
+            Log.DebugFormat("Message is dequeued and is being processed. Message type: " + message.MessageType);
         }
 
         protected static void WriteResponseMessageControlInformation(Message message, MessageType type)
         {
-            log.DebugFormat("Responding {0} message. Returning new {1} message in response.", message.MessageType, type);
+            Log.DebugFormat("Responding {0} message. Returning new {1} message in response.", message.MessageType, type);
         }
 
         protected virtual void ProcessDivideProblemMessage(DivideProblem message,
@@ -170,9 +169,9 @@ namespace Server.MessageProcessing
             //message from TM and only from it, so set partialSets array (it will be enough)
             if (!dataSets.ContainsKey((int)message.Id))
                 return;
-            int id = (int)message.Id;
+            var id = (int)message.Id;
             dataSets[id].PartialSets = new PartialSet[message.PartialProblems.Length];
-            for (int i = 0; i < message.PartialProblems.Length; i++)
+            for (var i = 0; i < message.PartialProblems.Length; i++)
             {
                 dataSets[id].PartialSets[i] = new PartialSet()
                 {
@@ -202,7 +201,7 @@ namespace Server.MessageProcessing
             if (message.SolutionsList == null || message.SolutionsList.Length == 0)
                 return;
 
-            int key = (int)message.Id;
+            var key = (int)message.Id;
             if (!dataSets.ContainsKey(key))
                 return;
             //this is from TM:
@@ -224,14 +223,11 @@ namespace Server.MessageProcessing
                 if (message.SolutionsList.Length != 1)
                     return;
                 var taskId = message.SolutionsList[0].TaskId;
-                foreach (var partialSet in dataSets[key].PartialSets)
+                foreach (var partialSet in dataSets[key].PartialSets.Where(partialSet => partialSet.PartialProblem.TaskId == taskId))
                 {
-                    if (partialSet.PartialProblem.TaskId == taskId)
-                    {
-                        partialSet.PartialSolution = message.SolutionsList[0];
-                        partialSet.Status = PartialSetStatus.Ongoing;
-                        break;
-                    }
+                    partialSet.PartialSolution = message.SolutionsList[0];
+                    partialSet.Status = PartialSetStatus.Ongoing;
+                    break;
                 }
             }
         }
@@ -296,7 +292,7 @@ namespace Server.MessageProcessing
         {
             //sent by client node. create new issue in dataset with unique problemId,
             //send back NoOp + SolveRequestResponse with proper problemId
-            int maxProblemId = dataSets.Count == 0 ? 1 : dataSets.Keys.Max() + 1;
+            var maxProblemId = dataSets.Count == 0 ? 1 : dataSets.Keys.Max() + 1;
             var newSet = new ProblemDataSet()
             {
                 CommonData = message.Data,
@@ -305,14 +301,14 @@ namespace Server.MessageProcessing
                 TaskManagerId = 0
             };
             dataSets.Add(maxProblemId, newSet);
-            log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}",
+            Log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}",
                 message.ProblemType, maxProblemId);
-            log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}",
+            Log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}",
                 message.ProblemType, maxProblemId);
 
             message.Id = (ulong)maxProblemId;
             message.IdSpecified = true;
-            _synchronizationQueue.Enqueue(message);
+            SynchronizationQueue.Enqueue(message);
 
             return new Message[]
             {
@@ -337,9 +333,9 @@ namespace Server.MessageProcessing
         {
             //practically nothing to do
             //warn logger, print something on console if verbose
-            log.DebugFormat("Error message acquired. Type={0}, Message={1}",
+            Log.DebugFormat("Error message acquired. Type={0}, Message={1}",
                 message.ErrorType, message.ErrorMessage);
-            log.DebugFormat("Error message acquired. Type={0}, Message={1}",
+            Log.DebugFormat("Error message acquired. Type={0}, Message={1}",
                 message.ErrorType, message.ErrorMessage);
             return null;
         }

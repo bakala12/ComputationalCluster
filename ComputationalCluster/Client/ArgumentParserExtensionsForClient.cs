@@ -20,10 +20,8 @@ namespace Client
                     case "address=":
                         Properties.Settings.Default.Address = pair.Value;
                         break;
-                    case "verbose=":
-                        bool enableConsoleLog = pair.Value.ChangeType<bool>();
-                        if (enableConsoleLog)
-                            LogHelper.EnableConsoleLogging();
+                    case "verbose":
+                        LogHelper.EnableConsoleLogging();
                         break;
                     default:
                         throw new ArgumentException();

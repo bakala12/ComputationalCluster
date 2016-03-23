@@ -20,9 +20,7 @@ namespace TaskManager
                     case "address=":
                         Properties.Settings.Default.Address = pair.Value;
                         break;
-                    case "verbose=":
-                        bool enableConsoleLog = pair.Value.ChangeType<bool>();
-                        if (enableConsoleLog)
+                    case "verbose":
                             LogHelper.EnableConsoleLogging();
                         break;
                     default:

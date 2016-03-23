@@ -37,10 +37,8 @@ namespace Server.Extensions
                     case "mport=":
                         Properties.Settings.Default.MasterPort = pair.Value.ChangeType<int>();
                         break;
-                    case "verbose=":
-                        bool enableConsoleLog = pair.Value.ChangeType<bool>();
-                        if (enableConsoleLog)
-                            LogHelper.EnableConsoleLogging();
+                    case "verbose":
+                        LogHelper.EnableConsoleLogging();
                         break;
                     default:
                         throw new ArgumentException();

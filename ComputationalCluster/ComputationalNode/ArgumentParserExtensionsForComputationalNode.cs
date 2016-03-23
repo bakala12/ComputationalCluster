@@ -20,11 +20,9 @@ namespace ComputationalNode
                         case "address=":
                             Properties.Settings.Default.Address = pair.Value;
                             break;
-                        case "verbose=":
-                            bool enableConsoleLog = pair.Value.ChangeType<bool>();
-                            if (enableConsoleLog)
-                                LogHelper.EnableConsoleLogging();
-                            break;
+                        case "verbose":
+                            LogHelper.EnableConsoleLogging();
+                        break;
                     default:
                             throw new ArgumentException();
                     }

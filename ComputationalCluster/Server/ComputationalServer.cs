@@ -53,6 +53,11 @@ namespace Server
         /// </summary>
         private readonly ConcurrentQueue<Message> _messagesQueue;
 
+        /// <summary>
+        /// Queue used by servers to synchronize data
+        /// </summary>
+        private readonly ConcurrentQueue<Message> _synchornizationQueue;
+
         private List<BackupServerInfo> _backups;
 
         /// <summary>
@@ -71,6 +76,7 @@ namespace Server
         /// INDEXED by problemId - assigned by server
         /// </summary>
         private ConcurrentDictionary<int, ProblemDataSet> _problemDataSets;
+
 
         /// <summary>
         /// Object responsible for processing messages.
@@ -97,9 +103,10 @@ namespace Server
             _messagesQueue = new ConcurrentQueue<Message>();
             _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
             _problemDataSets = new ConcurrentDictionary<int, ProblemDataSet>();
+            _synchornizationQueue = new ConcurrentQueue<Message>();
             _messageProcessor = (state == ServerState.Primary)
-                ? new PrimaryMessageProcessor() as MessageProcessor
-                : new BackupMessageProcessor();
+                ? new PrimaryMessageProcessor(_synchornizationQueue) as MessageProcessor
+                : new BackupMessageProcessor(_synchornizationQueue);
             _backups = new List<BackupServerInfo>();
         }
 
@@ -149,7 +156,7 @@ namespace Server
             //TODO: Primary initialize
             lock (_syncRoot)
             {
-                _messageProcessor = new PrimaryMessageProcessor();
+                _messageProcessor = new PrimaryMessageProcessor(_synchornizationQueue);
             }
             _backupClient = null;
             if (_clusterListener == null)
@@ -175,7 +182,7 @@ namespace Server
             //TODO: Backup initilize here
             lock(_syncRoot)
             {
-                _messageProcessor = new BackupMessageProcessor();
+                _messageProcessor = new BackupMessageProcessor(_synchornizationQueue);
             }
             _clusterListener = null;
             if (_backupClient == null)
@@ -248,12 +255,20 @@ namespace Server
                     foreach (var message in requestsMessages)
                     {
                         //TODO: not all messages should be enqueued (no SolveRequest, no Register)
-                        _messagesQueue.Enqueue(message);
-                        log.Debug(string.Format("Enqueueing {0} message.", message.MessageType));
+                        if (message.MessageType != MessageType.RegisterMessage &&
+                            message.MessageType != MessageType.NoOperationMessage &&
+                            message.MessageType != MessageType.SolutionRequestMessage &&
+                            message.MessageType != MessageType.SolveRequestMessage &&
+                            message.MessageType != MessageType.RegisterMessage &&
+                            message.MessageType != MessageType.ErrorMessage)
+                        {
+                            _messagesQueue.Enqueue(message);
+                        }
+                        log.DebugFormat("Enqueueing {0} message.", message.MessageType);
                         var responseMessages = _messageProcessor.CreateResponseMessages(message, _problemDataSets,
                             _activeComponents, _backups);
                         _clusterListener.SendResponse(responseMessages);
-                        log.Debug(string.Format("Response for {0} message has been sent.", message.MessageType));
+                        log.DebugFormat("Response for {0} message has been sent.", message.MessageType);
                     }
                 }
             }
@@ -271,9 +286,9 @@ namespace Server
                     Message message;
                     var result = _messagesQueue.TryDequeue(out message);
                     if (!result) continue;
-                    log.Debug(string.Format("Dequeueing {0} message.", message.MessageType));
+                    log.DebugFormat("Dequeueing {0} message.", message.MessageType);
                     _messageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
-                    log.Debug(string.Format("Message {0} has been proccessed.", message.MessageType));
+                    log.DebugFormat("Message {0} has been proccessed.", message.MessageType);
                 }
             }
         }

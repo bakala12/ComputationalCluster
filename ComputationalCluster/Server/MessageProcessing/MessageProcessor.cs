@@ -20,10 +20,18 @@ namespace Server.MessageProcessing
     public abstract class MessageProcessor : IMessageProcessor
     {
 
+        private ConcurrentQueue<Message> _synchronizationQueue;
+
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public Thread StatusThread { get; protected set; }
 
-        private static void StatusThreadWork (int who, 
+
+        protected MessageProcessor(ConcurrentQueue<Message> synchronizationQueue)
+        {
+            _synchronizationQueue = synchronizationQueue;
+        }
+
+        private void StatusThreadWork (int who, 
             IDictionary<int, ActiveComponent> activeComponents, IDictionary<int, ProblemDataSet> dataSets)
         {
             while (true)
@@ -31,7 +39,14 @@ namespace Server.MessageProcessing
                 var elapsed = activeComponents[who].StatusWatch.ElapsedMilliseconds;
                 if (elapsed > Properties.Settings.Default.Timeout)
                 {
-                    //TODO: make register with deregister=true message, add to synchronization queue
+                    Message deregister = new Register()
+                    {                 
+                        Deregister = true,
+                        DeregisterSpecified = true,
+                        Id = (ulong) who,
+                        IdSpecified = true
+                    };
+                    _synchronizationQueue.Enqueue(deregister);
                     log.DebugFormat("TIMEOUT of {0}. Deregistering.", activeComponents[who].ComponentType);
                     DataSetOps.HandleClientMalfunction(activeComponents, who, dataSets);
                     activeComponents.Remove(who);
@@ -128,8 +143,6 @@ namespace Server.MessageProcessing
                     return RespondSolutionRequestMessage(message.Cast<SolutionRequest>(), dataSets, activeComponents, backups);
                 case MessageType.SolveRequestMessage:
                     return RespondSolveRequestMessage(message.Cast<SolveRequest>(), dataSets, activeComponents, backups);
-                case MessageType.SolveRequestResponseMessage:
-                    return RespondSolveRequestResponseMessage(message.Cast<SolveRequestResponse>(), dataSets, activeComponents);
                 case MessageType.StatusMessage:
                     return RespondStatusMessage(message.Cast<Status>(), dataSets, activeComponents, backups);
                 case MessageType.ErrorMessage:
@@ -141,7 +154,7 @@ namespace Server.MessageProcessing
 
         private static void WriteControlInformation(Message message)
         {
-            log.Debug(string.Format("Message is dequeued and is being processed. Message type: " + message.MessageType));
+            log.DebugFormat("Message is dequeued and is being processed. Message type: " + message.MessageType);
         }
 
         protected static void WriteResponseMessageControlInformation(Message message, MessageType type)
@@ -171,7 +184,6 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: add to synchronization queue
             //TODO: implement it on backup side
             //update dataset for given problemId
             //message from TM and only from it, so set partialSets array (it will be enough)
@@ -211,7 +223,6 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //TODO: add to synchronization queue
             //TODO: implement it on backup side
             WriteControlInformation(message);
             //message delivered from TM or CN
@@ -269,7 +280,6 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            //TODO: add to synchronization queue
             //TODO: implement it on backup side (with id specified)
         }
 
@@ -301,7 +311,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            //nothing. msg delivered to TM. to backup too, but it only processes it
+            // TODO: processing of divideProblem message on backup
             return null;
         }
 
@@ -317,11 +327,12 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
+            _synchronizationQueue.Enqueue(message);
             //sent by TM. send noOperation only.
             return new Message[] { new NoOperation()
-            {
-                BackupServersInfo = backups.ToArray()
-            }
+                {
+                    BackupServersInfo = backups.ToArray()
+                }
             };
         }
 
@@ -342,7 +353,10 @@ namespace Server.MessageProcessing
             log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
             //add new watcher of timeout
             RunStatusThread(maxId, activeComponents, dataSets);
-            //TODO: add register message to synchronization queue (with id specified)
+            //add register message to synchronization queue
+            message.Id = (ulong) maxId;
+            message.IdSpecified = true;
+            _synchronizationQueue.Enqueue(message);
             return new Message[]
             {
                 new RegisterResponse()
@@ -370,6 +384,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
+            _synchronizationQueue.Enqueue(message);
             //sent by CN or TM. send NoOperation only.
             return new Message[] { new NoOperation()
             {
@@ -418,7 +433,10 @@ namespace Server.MessageProcessing
                 message.ProblemType, maxProblemId);
             log.DebugFormat("New problem, ProblemType={0}. Assigned id: {1}",
                 message.ProblemType, maxProblemId);
-            //TODO: add proper solveRequest message to synchronization queue
+
+            message.Id = (ulong) maxProblemId;
+            message.IdSpecified = true;
+            _synchronizationQueue.Enqueue(message);
 
             return new Message[]
             {
@@ -431,14 +449,6 @@ namespace Server.MessageProcessing
                     Id = (ulong) maxProblemId
                 }
             };
-        }
-
-        protected virtual Message[] RespondSolveRequestResponseMessage(SolveRequestResponse message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
-        {
-            //nothing. delivered to client node only. nowhere else
-            return null;
         }
 
         protected virtual Message[] RespondStatusMessage(Status message,
@@ -491,7 +501,8 @@ namespace Server.MessageProcessing
                 whatToDo.MessageType, activeComponents[who].ComponentType, who);
             log.DebugFormat("Found problem ({0}) for {1} (id={2})",
                 whatToDo.MessageType, activeComponents[who].ComponentType, who);
-            //TODO: add whatToDo to synchronization queue
+
+            _synchronizationQueue.Enqueue(whatToDo);
             return new Message[]
             {
                 whatToDo, 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using CommunicationsUtils.Messages;
 using Server.Data;
@@ -15,8 +16,8 @@ namespace Server.MessageProcessing
         //TODO: problem flow implementation will be in MessageProcessor for now.
         //TODO: so, remove definitions.
 
-        public PrimaryMessageProcessor() : 
-            base ()
+        public PrimaryMessageProcessor(ConcurrentQueue<Message> _synchornizationQueue) : 
+            base (_synchornizationQueue)
         {}
         //    protected override Message[] RespondRegisterMessage(Register message,
         //        IDictionary<int, ProblemDataSet> dataSets,

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using CommunicationsUtils.Messages;
 using Server.Data;
@@ -12,8 +13,8 @@ namespace Server.MessageProcessing
     /// </summary>
     public class BackupMessageProcessor : MessageProcessor
     {
-        public BackupMessageProcessor() : 
-            base ()
+        public BackupMessageProcessor(ConcurrentQueue<Message> _synchronizationQueu) : 
+            base (_synchronizationQueu)
         { }
 
         protected override Message[] RespondRegisterResponseMessage(RegisterResponse message,
@@ -59,27 +60,6 @@ namespace Server.MessageProcessing
         }
 
         protected override Message[] RespondNoOperationMessage(NoOperation message,
-            IDictionary<int, ProblemDataSet> dataSets,
-            IDictionary<int, ActiveComponent> activeComponents)
-        {
-            WriteResponseMessageControlInformation(message, MessageType.NoOperationMessage);
-            return new Message[]
-            {
-                new NoOperation
-                {
-                    BackupServersInfo = new[]
-                    {
-                        new BackupServerInfo()
-                        {
-                            address = "0.0.0.0",
-                            port = 8086
-                        }
-                    }
-                }
-            };
-        }
-
-        protected override Message[] RespondSolveRequestResponseMessage(SolveRequestResponse message,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {

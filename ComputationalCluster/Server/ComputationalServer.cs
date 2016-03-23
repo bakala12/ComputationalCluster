@@ -80,7 +80,12 @@ namespace Server
         /// <summary>
         /// Specifies the time interval between two Status messages.
         /// </summary>
-        public long BackupServerStatusInterval { get; protected set; }
+        public ulong? BackupServerStatusInterval { get; protected set; }
+
+        /// <summary>
+        /// Gets BackupServerId (if specified).
+        /// </summary>
+        public ulong? BackupServerId { get; protected set; }
 
         /// <summary>
         /// Private constructor that initializes server subcomponent correctly.
@@ -93,8 +98,8 @@ namespace Server
             _activeComponents = new ConcurrentDictionary<int, ActiveComponent>();
             _problemDataSets = new ConcurrentDictionary<int, ProblemDataSet>();
             _messageProcessor = (state == ServerState.Primary)
-                ? new PrimaryMessageProcessor(_currentlyWorkingThreads) as MessageProcessor
-                : new BackupMessageProcessor(_currentlyWorkingThreads);
+                ? new PrimaryMessageProcessor() as MessageProcessor
+                : new BackupMessageProcessor();
             _backups = new List<BackupServerInfo>();
         }
 
@@ -144,7 +149,7 @@ namespace Server
             //TODO: Primary initialize
             lock (_syncRoot)
             {
-                _messageProcessor = new PrimaryMessageProcessor(_currentlyWorkingThreads);
+                _messageProcessor = new PrimaryMessageProcessor();
             }
             _backupClient = null;
             if (_clusterListener == null)
@@ -157,6 +162,8 @@ namespace Server
             _isWorking = true;
             _currentlyWorkingThreads.Clear();
             log.Debug("Listening mechanism has been started.");
+            BackupServerStatusInterval = null;
+            BackupServerId = null;
             DoPrimaryWork();
         }
 
@@ -168,7 +175,7 @@ namespace Server
             //TODO: Backup initilize here
             lock(_syncRoot)
             {
-                _messageProcessor = new BackupMessageProcessor(_currentlyWorkingThreads);
+                _messageProcessor = new BackupMessageProcessor();
             }
             _clusterListener = null;
             if (_backupClient == null)
@@ -208,6 +215,8 @@ namespace Server
             _currentlyWorkingThreads.Clear();
             _clusterListener = null;
             _backupClient = null;
+            if (State == ServerState.Backup)
+                _messageProcessor?.StatusThread?.Join();
             log.Debug("Threads have been stopped.");
         }
 
@@ -324,14 +333,22 @@ namespace Server
             try
             {
                 var response = _backupClient.SendRequests(new Message[] {register});
-                //TODO: Set status timeout
-                //TODO: This should be read from RegisterResponse message.
-                BackupServerStatusInterval = 5000; //5sec
+                foreach (var message in response)
+                {
+                    _messageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
+                    if (message.MessageType == MessageType.RegisterResponseMessage)
+                    {
+                        RegisterResponse registerResponse = message.Cast<RegisterResponse>();
+                        BackupServerStatusInterval = registerResponse.Timeout;
+                        BackupServerId = registerResponse.Id;
+                    }
+                }
             }
             catch (SocketException) //probably Exception might be written here
             {
                 //TODO: Exception caugth. Something went wrong, so we should react here
-                //TODO: Default reaction would be critical ecit here.
+                //TODO: Default reaction would be critical exit here.
+                //TODO: Or maybe make this seerver primary?
                 throw;
             }
         }
@@ -350,7 +367,7 @@ namespace Server
                     
                 };
                 _backupClient.SendRequests(new Message[] {status});
-                Thread.Sleep((int)BackupServerStatusInterval);
+                Thread.Sleep((int)(BackupServerStatusInterval ?? 0));
             }
         }
     }

@@ -87,12 +87,12 @@ namespace Client
                 Solutions solution = CheckComputations(request);
 
                 //assuming that final solution has one element with type==final
-                if (solution.Solutions1[0].Type == SolutionsSolutionType.Final)
+                if (solution.SolutionsList[0].Type == SolutionsSolutionType.Final)
                 {
-                    return solution.Solutions1[0];
+                    return solution.SolutionsList[0];
                 }
                 //assuming only one timeout is enough to end waiting for an answer
-                if (solution.Solutions1[0].TimeoutOccured)
+                if (solution.SolutionsList[0].TimeoutOccured)
                 {
                     break;
                 }

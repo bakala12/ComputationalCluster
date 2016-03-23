@@ -82,7 +82,7 @@ namespace Server.Data
                             CommonData = dataSet.Value.CommonData,
                             Id = (ulong) dataSet.Key,
                             ProblemType = dataSet.Value.ProblemType,
-                            Solutions1 = solutionsToSend.ToArray()
+                            SolutionsList = solutionsToSend.ToArray()
                         };
                     }
                 }
@@ -159,7 +159,7 @@ namespace Server.Data
                 CommonData = dataSets[key].CommonData,
                 Id = (ulong) key,
                 ProblemType = dataSets[key].ProblemType,
-                Solutions1 = new[]
+                SolutionsList = new[]
                 {
                     new SolutionsSolution()
                     {
@@ -184,7 +184,7 @@ namespace Server.Data
                     CommonData = dataSets[key].CommonData,
                     Id = (ulong) key,
                     ProblemType = dataSets[key].ProblemType,
-                    Solutions1 = new[] {dataSets[key].PartialSets[0].PartialSolution}
+                    SolutionsList = new[] {dataSets[key].PartialSets[0].PartialSolution}
                 };
             }
 

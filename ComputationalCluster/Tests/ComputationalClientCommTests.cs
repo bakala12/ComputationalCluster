@@ -209,7 +209,7 @@ namespace Tests
             mock.Setup(u => u.CheckComputations(solutionRequest)).Returns(
                 new Solutions()
                 {
-                    Solutions1 = new SolutionsSolution[] { finalSolution }
+                    SolutionsList = new SolutionsSolution[] { finalSolution }
                 });
             var clientNode = mock.Object;
 
@@ -230,7 +230,7 @@ namespace Tests
             mock.Setup(u => u.CheckComputations(solutionRequest)).Returns(
                 new Solutions()
                 {
-                    Solutions1 = new SolutionsSolution[] { solution }
+                    SolutionsList = new SolutionsSolution[] { solution }
                 });
             var clientNode = mock.Object;
 

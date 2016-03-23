@@ -233,7 +233,7 @@ namespace Server
             _currentlyWorkingThreads.Clear();
 
             _backupClient = null;
-            //TODO: Stop that thread. Not in this way, because it probabely does nothing.
+            //TODO: Stop that thread. Not in this way, because it probably does nothing.
             //if (State == ServerState.Backup)
               //  _messageProcessor?.StatusThread?.Join();
             log.Debug("Threads have been stopped.");
@@ -260,9 +260,17 @@ namespace Server
                 lock (_syncRoot)
                 {
                     log.Debug("Waiting for request messages.");
-                    var requestsMessages = _clusterListener.WaitForRequest();
-                    if(requestsMessages==null) log.Debug("No request messages detected.");
-                    // ReSharper disable once PossibleNullReferenceException
+                    Message[] requestsMessages;
+                    try
+                    {
+                        requestsMessages = _clusterListener.WaitForRequest();
+                    }
+                    catch (Exception)
+                    {
+                        log.Debug("Communication accident. Connection has been broken down");
+                        continue;
+                    }
+                    if (requestsMessages==null) log.Debug("No request messages detected.");
                     log.Debug("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);
                     foreach (var message in requestsMessages)
                     {

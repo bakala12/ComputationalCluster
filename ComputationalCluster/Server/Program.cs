@@ -32,7 +32,7 @@ namespace Server
                 Properties.Settings.Default.MasterPort);
             var server = (state == ServerState.Primary)
                 ? new ComputationalServer(listener)
-                : new ComputationalServer(client);
+                : new ComputationalServer(client, listener);
             server.Run(); //starting server
         }
 

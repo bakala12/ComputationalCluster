@@ -115,11 +115,13 @@ namespace Server
         /// a speciefied server state.
         /// </summary>
         /// <param name="backupClient"> A client used as BS request sender.</param>
-        public ComputationalServer(IClusterClient backupClient) :this(ServerState.Backup)
+        /// /// <param name="backupListener"> A listener used as BS request receiver.</param>
+        public ComputationalServer(IClusterClient backupClient, IClusterListener backupListener) :this(ServerState.Backup)
         {
             if(backupClient == null) throw new ArgumentNullException(nameof(backupClient));
             _backupClient = backupClient;
-            log.Debug("New instance of ComputationalServer has been created.");
+            _clusterListener = backupListener;
+            log.Debug("New instance of Backup ComputationalServer has been created.");
         }
 
         /// <summary>

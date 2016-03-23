@@ -21,12 +21,7 @@ namespace Server.MessageProcessing
     {
 
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private List<Thread> _currentlyWorkingThreads;
-
-        public MessageProcessor(List<Thread> currentlyWorkingThreads)
-        {
-            _currentlyWorkingThreads = currentlyWorkingThreads;
-        }
+        public Thread StatusThread { get; protected set; }
 
         private static void StatusThreadWork (int who, 
             IDictionary<int, ActiveComponent> activeComponents, IDictionary<int, ProblemDataSet> dataSets)
@@ -51,7 +46,7 @@ namespace Server.MessageProcessing
         {
             var t = new Thread(() => StatusThreadWork(who, activeComponents, dataSets));
             t.Start();
-            _currentlyWorkingThreads.Add(t);
+            StatusThread = t;
         }
 
         /// <summary>
@@ -168,6 +163,7 @@ namespace Server.MessageProcessing
         {
             WriteControlInformation(message);
             //nothing. noOperation is not enqueued anywhere
+            //TODO: Update Backup list on server!
         }
 
         protected virtual void ProcessSolvePartialProblemMessage(SolvePartialProblems message,

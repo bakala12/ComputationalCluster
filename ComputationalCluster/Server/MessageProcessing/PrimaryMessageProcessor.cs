@@ -66,7 +66,7 @@ namespace Server.MessageProcessing
         {
            backups.Add(new BackupServerInfo()
            {
-               address = "192.168.56.1",
+               address = "192.168.0.33",
                port = 8086
            });
         }

@@ -49,7 +49,7 @@ namespace Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.56.1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.33")]
         public string MasterAddress {
             get {
                 return ((string)(this["MasterAddress"]));

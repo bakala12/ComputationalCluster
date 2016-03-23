@@ -191,10 +191,11 @@ namespace Server
                 address = Properties.Settings.Default.MasterAddress,
                 port = (ushort)Properties.Settings.Default.Port,
             });
-            _clusterListener = null;
             if (_backupClient == null)
                 _backupClient = ClusterClientFactory.Factory.Create(Properties.Settings.Default.MasterAddress,
                     Properties.Settings.Default.MasterPort);
+            if (_clusterListener == null)
+                _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
             //TODO: Maybe reset data sets and list of active components here.
 
             //TODO: Backup run
@@ -228,11 +229,18 @@ namespace Server
                 currentlyWorkingThread?.Join();
             }
             _currentlyWorkingThreads.Clear();
-            _clusterListener = null;
+
             _backupClient = null;
-            //TODO: Stop that thread. Not in this way, because it probabely does nothing.
-            //if (State == ServerState.Backup)
-              //  _messageProcessor?.StatusThread?.Join();
+            //Stopping and joining messageprocessor threads 
+            if (State == ServerState.Backup)
+            {
+                _messageProcessor.Stop();
+                foreach (var thread in _messageProcessor.StatusThreads)
+                {
+                    thread?.Join();
+                }
+                _messageProcessor.StatusThreads.Clear();
+            }
             Log.Debug("Threads have been stopped.");
         }
 
@@ -257,9 +265,17 @@ namespace Server
                 lock (_syncRoot)
                 {
                     Log.Debug("Waiting for request messages.");
-                    var requestsMessages = _clusterListener.WaitForRequest();
-                    if(requestsMessages==null) Log.Debug("No request messages detected.");
-                    // ReSharper disable once PossibleNullReferenceException
+                    Message[] requestsMessages;
+                    try
+                    {
+                        requestsMessages = _clusterListener.WaitForRequest();
+                    }
+                    catch (Exception)
+                    {
+                        Log.Debug("Communication accident. Connection has been broken down");
+                        continue;
+                    }
+                    if (requestsMessages==null) Log.Debug("No request messages detected.");
                     Log.Debug("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);
                     foreach (var message in requestsMessages)
                     {
@@ -307,12 +323,11 @@ namespace Server
         /// </summary>
         protected virtual void DoPrimaryWork()
         {
-            Log.Debug("Starting new thread for listening, storing messages and sending responses.");
-            ProcessInParallel(ListenAndStoreMessagesAndSendResponses);
-            Log.Debug("Thread for listening, storing messages and sending responses has been started.");
             Log.Debug("Starting new thread for dequeueing messages and updating additional sets.");
             ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
             Log.Debug("Thread for dequeueing messages and updating additional sets has been started.");
+            Log.Debug("Initializing listening module in main thread");
+            ListenAndStoreMessagesAndSendResponses();
         }
 
         /// <summary>
@@ -373,9 +388,11 @@ namespace Server
                         BackupServerStatusInterval = registerResponse.Timeout;
                         BackupServerId = registerResponse.Id;
                     }
-                    if (message.MessageType != MessageType.NoOperationMessage) continue;
-                    var nop = message.Cast<NoOperation>();
-                    var n = nop.BackupServersInfo.Length;
+                    if (message.MessageType == MessageType.NoOperationMessage)
+                    {
+                        NoOperation nop = message.Cast<NoOperation>();
+                        _backups = nop.BackupServersInfo.ToList();
+                    }
                 }
             }
             catch (SocketException) //probably Exception might be written here

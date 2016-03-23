@@ -13,9 +13,12 @@ namespace Server.MessageProcessing
     public class PrimaryMessageProcessor : MessageProcessor
     {
 
-        public PrimaryMessageProcessor(ConcurrentQueue<Message> synchronizationQueue) :
-            base(synchronizationQueue)
+        public PrimaryMessageProcessor(ConcurrentQueue<Message> synchronizationQueue,
+            IDictionary<int, ProblemDataSet> dataSets,
+            IDictionary<int, ActiveComponent> activeComponents) : 
+            base (synchronizationQueue, dataSets, activeComponents)
         { }
+
         protected override Message[] RespondRegisterResponseMessage(RegisterResponse message,
               IDictionary<int, ProblemDataSet> dataSets,
               IDictionary<int, ActiveComponent> activeComponents)
@@ -38,12 +41,12 @@ namespace Server.MessageProcessing
             };
             activeComponents.Add(maxId, newComponent);
             Log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
-            Log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
             //add new watcher of timeout
             RunStatusThread(maxId, activeComponents, dataSets);
             //add register message to synchronization queue
             message.Id = (ulong)maxId;
             message.IdSpecified = true;
+            message.DeregisterSpecified = false;
             SynchronizationQueue.Enqueue(message);
             if(message.Type.Value==ComponentType.CommunicationServer)
                 AddBackupAddressToBackupList(backups);

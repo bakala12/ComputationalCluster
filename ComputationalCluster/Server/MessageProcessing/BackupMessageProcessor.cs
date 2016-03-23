@@ -12,8 +12,10 @@ namespace Server.MessageProcessing
     /// </summary>
     public class BackupMessageProcessor : MessageProcessor
     {
-        public BackupMessageProcessor(ConcurrentQueue<Message> synchronizationQueue) : 
-            base (synchronizationQueue)
+        public BackupMessageProcessor(ConcurrentQueue<Message> synchronizationQueue,
+            IDictionary<int, ProblemDataSet> dataSets, 
+            IDictionary<int, ActiveComponent> activeComponents ) : 
+            base (synchronizationQueue, dataSets, activeComponents)
         { }
 
         protected override Message[] RespondStatusMessage(Status message,
@@ -47,7 +49,7 @@ namespace Server.MessageProcessing
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents)
         {
-            if (message.Deregister)
+            if (message.DeregisterSpecified)
             {
                 activeComponents.Remove((int) message.Id);
             }

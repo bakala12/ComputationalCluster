@@ -29,10 +29,21 @@ namespace Server.MessageProcessing
 
         public List<Thread> StatusThreads { get; protected set; }
 
-        protected MessageProcessor(ConcurrentQueue<Message> synchronizationQueue)
+        protected MessageProcessor(ConcurrentQueue<Message> synchronizationQueue,
+            IDictionary<int, ProblemDataSet> dataSets,
+            IDictionary<int, ActiveComponent> activeComponents )
         {
             SynchronizationQueue = synchronizationQueue;
             StatusThreads = new List<Thread>();
+            //run all status threads (needed if backup is getting primary status)
+            if (activeComponents != null)
+            {
+                foreach (var activeComponent in activeComponents)
+                {
+                    activeComponent.Value.StatusWatch.Start();
+                    RunStatusThread(activeComponent.Key, activeComponents, dataSets);
+                }
+            }
         }
 
         public void Stop()
@@ -175,8 +186,11 @@ namespace Server.MessageProcessing
             WriteControlInformation(message);
             //update dataset for given problemId
             //message from TM and only from it, so set partialSets array (it will be enough)
-            if (!dataSets.ContainsKey((int)message.Id))
+            if (!dataSets.ContainsKey((int) message.Id))
+            {
+                Log.DebugFormat("No problem ID {0} found for {1}", message.Id, message.MessageType);
                 return;
+            }
             var id = (int)message.Id;
             dataSets[id].PartialSets = new PartialSet[message.PartialProblems.Length];
             for (var i = 0; i < message.PartialProblems.Length; i++)

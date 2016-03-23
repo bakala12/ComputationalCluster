@@ -107,8 +107,8 @@ namespace Server
             _problemDataSets = new ConcurrentDictionary<int, ProblemDataSet>();
             _synchronizationQueue = new ConcurrentQueue<Message>();
             _messageProcessor = (state == ServerState.Primary)
-                ? new PrimaryMessageProcessor(_synchronizationQueue) as MessageProcessor
-                : new BackupMessageProcessor(_synchronizationQueue);
+                ? new PrimaryMessageProcessor(_synchronizationQueue, _problemDataSets, _activeComponents) as MessageProcessor
+                : new BackupMessageProcessor(_synchronizationQueue, _problemDataSets, _activeComponents);
             _backups = new List<BackupServerInfo>();
         }
 
@@ -158,7 +158,7 @@ namespace Server
             //TODO: Primary initialize
             lock (_syncRoot)
             {
-                _messageProcessor = new PrimaryMessageProcessor(_synchronizationQueue);
+                _messageProcessor = new PrimaryMessageProcessor(_synchronizationQueue, _problemDataSets, _activeComponents);
             }
             _backupClient = null;
             if (_clusterListener == null)
@@ -184,7 +184,7 @@ namespace Server
             //TODO: Backup initilize here
             lock(_syncRoot)
             {
-                _messageProcessor = new BackupMessageProcessor(_synchronizationQueue);
+                _messageProcessor = new BackupMessageProcessor(_synchronizationQueue, _problemDataSets, _activeComponents);
             }
             _backups.Add(new BackupServerInfo()
             {
@@ -212,6 +212,7 @@ namespace Server
         {
             Stop();
             State = state;
+            Log.Debug("\n*** ASSUMING CONTROL ***\n");
             Run();
         }
 
@@ -444,7 +445,7 @@ namespace Server
                         //TODO: Watch out on threads!!!
                     }
                 }
-                Thread.Sleep((int)(BackupServerStatusInterval ?? 0));
+                Thread.Sleep((int)(BackupServerStatusInterval!= null ? BackupServerStatusInterval/5 : 0));
             }
         }
 

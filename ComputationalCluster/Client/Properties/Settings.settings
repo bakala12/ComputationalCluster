@@ -2,17 +2,17 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Client.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="Address" Type="System.String" Scope="User">
-      <Value Profile="(Default)">192.168.43.199</Value>
-    </Setting>
     <Setting Name="Port" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">8086</Value>
     </Setting>
     <Setting Name="SolutionCheckingInterval" Type="System.UInt64" Scope="User">
-      <Value Profile="(Default)">4000</Value>
+      <Value Profile="(Default)">9000</Value>
     </Setting>
     <Setting Name="SolveTimeout" Type="System.UInt64" Scope="User">
       <Value Profile="(Default)">50000</Value>
+    </Setting>
+    <Setting Name="Address" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.0.33</Value>
     </Setting>
   </Settings>
 </SettingsFile>

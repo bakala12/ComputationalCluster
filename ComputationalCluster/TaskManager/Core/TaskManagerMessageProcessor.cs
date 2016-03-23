@@ -85,7 +85,7 @@ namespace TaskManager.Core
             storage.AddTaskToIssue(divideProblem.Id, partialProblem2);
             //end of implementation
             //mock (thread sleep)
-            Thread.Sleep(7000);
+            Thread.Sleep(30000);
             log.DebugFormat("Division finished. ({0})", divideProblem.Id);
             //creating msg
             SolvePartialProblems partialProblems = new SolvePartialProblems()
@@ -140,7 +140,7 @@ namespace TaskManager.Core
             //for issue in storage (by problemId) - get all tasks
             //get SolutionsSolution from them and do something amazing
             //mock (thread sleep)
-            Thread.Sleep(4000);
+            Thread.Sleep(20000);
             log.DebugFormat("Solutions have been linked ({0})", problemId);
             //return final solution (this one is mocked)
             return new Solutions()

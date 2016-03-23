@@ -47,7 +47,7 @@ namespace TaskManager
             while(true)
             {
                 log.DebugFormat("Sleeping (less than timeout={0})",timeout);
-                Thread.Sleep((int)(0.7 * timeout));
+                Thread.Sleep((int)(0.5 * timeout));
                 log.Debug("Sending status");
                 Message[] responses = this.SendStatus();
                 log.Debug("Status sent");

@@ -31,7 +31,7 @@ namespace Tests
         public void BackupRegisteringTest1()
         {
             var backup = new List<BackupServerInfo>();
-            MessageProcessor processor = new PrimaryMessageProcessor(new ConcurrentQueue<Message>());
+            MessageProcessor processor = new PrimaryMessageProcessor(new ConcurrentQueue<Message>(), new ConcurrentDictionary<int, ProblemDataSet>(), new ConcurrentDictionary<int, ActiveComponent>() );
             var register = new Register()
             {
                 Type = new RegisterType()
@@ -52,7 +52,7 @@ namespace Tests
         public void ComponentRegisteringTest1()
         {
             var backup = new List<BackupServerInfo>();
-            MessageProcessor processor = new PrimaryMessageProcessor(new ConcurrentQueue<Message>());
+            MessageProcessor processor = new PrimaryMessageProcessor(new ConcurrentQueue<Message>(), new ConcurrentDictionary<int, ProblemDataSet>(), new ConcurrentDictionary<int, ActiveComponent>() );
             var register = new Register()
             {
                 Type = new RegisterType()

@@ -12,8 +12,8 @@ namespace Server.MessageProcessing
     /// </summary>
     public class BackupMessageProcessor : MessageProcessor
     {
-        public BackupMessageProcessor(List<Thread> currentlyWorkingThreads) : 
-            base (currentlyWorkingThreads)
+        public BackupMessageProcessor() : 
+            base ()
         { }
 
         protected override Message[] RespondRegisterResponseMessage(RegisterResponse message,

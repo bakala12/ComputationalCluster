@@ -15,8 +15,8 @@ namespace Server.MessageProcessing
         //TODO: problem flow implementation will be in MessageProcessor for now.
         //TODO: so, remove definitions.
 
-        public PrimaryMessageProcessor(List<Thread> currentlyWorkingThreads) : 
-            base (currentlyWorkingThreads)
+        public PrimaryMessageProcessor() : 
+            base ()
         {}
         //    protected override Message[] RespondRegisterMessage(Register message,
         //        IDictionary<int, ProblemDataSet> dataSets,

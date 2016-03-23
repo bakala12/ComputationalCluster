@@ -22,6 +22,8 @@ namespace Server.MessageProcessing
 
         protected ConcurrentQueue<Message> _synchronizationQueue;
 
+        private bool _doStatusWork = false;
+
         protected static readonly ILog log =
             LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -33,10 +35,15 @@ namespace Server.MessageProcessing
             StatusThreads = new List<Thread>();
         }
 
+        public void Stop()
+        {
+            _doStatusWork = false;
+        }
+
         private void StatusThreadWork(int who,
             IDictionary<int, ActiveComponent> activeComponents, IDictionary<int, ProblemDataSet> dataSets)
         {
-            while (true)
+            while (_doStatusWork)
             {
                 var elapsed = activeComponents[who].StatusWatch.ElapsedMilliseconds;
                 if (elapsed > Properties.Settings.Default.Timeout)
@@ -61,6 +68,7 @@ namespace Server.MessageProcessing
         protected void RunStatusThread(int who,
             IDictionary<int, ActiveComponent> activeComponents, IDictionary<int, ProblemDataSet> dataSets)
         {
+            if (!_doStatusWork) _doStatusWork = true;
             var t = new Thread(() => StatusThreadWork(who, activeComponents, dataSets));
             t.Start();
             StatusThreads.Add(t);

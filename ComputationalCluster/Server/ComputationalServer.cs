@@ -232,9 +232,16 @@ namespace Server
             _currentlyWorkingThreads.Clear();
             _clusterListener = null;
             _backupClient = null;
-            //TODO: Stop that thread. Not in this way, because it probably does nothing.
-            //if (State == ServerState.Backup)
-              //  _messageProcessor?.StatusThread?.Join();
+            //Stopping and joining messageprocessor threads 
+            if (State == ServerState.Backup)
+            {
+                _messageProcessor.Stop();
+                foreach (var thread in _messageProcessor.StatusThreads)
+                {
+                    thread?.Join();
+                }
+                _messageProcessor.StatusThreads.Clear();
+            }
             log.Debug("Threads have been stopped.");
         }
 

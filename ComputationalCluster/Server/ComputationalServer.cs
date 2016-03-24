@@ -26,11 +26,6 @@ namespace Server
         /// Indicating whether server threads work.
         /// </summary>
         private volatile bool _isWorking;
-
-        /// <summary>
-        /// 0 - for primary, 1 - for first backup 2 - for second, etc...
-        /// </summary>
-        private int _hierarchyPosition;
         
         /// <summary>
         /// A list of currently running threads at server.
@@ -162,7 +157,6 @@ namespace Server
         /// </summary>
         public virtual void RunAsPrimary()
         {
-            //TODO: Primary initialize
             lock (_syncRoot)
             {
                 _messageProcessor = new PrimaryMessageProcessor
@@ -171,9 +165,8 @@ namespace Server
             _backupClient = null;
             if (_clusterListener == null)
                 _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
-            //TODO: Maybe reset data sets and list of active components here
 
-            //TODO: Primary run !!!
+
             Log.Debug("Starting listening mechanism.");
             _clusterListener.Start();
             _isWorking = true;
@@ -189,7 +182,6 @@ namespace Server
         /// </summary>
         public virtual void RunAsBackup()
         {
-            //TODO: Backup initilize here
             lock(_syncRoot)
             {
                 _messageProcessor = new BackupMessageProcessor
@@ -205,6 +197,7 @@ namespace Server
                     Properties.Settings.Default.MasterPort);
             if (_clusterListener == null)
                 _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
+            //AZBEST314
             //Log.Debug("Starting backup listening mechanism.");
             //_clusterListener.Start();
             _currentlyWorkingThreads.Clear();
@@ -288,7 +281,6 @@ namespace Server
                     Log.Debug("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);
                     foreach (var message in requestsMessages)
                     {
-                        //TODO: not all messages should be enqueued (no SolveRequest, no Register)
                         if (message.MessageType != MessageType.RegisterMessage &&
                             message.MessageType != MessageType.NoOperationMessage &&
                             message.MessageType != MessageType.SolutionRequestMessage &&
@@ -344,7 +336,6 @@ namespace Server
         /// </summary>
         protected virtual void DoBackupWork()
         {
-            //TODO: Do this things
             Log.Debug("Starting server as backup");
             Log.Debug("Starting backup client");
             Log.Debug("Registering backup server");
@@ -354,17 +345,9 @@ namespace Server
             ProcessInParallel(SendBackupStatusMessages);
             Log.Debug("Starting new thread for dequeueing messages and updating additional sets.");
             ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
+            //AZBEST314
             //Log.Debug("Starting additonal listener on backup");
             //ListenAndStoreMessagesAndSendResponses();
-        }
-
-        /// <summary>
-        /// Updates backup server state.
-        /// </summary>
-        private void UpdateBackupServerState()
-        {
-            //TODO: Update backup server state here
-            //TODO: This include updating data sets and updating active components.
         }
 
         /// <summary>
@@ -401,12 +384,13 @@ namespace Server
                     {
                         NoOperation nop = message.Cast<NoOperation>();
                         //current positon of backup in hierarchy (1 for first backup, etc...)
-                        _hierarchyPosition = nop.BackupServersInfo.Length;
+                        int pos = nop.BackupServersInfo.Length;
                         _backups = nop.BackupServersInfo.ToList();
-                        if (_hierarchyPosition > 1)
+                        //if youre not first backup, switch listener params to higher
+                        if (pos > 1)
                         {
                             _backupClient.ChangeListenerParameters
-                                (_backups[_hierarchyPosition - 1].address,_backups[_hierarchyPosition - 1].port);
+                                (_backups[pos - 1].address,_backups[pos - 1].port);
                         }
                     }
                 }
@@ -438,26 +422,22 @@ namespace Server
                     var response = _backupClient.SendRequests(new Message[] {status});
                     foreach (var message in response)
                     {
-                        //TODO: Process all response messages in backup.
-                        //TODO: Update backup list!
-                        _synchronizationQueue.Enqueue(message);
-                        _messagesQueue.Enqueue(message);
+                        if (message.MessageType != MessageType.NoOperationMessage)
+                        {
+                            _synchronizationQueue.Enqueue(message);
+                            _messagesQueue.Enqueue(message);
+                            continue;
+                        }
 
-                        if (message.MessageType != MessageType.NoOperationMessage) continue;
                         var nop = message.Cast<NoOperation>();
                         _backups = nop.BackupServersInfo.ToList();
-                        //TODO: Update components. 
-                        //TODO: Call synchronization functions here.
                     }
                 }
                 catch (Exception)
                 {
-                    //TODO: Switching context to primary server or rearrange backup list.
-                    //TODO: Assuming _backups field contains current list of available backups. 
                     if (BackupProblem())
                     {
                         ChangeState(ServerState.Primary);
-                        //TODO: Watch out on threads!!!
                     }
                 }
                 Thread.Sleep((int)(BackupServerStatusInterval!= null ? BackupServerStatusInterval/4 : 0));
@@ -473,27 +453,9 @@ namespace Server
         {
             if(_backups == null || _backups.Count ==0)
                 throw new Exception("Backup has empty backup list!!!");
-            //jump to higher backup (probably impossible if we assume backups' invulnerability)
-            if (_hierarchyPosition > 2)
-            {
-                _hierarchyPosition++;
-                _backupClient.ChangeListenerParameters
-                    (_backups[_hierarchyPosition - 2].address, _backups[_hierarchyPosition - 2].port);
-            }
-            //become first backup
-            else if (_hierarchyPosition == 2)
-            {
-                _hierarchyPosition++;
-                _backupClient.ChangeListenerParameters
-                    (Properties.Settings.Default.MasterAddress, Properties.Settings.Default.MasterPort);
-            }
-            else
-            {
-                //remove first backup (me), i'm new server
-                _backups.RemoveAt(0);
-                return true;
-            }
-            return false;
+            //become main server - we assume backups' invulnerability
+            if (true)
+            return true;
         }
     }
 }

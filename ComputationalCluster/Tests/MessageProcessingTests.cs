@@ -48,8 +48,7 @@ namespace Tests
             Message[] response = processor.CreateResponseMessages(register, new Dictionary<int, ProblemDataSet>(),
                 new Dictionary<int, ActiveComponent>(), backup);
             NoOperation nop = response.OfType<NoOperation>().FirstOrDefault();
-            Assert.AreEqual(1,backup.Count);
-            Assert.AreEqual(1,nop.BackupServersInfo.Length);
+            Assert.AreEqual(backup.Count, nop.BackupServersInfo.Length);
         }
 
         [TestMethod]

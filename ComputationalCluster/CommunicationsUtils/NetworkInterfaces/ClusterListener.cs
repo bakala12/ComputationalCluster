@@ -42,12 +42,12 @@ namespace CommunicationsUtils.NetworkInterfaces
 
         public string ExtractSocketAddress()
         {
-            return currentSocket.ExtractSocketAddress();
+            return currentSocket== null ?"": currentSocket.ExtractSocketAddress();
         }
 
         public int ExtractSocketPort()
         {
-            return currentSocket.ExtractSocketPort();
+            return currentSocket== null ? -1 : currentSocket.ExtractSocketPort();
         }
 
         /// <summary>

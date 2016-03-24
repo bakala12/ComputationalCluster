@@ -24,7 +24,11 @@ namespace Tests
         [TestMethod]
         public void ComputationalNodeCorrectResponseTest()
         {
-            SolvePartialProblems spp = new SolvePartialProblems() { ProblemType = "DEF", Id = 123 };
+            SolvePartialProblems spp = new SolvePartialProblems()
+            {
+                ProblemType = "DEF", Id = 123,
+                PartialProblems = new [] { new SolvePartialProblemsPartialProblem()}
+            };
             var cnp = new ComputationalNodeMessageProcessor(new List<string>() {"DEF"});
             var msg = cnp.ComputeSubtask(spp);
             Assert.IsInstanceOfType(msg, typeof(Solutions));

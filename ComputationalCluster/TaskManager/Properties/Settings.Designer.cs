@@ -25,18 +25,6 @@ namespace TaskManager.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.33")]
-        public string Address {
-            get {
-                return ((string)(this["Address"]));
-            }
-            set {
-                this["Address"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("8086")]
         public int Port {
             get {
@@ -44,6 +32,18 @@ namespace TaskManager.Properties {
             }
             set {
                 this["Port"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.33")]
+        public string Address {
+            get {
+                return ((string)(this["Address"]));
+            }
+            set {
+                this["Address"] = value;
             }
         }
     }

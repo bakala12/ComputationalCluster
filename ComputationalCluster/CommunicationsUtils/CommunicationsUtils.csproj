@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NDesk.Options, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NDesk.Options.0.2.1\lib\NDesk.Options.dll</HintPath>
       <Private>True</Private>
@@ -46,9 +50,10 @@
   <ItemGroup>
     <Compile Include="ClientComponentCommon\IMessageArrayCreator.cs" />
     <Compile Include="ClientComponentCommon\InternalClientComponent.cs" />
-    <Compile Include="ClientComponentCommon\IExternalClientComponent.cs" />
+    <Compile Include="ClientComponentCommon\ExternalClientComponent.cs" />
     <Compile Include="ClientComponentCommon\MessageArrayCreator.cs" />
     <Compile Include="ClientComponentCommon\ClientMessageProcessor.cs" />
+    <Compile Include="Log4Net\LogHelper.cs" />
     <Compile Include="Messages\Constructors.cs" />
     <Compile Include="Messages\DivideProblem.cs" />
     <Compile Include="Messages\Error.cs" />
@@ -58,7 +63,7 @@
     <Compile Include="Messages\PartialProblems.cs" />
     <Compile Include="Messages\Register.cs" />
     <Compile Include="Messages\RegisterResponse.cs" />
-    <Compile Include="Messages\Solution.cs" />
+    <Compile Include="Messages\Solutions.cs" />
     <Compile Include="Messages\SolutionRequest.cs" />
     <Compile Include="Messages\SolveRequest.cs" />
     <Compile Include="Messages\SolveRequestResponse.cs" />
@@ -106,7 +111,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

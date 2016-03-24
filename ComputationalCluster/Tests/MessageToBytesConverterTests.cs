@@ -30,7 +30,10 @@ namespace Tests
                 }
                 , new Register()
             {
-                Type = RegisterType.CommunicationServer,
+                Type = new RegisterType()
+                {
+                    Value = ComponentType.CommunicationServer,
+                },
                 Id = 212,
                 IdSpecified = true
             }, new Status ()
@@ -53,7 +56,7 @@ namespace Tests
                 (outMessages[0] as DivideProblem).ComputationalNodes);
             Assert.AreEqual((messages[0] as DivideProblem).ProblemType,
                 (outMessages[0] as DivideProblem).ProblemType);
-            Assert.AreEqual((messages[1] as Register).Type, (outMessages[1] as Register).Type);
+            Assert.AreEqual((messages[1] as Register).Type.Value, (outMessages[1] as Register).Type.Value);
             Assert.AreEqual((messages[1] as Register).Id, (outMessages[1] as Register).Id);
             Assert.AreEqual((messages[2] as Status).Threads.Length, (outMessages[2] as Status).Threads.Length);
             Assert.AreEqual((messages[2] as Status).Threads[0].ProblemType, 

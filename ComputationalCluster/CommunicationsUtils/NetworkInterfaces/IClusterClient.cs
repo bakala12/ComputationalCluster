@@ -9,5 +9,6 @@ namespace CommunicationsUtils.NetworkInterfaces
     public interface IClusterClient
     {
         Messages.Message[] SendRequests(Messages.Message[] requests);
+        void ChangeListenerParameters(string address, int port);
     }
 }

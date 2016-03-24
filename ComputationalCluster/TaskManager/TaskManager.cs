@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using log4net;
 using TaskManager.Core;
 
 namespace TaskManager
@@ -20,6 +21,8 @@ namespace TaskManager
     /// </summary>
     public class TaskManager : InternalClientComponent
     {
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         //task manager non-communication context
         private TaskManagerMessageProcessor core;
 
@@ -37,17 +40,17 @@ namespace TaskManager
             handlerThread.Start();
 
             //this thread becomes now status sending thread
-            Console.WriteLine("Registering TM...");
+            log.Debug("Registering TM...");
             RegisterComponent();
             core.ComponentId = this.componentId;
-            Console.WriteLine("Registering complete with id={0}", componentId);
+            log.DebugFormat("Registering complete with id={0}", componentId);
             while(true)
             {
-                Console.WriteLine("Sleeping (less than timeout={0}",timeout);
-                Thread.Sleep((int)(0.7 * timeout));
-                Console.WriteLine("Sending status");
+                log.DebugFormat("Sleeping (less than timeout={0})",timeout);
+                Thread.Sleep((int)(0.6 * timeout));
+                log.Debug("Sending status");
                 Message[] responses = this.SendStatus();
-                Console.WriteLine("Status sent");
+                log.Debug("Status sent");
                 foreach (var response in responses)
                 {
                     messageQueue.Enqueue(response);
@@ -64,7 +67,7 @@ namespace TaskManager
             Status status = core.GetStatus();
             status.Id = this.componentId;
             Message[] requests = creator.Create(status);
-            return statusClient.SendRequests(requests);
+            return this.SendMessages(clusterClient, requests);
         }
 
         /// <summary>
@@ -77,7 +80,10 @@ namespace TaskManager
             {
                 ParallelThreads = 1,
                 SolvableProblems = new[] { "DVRP" },
-                Type = RegisterType.TaskManager,
+                Type = new RegisterType()
+                {
+                    Value = ComponentType.TaskManager
+                },
                 DeregisterSpecified = false,
                 IdSpecified = false
             };
@@ -102,13 +108,13 @@ namespace TaskManager
                 switch (message.MessageType)
                 {
                     case MessageType.NoOperationMessage:
-                        Console.WriteLine("NoOperation acquired: updating backups");
+                        log.Debug("NoOperation acquired: updating backups");
                         UpdateBackups(message.Cast<NoOperation>());
                         break;
                     case MessageType.DivideProblemMessage:
                         //should be done in another thread not to
                         //overload message handler thread
-                        Console.WriteLine("DivideProblem acquired: dividing problem processing...");
+                        log.Debug("DivideProblem acquired: dividing problem processing...");
                         DivideProblem msg = message.Cast<DivideProblem>();
                         Thread compThread = new Thread
                             (o=> this.StartLongComputation(() => core.DivideProblem
@@ -118,28 +124,19 @@ namespace TaskManager
                     case MessageType.SolutionsMessage:
                         //first, in this thread, if solution needs to be linked,
                         //create new thread
-                        Console.WriteLine("Solutions acquired: solutions msg processing");
+                        log.Debug("Solutions acquired: solutions msg processing");
                         Solutions smsg = message.Cast<Solutions>();
                         Thread solThread = new Thread (o=> this.StartLongComputation
                         (() => core.HandleSolutions(smsg)));
                         solThread.Start();
                         break;
                     case MessageType.ErrorMessage:
-                        Console.WriteLine("Error message acquired:{0}",message.Cast<Error>().ErrorMessage);
+                        log.DebugFormat("Error message acquired:{0}",message.Cast<Error>().ErrorMessage);
                         break;
                     default:
                         throw new Exception("Wrong message delivered to TM: " + message.ToString());
                 }
             }
-        }
-
-        /// <summary>
-        /// nothing for now:
-        /// </summary>
-        /// <param name="msg"></param>
-        public override void UpdateBackups (NoOperation msg)
-        {
-            //will be implemented in internalclientcomponent in the next week
         }
     }
 }

@@ -16,6 +16,7 @@ using System.Xml.Serialization;
 
 namespace CommunicationsUtils.Messages
 {
+
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
     [System.SerializableAttribute()]
@@ -33,15 +34,27 @@ namespace CommunicationsUtils.Messages
         /// <remarks/>
         public ErrorErrorType ErrorType
         {
-            get { return this.errorTypeField; }
-            set { this.errorTypeField = value; }
+            get
+            {
+                return this.errorTypeField;
+            }
+            set
+            {
+                this.errorTypeField = value;
+            }
         }
 
         /// <remarks/>
         public string ErrorMessage
         {
-            get { return this.errorMessageField; }
-            set { this.errorMessageField = value; }
+            get
+            {
+                return this.errorMessageField;
+            }
+            set
+            {
+                this.errorMessageField = value;
+            }
         }
     }
 
@@ -54,6 +67,9 @@ namespace CommunicationsUtils.Messages
 
         /// <remarks/>
         UnknownSender,
+
+        /// <remarks/>
+        NotAPrimaryServer,
 
         /// <remarks/>
         InvalidOperation,

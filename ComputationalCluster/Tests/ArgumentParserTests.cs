@@ -38,5 +38,14 @@ namespace Tests
             Assert.AreEqual("1000", parser.map["address="]);
             Assert.AreEqual("4", parser.map["port="]);
         }
+
+        [TestMethod]
+        public void TestVerboseArg_ForServerExecution()
+        {
+            var parser = new ArgumentParser(OptionSetPool.ServerOptionsSet);
+            var args = new[] { "NazwaProgramu", "-verbose" };
+            parser.ProcessArguments(args);
+            Assert.AreEqual("verbose", parser.map["verbose"]);
+        }
     }
 }

@@ -33,6 +33,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,9 +49,12 @@
   <ItemGroup>
     <Compile Include="ComputationalServer.cs" />
     <Compile Include="Data\ActiveComponent.cs" />
+    <Compile Include="Data\DataSetOps.cs" />
+    <Compile Include="Data\PartialSet.cs" />
     <Compile Include="Data\ProblemDataSet.cs" />
     <Compile Include="Data\ServerState.cs" />
     <Compile Include="Extensions\ArgumentParserExtensionsForServer.cs" />
+    <Compile Include="Interfaces\IChangeServerState.cs" />
     <Compile Include="Interfaces\IMessageProcessor.cs" />
     <Compile Include="Interfaces\IRunnable.cs" />
     <Compile Include="MessageProcessing\BackupMessageProcessor.cs" />
@@ -63,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

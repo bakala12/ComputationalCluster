@@ -1,4 +1,5 @@
-﻿using CommunicationsUtils.Messages;
+﻿using System.Diagnostics;
+using CommunicationsUtils.Messages;
 // ReSharper disable UnusedAutoPropertyAccessor.Local
 // ReSharper disable InconsistentNaming
 
@@ -11,13 +12,15 @@ namespace Server.Data
     /// </summary>
     public class ActiveComponent
     {
-        /// <summary>
-        /// Id of a component
-        /// </summary>
-        public ulong componentId { get; private set; }
-        /// <summary>
-        /// Status of a component
-        /// </summary>
-        public StatusThreadState componentStatus { get; private set; }
+        //componentId is not necessary, it's the key of a dict
+        public ComponentType ComponentType { get; set;}
+        public string[] SolvableProblems { get; set; }
+        public Stopwatch StatusWatch { get; set; }
+
+        public ActiveComponent()
+        {
+            StatusWatch = new Stopwatch();
+            StatusWatch.Start();
+        }
     }
 }

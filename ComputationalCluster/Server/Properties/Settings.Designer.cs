@@ -37,18 +37,6 @@ namespace Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("109.243.41.236")]
-        public string Address {
-            get {
-                return ((string)(this["Address"]));
-            }
-            set {
-                this["Address"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("8086")]
         public int Port {
             get {
@@ -61,7 +49,7 @@ namespace Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0.0.0.0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.33")]
         public string MasterAddress {
             get {
                 return ((string)(this["MasterAddress"]));
@@ -85,7 +73,7 @@ namespace Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("14000")]
         public uint Timeout {
             get {
                 return ((uint)(this["Timeout"]));

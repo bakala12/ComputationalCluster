@@ -9,34 +9,35 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 
 namespace Client
 {
-    public class ClientNode : IExternalClientComponent
+    public class ClientNode : ExternalClientComponent
     {
-        private IClusterClient clusterClient;
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private Stopwatch solvingWatch;
         private ClientNodeProcessingModule core;
         private IMessageArrayCreator creator;
 
         public ClientNode(IClusterClient _clusterClient, ClientNodeProcessingModule _core,
-            IMessageArrayCreator _creator)
+            IMessageArrayCreator _creator): base (_clusterClient)
         {
-            clusterClient = _clusterClient;
             core = _core;
             creator = _creator;
             solvingWatch = new Stopwatch();
         }
 
-        public ClientNode()
+        public ClientNode(IClusterClient _clusterClient): base (_clusterClient)
         {
-
+            
         }
 
         /// <summary>
         /// main CC loop (I dont see a need to unit test it)
         /// </summary>
-        public void Run ()
+        public override void Run ()
         {
             while (true)
             {
@@ -44,9 +45,10 @@ namespace Client
                 core.GetProblem();
                 //could be in another thread:
                 solvingWatch.Reset();
-                Console.WriteLine("Sending problem");
+                log.Debug("Sending problem");
                 SolveRequestResponse response = SendProblem();
                 ulong problemId = response.Id;
+                log.DebugFormat("Response received. Id of the problem in cluster: {0}", problemId);
                 solvingWatch.Start();
 
                 SolutionRequest request = new SolutionRequest()
@@ -57,13 +59,15 @@ namespace Client
                 SolutionsSolution solution = this.WorkProblem(request);
                 if (solution == null)
                 {
-                    Console.WriteLine("Solving timeout. Aborting.");
+                    log.Debug("Solving timeout. Aborting.");
                     continue;
                 }
                 else
-                    Console.WriteLine("Solution found.");
+                {
+                    log.DebugFormat("\n*** SOLUTION FOUND ({0}) ***\n", problemId);
+                }
 
-            core.DoSomethingWithSolution(solution);
+                core.DoSomethingWithSolution(solution);
             }
         }
 
@@ -76,21 +80,21 @@ namespace Client
             while (true)
             {
                 Thread.Sleep((int)Properties.Settings.Default.SolutionCheckingInterval);
-
+                log.DebugFormat("Sending solutionRequest ({0})", request.Id);
                 Solutions solution = CheckComputations(request);
 
                 //assuming that final solution has one element with type==final
-                if (solution.Solutions1[0].Type == SolutionsSolutionType.Final)
+                if (solution.SolutionsList[0].Type == SolutionsSolutionType.Final)
                 {
-                    return solution.Solutions1[0];
+                    return solution.SolutionsList[0];
                 }
                 //assuming only one timeout is enough to end waiting for an answer
-                if (solution.Solutions1[0].TimeoutOccured)
+                if (solution.SolutionsList[0].TimeoutOccured)
                 {
                     break;
                 }
                 // ~~ else continue
-                Console.WriteLine("No solution yet");
+                log.DebugFormat("No solution yet ({0})", request.Id);
             }
 
             return null;
@@ -99,7 +103,6 @@ namespace Client
         /// <summary>
         /// sends problem to cluster, returns unique problem id
         /// </summary>
-        /// <param name="byteData"></param>
         /// <returns></returns>
         public virtual SolveRequestResponse SendProblem()
         {
@@ -107,7 +110,7 @@ namespace Client
             problemRequest.IdSpecified = false;
 
             Message[] requests = creator.Create(problemRequest);
-            Message[] responses = clusterClient.SendRequests(requests);
+            Message[] responses = this.SendMessages(clusterClient, requests);
             SolveRequestResponse solveResponse = null;
 
             foreach (var response in responses)
@@ -115,13 +118,13 @@ namespace Client
                 switch (response.MessageType)
                 {
                     case MessageType.SolveRequestResponseMessage:
-                        Console.WriteLine("SolveRequestResponse acquired: handling");
+                        log.Debug("SolveRequestResponse acquired: handling");
                         if (solveResponse != null)
                             throw new Exception("Multiple SolveRequestResponse messages in CC");
                         solveResponse = response.Cast<SolveRequestResponse>();
                         break;
                     case MessageType.NoOperationMessage:
-                        Console.WriteLine("NoOperation acquired: updating backups");
+                        log.Debug("NoOperation acquired: updating backups");
                         UpdateBackups(response.Cast<NoOperation>());
                         break;
                     default:
@@ -143,8 +146,7 @@ namespace Client
         public virtual Solutions CheckComputations(SolutionRequest request)
         {
             Message[] requests = creator.Create(request);
-            Console.WriteLine("Sending solution request...");
-            Message[] responses = clusterClient.SendRequests(requests);
+            Message[] responses = this.SendMessages(clusterClient, requests);
             Solutions solutionReponse = null;
 
             foreach (var response in responses)
@@ -152,11 +154,11 @@ namespace Client
                 switch (response.MessageType)
                 {
                     case MessageType.NoOperationMessage:
-                        Console.WriteLine("NoOperation acquired: updating backups");
+                        log.Debug("NoOperation acquired: updating backups");
                         this.UpdateBackups(response.Cast<NoOperation>());
                         break;
                     case MessageType.SolutionsMessage:
-                        Console.WriteLine("Solutions acquired: checking...");
+                        log.Debug("Solutions acquired: checking...");
                         if (solutionReponse != null)
                         {
                             throw new Exception("Multiple solutions msg from CS to CC");
@@ -169,19 +171,10 @@ namespace Client
             }
             if (solutionReponse == null)
             {
-                throw new Exception("No Solutions message from server delivered (it always should do it)");
+                throw new Exception("No Solutions message from server delivered (it always should do that)");
             }
             //could (or couldn't?) be null:
             return solutionReponse;
-        }
-
-        /// <summary>
-        /// will be implemented in the future
-        /// </summary>
-        /// <param name="msg"></param>
-        public void UpdateBackups(NoOperation msg)
-        {
-
         }
     }
 }

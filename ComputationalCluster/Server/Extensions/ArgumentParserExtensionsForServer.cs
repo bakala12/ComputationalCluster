@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CommunicationsUtils.Argument_parser;
+using CommunicationsUtils.Log4Net;
 using CommunicationsUtils.Shared;
 
 namespace Server.Extensions
@@ -28,7 +29,7 @@ namespace Server.Extensions
                         Properties.Settings.Default.Timeout = pair.Value.ChangeType<uint>();
                         break;
                     case "backup":
-                        Properties.Settings.Default.IsBackup = pair.Value.ChangeType<bool>();
+                        Properties.Settings.Default.IsBackup = true;
                         break;
                     case "maddress=":
                         Properties.Settings.Default.MasterAddress = pair.Value;
@@ -36,8 +37,8 @@ namespace Server.Extensions
                     case "mport=":
                         Properties.Settings.Default.MasterPort = pair.Value.ChangeType<int>();
                         break;
-                    case "address=":
-                        Properties.Settings.Default.Address = pair.Value;
+                    case "verbose":
+                        LogHelper.EnableConsoleLogging();
                         break;
                     default:
                         throw new ArgumentException();

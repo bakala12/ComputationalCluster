@@ -8,25 +8,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]
+
 namespace CommunicationsUtils.ClientComponentCommon
 {
     //common things for cluster's internal client components (TM and CN, not comp. client)
-    public abstract class InternalClientComponent: IExternalClientComponent
+    public abstract class InternalClientComponent: ExternalClientComponent
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         //external:
-        public abstract void Run();
-        public abstract void UpdateBackups(NoOperation msg);
+        //run defined in inheriting classes
+        //updateBackups defined in inherited class
 
         //internal:
         #region fields
         /// <summary>
-        /// tcp client wrapper used in status sending thread only
-        /// </summary>
-        protected IClusterClient statusClient;
-        /// <summary>
         /// tcp client wrapper used in sending problem related messages only
         /// </summary>
         protected IClusterClient problemClient;
+        /// <summary>
+        /// lock to handle possible undesirable concurrent writing via problemClient
+        /// </summary>
+        protected readonly object SyncRoot = new object();
         /// <summary>
         /// creates Message[] array from params messages (test-friendly feature)
         /// </summary>
@@ -47,9 +50,8 @@ namespace CommunicationsUtils.ClientComponentCommon
 
         public InternalClientComponent
             (IClusterClient _clusterClient, IClusterClient _problemClient,
-            IMessageArrayCreator _creator)
+            IMessageArrayCreator _creator) : base (_clusterClient)
         {
-            statusClient = _clusterClient;
             problemClient = _problemClient;
             creator = _creator;
             messageQueue = new ConcurrentQueue<Message>();
@@ -89,14 +91,18 @@ namespace CommunicationsUtils.ClientComponentCommon
         }
 
         /// <summary>
-        /// sends some problem solution via problemClient
+        /// sends some problem related message via problemClient
         /// </summary>
         /// <param name="request"></param>
         public void SendProblemRelatedMessage(Message request)
         {
             Message[] requests = creator.Create(request);
-            Console.WriteLine("Sending after computations: {0}", request.ToString());
-            Message[] responses = problemClient.SendRequests(requests);
+            log.DebugFormat("Sending after computations: {0}", request.ToString());
+            Message[] responses;
+            lock (SyncRoot)
+            {
+                responses = this.SendMessages(problemClient, requests);
+            }
             foreach (var response in responses)
                 messageQueue.Enqueue(response);
         }
@@ -110,7 +116,7 @@ namespace CommunicationsUtils.ClientComponentCommon
         protected virtual void handleRegisterResponses(Register registerMessage)
         {
             Message[] requests = creator.Create(registerMessage);
-            Message[] responses = statusClient.SendRequests(requests);
+            Message[] responses = this.SendMessages(clusterClient, requests);
             RegisterResponse registerResponse = null;
             foreach (var response in responses)
             {
@@ -119,11 +125,11 @@ namespace CommunicationsUtils.ClientComponentCommon
                     case MessageType.RegisterResponseMessage:
                         if (registerResponse != null)
                             throw new Exception("Multiple register responses");
-                        Console.WriteLine("RegisterResponse acquired: updating fields...");
+                        log.Debug("RegisterResponse acquired: updating fields...");
                         registerResponse = response.Cast<RegisterResponse>();
                         break;
                     case MessageType.NoOperationMessage:
-                        Console.WriteLine("NoOperation acquired: updating backups");
+                        log.Debug("NoOperation acquired: updating backups");
                         UpdateBackups(response.Cast<NoOperation>());
                         break;
                     default:

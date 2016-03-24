@@ -11,6 +11,7 @@ namespace CommunicationsUtils.NetworkInterfaces
     {
         void Start();
         Message[] WaitForRequest();
+        string ExtractSocketAddress();
         void SendResponse(Message[] responses);
         void Stop();
     }

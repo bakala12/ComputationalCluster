@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CommunicationsUtils.Argument_parser;
+using CommunicationsUtils.Log4Net;
 using CommunicationsUtils.Shared;
 
 namespace Client
@@ -18,6 +19,9 @@ namespace Client
                         break;
                     case "address=":
                         Properties.Settings.Default.Address = pair.Value;
+                        break;
+                    case "verbose":
+                        LogHelper.EnableConsoleLogging();
                         break;
                     default:
                         throw new ArgumentException();

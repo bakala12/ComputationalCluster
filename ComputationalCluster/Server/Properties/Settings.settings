@@ -5,20 +5,17 @@
     <Setting Name="IsBackup" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Address" Type="System.String" Scope="User">
-      <Value Profile="(Default)">109.243.41.236</Value>
-    </Setting>
     <Setting Name="Port" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">8086</Value>
     </Setting>
     <Setting Name="MasterAddress" Type="System.String" Scope="User">
-      <Value Profile="(Default)">0.0.0.0</Value>
+      <Value Profile="(Default)">192.168.0.33</Value>
     </Setting>
     <Setting Name="MasterPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">8086</Value>
     </Setting>
     <Setting Name="Timeout" Type="System.UInt32" Scope="User">
-      <Value Profile="(Default)">5000</Value>
+      <Value Profile="(Default)">14000</Value>
     </Setting>
   </Settings>
 </SettingsFile>

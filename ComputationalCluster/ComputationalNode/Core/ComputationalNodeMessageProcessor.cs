@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Messages;
+using log4net;
 
 namespace ComputationalNode.Core
 {
@@ -13,6 +15,8 @@ namespace ComputationalNode.Core
     /// </summary>
     public class ComputationalNodeMessageProcessor: ClientMessageProcessor
     {
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public ComputationalNodeMessageProcessor(List<string> problems ): base (problems)
         {
             //enough for this stage:
@@ -29,37 +33,31 @@ namespace ComputationalNode.Core
 
         public Message ComputeSubtask(SolvePartialProblems solvePartialProblems)
         {
-            //some error handling:
-            if (!this.SolvableProblems.Contains(solvePartialProblems.ProblemType))
-            {
-                return new Error()
-                {
-                    ErrorMessage = "Invalid type of problem delivered",
-                    ErrorType = ErrorErrorType.InvalidOperation
-                };
-            }
-            Console.WriteLine("Computation started & finished.");
-            //implementation in second stage, now mocked:
+            log.DebugFormat("Computation started. ({0})", solvePartialProblems.Id);
+            Thread.Sleep(20000);
+            //implementation in second stage, now mocked (thread sleep)
             if (!SolvableProblems.Contains(solvePartialProblems.ProblemType))
                 return new Error()
                 {
-                    ErrorMessage = "not supported problem type",
+                    ErrorMessage = "Not supported problem type",
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
 
+            log.DebugFormat("Computation finished. ({0})", solvePartialProblems.Id);
 
             return new Solutions()
             {
                 CommonData = new byte[] {0},
                 Id = solvePartialProblems.Id,
                 ProblemType = solvePartialProblems.ProblemType,
-                Solutions1 = new[]
+                SolutionsList = new[]
                 {
                     new SolutionsSolution()
                     {
                         Data = null,
                         ComputationsTime = 1,
-                        TaskIdSpecified = false,
+                        TaskIdSpecified = true,
+                        TaskId = solvePartialProblems.PartialProblems[0].TaskId,
                         Type = SolutionsSolutionType.Partial
                     }
                 }

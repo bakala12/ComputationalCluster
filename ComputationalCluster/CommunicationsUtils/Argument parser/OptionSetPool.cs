@@ -4,12 +4,12 @@
     {
         public static string[] ServerOptionsSet => new[]
         {
-            "port=","time=","backup","maddress=","mport="
+            "port=","time=","backup","maddress=","mport=","verbose"
         };
 
         public static string[] ClientOptionsSet => new[]
         {
-            "address=","port="
+            "address=","port=","verbose"
         };
     }
 }

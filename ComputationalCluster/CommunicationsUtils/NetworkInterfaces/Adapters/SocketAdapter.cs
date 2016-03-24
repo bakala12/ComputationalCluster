@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,12 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
         public void Send(byte[] v, int count)
         {
             wrappedSocket.Send(v, count, SocketFlags.None);
+        }
+
+        public string ExtractSocketAddress()
+        {
+            IPEndPoint endPoint = (IPEndPoint)wrappedSocket.RemoteEndPoint;
+            return endPoint.Address.ToString();
         }
     }
 }

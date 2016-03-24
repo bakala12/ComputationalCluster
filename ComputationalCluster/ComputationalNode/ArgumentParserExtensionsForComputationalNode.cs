@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CommunicationsUtils.Argument_parser;
+using CommunicationsUtils.Log4Net;
 using CommunicationsUtils.Shared;
 
 namespace ComputationalNode
@@ -19,7 +20,10 @@ namespace ComputationalNode
                         case "address=":
                             Properties.Settings.Default.Address = pair.Value;
                             break;
-                        default:
+                        case "verbose":
+                            LogHelper.EnableConsoleLogging();
+                        break;
+                    default:
                             throw new ArgumentException();
                     }
                 }

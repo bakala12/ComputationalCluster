@@ -4,15 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 
 namespace TaskManager.Core
 {
     /// <summary>
     /// TM's message handling utilities
     /// </summary>
-    public class TaskManagerMessageProcessor: ClientMessageProcessor
+    public class TaskManagerMessageProcessor : ClientMessageProcessor
     {
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// current problems in TM indexed by problem id in cluster (given by CS)
         /// </summary>
@@ -45,36 +49,44 @@ namespace TaskManager.Core
 
         public Message DivideProblem(DivideProblem divideProblem)
         {
-            //implementation in second stage, this is mocked
+            log.DebugFormat("Division of problem has started. ({0})", divideProblem.Id);
+            //implementation in second stage
             if (!SolvableProblems.Contains(divideProblem.ProblemType))
             {
-                Console.WriteLine("Not supported problem type.");
+                log.Debug("Not supported problem type.");
                 return new Error()
                 {
                     ErrorMessage = "not supported problem type",
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
             }
-            Console.WriteLine("Division of problem has started.");
             var partialProblem = new SolvePartialProblemsPartialProblem()
             {
                 TaskId = 0,
                 Data = new byte[] { 0 },
                 NodeID = componentId
             };
-
+            var partialProblem2 = new SolvePartialProblemsPartialProblem()
+            {
+                TaskId = 1,
+                Data = new byte[] { 0 },
+                NodeID = componentId
+            };
             //adding info about partial problems, their task ids, and partialProblem
             //some things can be temporary (partialProblems?)
             storage.AddIssue(divideProblem.Id, new ProblemInfo()
             {
-                ProblemsCount = 1,
+                ProblemsCount = 2,
                 ProblemType = divideProblem.ProblemType,
                 SolutionsCount = 0
             });
 
             storage.AddTaskToIssue(divideProblem.Id, partialProblem);
+            storage.AddTaskToIssue(divideProblem.Id, partialProblem2);
             //end of implementation
-
+            //mock (thread sleep)
+            Thread.Sleep(20000);
+            log.DebugFormat("Division finished. ({0})", divideProblem.Id);
             //creating msg
             SolvePartialProblems partialProblems = new SolvePartialProblems()
             {
@@ -83,10 +95,9 @@ namespace TaskManager.Core
                 CommonData = divideProblem.Data,
                 PartialProblems = new SolvePartialProblemsPartialProblem[]
                 {
-                    partialProblem
+                    partialProblem, partialProblem2
                 }
             };
-            Console.WriteLine("Success. Problem divided");
             return partialProblems;
         }
 
@@ -97,12 +108,12 @@ namespace TaskManager.Core
         /// <param name="solutions"></param>
         public Solutions HandleSolutions(Solutions solutions)
         {
-            if (solutions.Solutions1 == null)
+            if (solutions.SolutionsList == null)
                 return null;
-            Console.WriteLine("Adding partial solutions to TM's memory.");
-            foreach (var solution in solutions.Solutions1)
+            log.DebugFormat("Adding partial solutions to TM's memory. ({0})", solutions.Id);
+            foreach (var solution in solutions.SolutionsList)
             {
-                if (!storage.ContainsIssue(solutions.Id) || storage.ExistsTask(solutions.Id,solution.TaskId))
+                if (!storage.ContainsIssue(solutions.Id) || !storage.ExistsTask(solutions.Id, solution.TaskId))
                 {
                     throw new Exception("Invalid solutions message delivered to TM");
                 }
@@ -114,7 +125,7 @@ namespace TaskManager.Core
             //can be linked, because all of partial problems were solved & delivered
             if (storage.IssueCanBeLinked(solutions.Id))
             {
-                Console.WriteLine("Linking solutions (id:{0})", solutions.Id);
+                log.DebugFormat("Linking solutions (id:{0})", solutions.Id);
                 Solutions finalSolution = LinkSolutions(solutions.Id);
                 storage.RemoveIssue(solutions.Id);
                 return finalSolution;
@@ -128,16 +139,25 @@ namespace TaskManager.Core
         {
             //for issue in storage (by problemId) - get all tasks
             //get SolutionsSolution from them and do something amazing
-
+            //mock (thread sleep)
+            Thread.Sleep(20000);
+            log.DebugFormat("Solutions have been linked ({0})", problemId);
             //return final solution (this one is mocked)
             return new Solutions()
             {
                 CommonData = new byte[] { 0 },
                 Id = problemId,
                 ProblemType = storage.GetIssueType(problemId),
-                Solutions1
-            = new[] { new SolutionsSolution() { Data = null, ComputationsTime = 1, TaskIdSpecified = false,
-            Type = SolutionsSolutionType.Final} }
+                SolutionsList = new[]
+                {
+                    new SolutionsSolution()
+                    {
+                        Data = null,
+                        ComputationsTime = 1,
+                        TaskIdSpecified = false,
+                        Type = SolutionsSolutionType.Final
+                    }
+                }
             };
         }
     }

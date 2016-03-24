@@ -21,22 +21,22 @@ Computational Client : Bondyra
 	2. Poprawna komunikacja z serwerem bez uwzglêdnienia awaryjnoœci (3h) 
 	- poœwiêcono: 3-4h.
 	3. Poprawna komunikacja z serwerem z uwzglêdnieniem awaryjnoœci(3h) 
-	- zadanie w toku
+	- poœwiêcono ok. 7h.
 
 Communication Server : B¹ka³a, Duszak
 	1. Skonstruowanie szkieletu klas dla projektu (5h) 
 	- poœwiêcono: oko³o 5.5h
 	2. Konfiguracja systemu przez parametry wywo³ania (3h) 
 	- poœwiêcono: 3h.
-	3. Implementacja sposobu komunikacji serwer - backupy (4h) 
-	- zadanie w toku
+	3. Implementacja sposobu komunikacji serwer - backupy (4h) + Uwzglêdnienie awaryjnoœci (6h) 
+	- poœwiêcono ok. 8h. 
 	4. Implementacja komunikacji serwer - klient (3h) 
 	- zadanie w toku
-	5. Implementacja komunikacji z Task Managerami i wêz³ami obliczeniowymi (5h) - zadanie w toku
+	5. Implementacja komunikacji z Task Managerami i wêz³ami obliczeniowymi (5h) 
+	- poœwiêcono ok. 6h.
 	6. Poprawne kolejkowanie wiadomoœci (3h) 
-	- poœwiêcono ok. 2h.
-	7. Uwzglêdnienie awaryjnoœci (6h) 
-	- zadanie w toku
+	- poœwiêcono ok. 3h.
+
 
 Task Manager : Bondyra
 	1. Skonstruowanie szkieletu klas dla projektu (4h) 
@@ -47,7 +47,7 @@ Task Manager : Bondyra
 	komponent w celu przetestowania poprawnoœci implementacji komunikacji w systemie (4h) 
 	- poœwiêcono: 2h.
 	4. Uwzglêdnienie awaryjnoœci (3h) 
-	- zadanie w toku
+	- poœwiêcono ok. 2h.
 
 Computational Node : Augustyniak
 	1. Skonstruowanie szkieletu klas dla projektu (4h) 
@@ -58,7 +58,7 @@ Computational Node : Augustyniak
 	przetestowania poprawnoœci implementacji komunikacji w systemie (4h) 
 	- poœwiêcono: 1-2h.
 	4. Uwzglêdnienie awaryjnoœci (3h) 
-	- zadanie w toku
+	- poœwiêcono ok. 2h.
 
 Inne : Bondyra
 	1. Globalna konfiguracja systemu (3h) 

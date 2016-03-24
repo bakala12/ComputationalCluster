@@ -165,7 +165,7 @@ namespace Server
             _backupClient = null;
             if (_clusterListener == null)
                 _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
-
+            _backups.Clear();
 
             Log.Debug("Starting listening mechanism.");
             _clusterListener.Start();
@@ -182,16 +182,11 @@ namespace Server
         /// </summary>
         public virtual void RunAsBackup()
         {
-            lock(_syncRoot)
+            lock (_syncRoot)
             {
                 _messageProcessor = new BackupMessageProcessor
                     (_clusterListener, _synchronizationQueue, _problemDataSets, _activeComponents);
             }
-            _backups.Add(new BackupServerInfo()
-            {
-                address = Properties.Settings.Default.MasterAddress,
-                port = (ushort)Properties.Settings.Default.Port,
-            });
             if (_backupClient == null)
                 _backupClient = ClusterClientFactory.Factory.Create(Properties.Settings.Default.MasterAddress,
                     Properties.Settings.Default.MasterPort);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CommunicationsUtils.Messages;
+using CommunicationsUtils.NetworkInterfaces;
 using Server.Data;
 
 namespace Server.MessageProcessing
@@ -13,10 +14,11 @@ namespace Server.MessageProcessing
     public class PrimaryMessageProcessor : MessageProcessor
     {
 
-        public PrimaryMessageProcessor(ConcurrentQueue<Message> synchronizationQueue,
+        public PrimaryMessageProcessor(IClusterListener clusterListener, 
+            ConcurrentQueue<Message> synchronizationQueue,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents) : 
-            base (synchronizationQueue, dataSets, activeComponents)
+            base (clusterListener, synchronizationQueue, dataSets, activeComponents)
         { }
 
         protected override Message[] RespondRegisterResponseMessage(RegisterResponse message,
@@ -40,7 +42,7 @@ namespace Server.MessageProcessing
                 SolvableProblems = message.SolvableProblems
             };
             activeComponents.Add(maxId, newComponent);
-            Log.DebugFormat("New component: {0}, assigned id: {1}", message.Type, maxId);
+            Log.DebugFormat("New component: {0}, assigned id: {1}", message.Type.Value, maxId);
             //add new watcher of timeout
             RunStatusThread(maxId, activeComponents, dataSets);
             //add register message to synchronization queue
@@ -67,11 +69,13 @@ namespace Server.MessageProcessing
 
         private void AddBackupAddressToBackupList(ICollection<BackupServerInfo> backups)
         {
-           backups.Add(new BackupServerInfo()
-           {
-               address = "192.168.0.33",
-               port = 8086
-           });
+            var _address = ClusterListener.ExtractSocketAddress();
+            var _port = ClusterListener.ExtractSocketPort();
+            backups.Add(new BackupServerInfo()
+            {
+                address = _address,
+                port = (ushort)_port
+            });
         }
 
         protected override Message[] RespondNoOperationMessage(NoOperation message,
@@ -124,8 +128,6 @@ namespace Server.MessageProcessing
             Message whatToDo = null;
             Log.DebugFormat("Handling status message of {0}(id={1}). Searching for problems.",
                 activeComponents[who].ComponentType, who);
-            Log.DebugFormat("Handling status message of {0}(id={1}).",
-                activeComponents[who].ComponentType, who);
             switch (activeComponents[who].ComponentType)
             {
                 case ComponentType.ComputationalNode:
@@ -143,8 +145,6 @@ namespace Server.MessageProcessing
             {
                 Log.DebugFormat("Nothing additional found for {0} (id={1})",
                     activeComponents[who].ComponentType, who);
-                Log.DebugFormat("Nothing additional found for {0} (id={1})",
-                    activeComponents[who].ComponentType, who);
                 return new Message[]
                 {
                     new NoOperation()
@@ -153,8 +153,6 @@ namespace Server.MessageProcessing
                     }
                 };
             }
-            Log.DebugFormat("Found problem ({0}) for {1} (id={2})",
-                whatToDo.MessageType, activeComponents[who].ComponentType, who);
             Log.DebugFormat("Found problem ({0}) for {1} (id={2})",
                 whatToDo.MessageType, activeComponents[who].ComponentType, who);
 

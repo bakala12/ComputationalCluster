@@ -85,7 +85,7 @@ namespace TaskManager.Core
             storage.AddTaskToIssue(divideProblem.Id, partialProblem2);
             //end of implementation
             //mock (thread sleep)
-            Thread.Sleep(30000);
+            Thread.Sleep(20000);
             log.DebugFormat("Division finished. ({0})", divideProblem.Id);
             //creating msg
             SolvePartialProblems partialProblems = new SolvePartialProblems()

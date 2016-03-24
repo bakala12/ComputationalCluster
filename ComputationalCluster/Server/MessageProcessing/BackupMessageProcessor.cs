@@ -1,7 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using CommunicationsUtils.Messages;
+using CommunicationsUtils.NetworkInterfaces;
 using Server.Data;
 
 namespace Server.MessageProcessing
@@ -12,20 +15,27 @@ namespace Server.MessageProcessing
     /// </summary>
     public class BackupMessageProcessor : MessageProcessor
     {
-        public BackupMessageProcessor(ConcurrentQueue<Message> synchronizationQueue,
+        public BackupMessageProcessor(IClusterListener clusterListener, 
+            ConcurrentQueue<Message> synchronizationQueue,
             IDictionary<int, ProblemDataSet> dataSets, 
-            IDictionary<int, ActiveComponent> activeComponents ) : 
-            base (synchronizationQueue, dataSets, activeComponents)
+            IDictionary<int, ActiveComponent> activeComponents) : 
+            base (clusterListener, synchronizationQueue, dataSets, activeComponents)
         { }
 
         protected override Message[] RespondStatusMessage(Status message,
            IDictionary<int, ProblemDataSet> dataSets,
            IDictionary<int, ActiveComponent> activeComponents, List<BackupServerInfo> backups)
         {
-            WriteResponseMessageControlInformation(message, MessageType.SolutionsMessage);
-            var msgs = SynchronizationQueue.ToArray();
+            WriteResponseMessageControlInformation(message, MessageType.StatusMessage);
+            var msgs = SynchronizationQueue.ToList();
+            //send nooperation with no information about this backup (server imitation)
+            msgs.Add(new NoOperation()
+            {
+                //linq is awesome:
+                BackupServersInfo = backups.Skip(1).ToArray()
+            });
             SynchronizationQueue = new ConcurrentQueue<Message>();
-            return msgs;
+            return msgs.ToArray();
         }
 
 

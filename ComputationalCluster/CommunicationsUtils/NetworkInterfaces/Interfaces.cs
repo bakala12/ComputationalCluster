@@ -33,5 +33,7 @@ namespace CommunicationsUtils.NetworkInterfaces
         int Receive(byte[] requestBytes, int count);
         void Close();
         void Send(byte[] v, int count);
+        string ExtractSocketAddress();
+        int ExtractSocketPort();
     }
 }

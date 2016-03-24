@@ -64,7 +64,7 @@ namespace Client
                 }
                 else
                 {
-                    log.DebugFormat("Solution found. ({0})", problemId);
+                    log.DebugFormat("\n*** SOLUTION FOUND ({0}) ***\n", problemId);
                 }
 
                 core.DoSomethingWithSolution(solution);

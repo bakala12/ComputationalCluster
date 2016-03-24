@@ -40,6 +40,16 @@ namespace CommunicationsUtils.NetworkInterfaces
             return converter.BytesToMessages(requestBytes, len);
         }
 
+        public string ExtractSocketAddress()
+        {
+            return currentSocket.ExtractSocketAddress();
+        }
+
+        public int ExtractSocketPort()
+        {
+            return currentSocket.ExtractSocketPort();
+        }
+
         /// <summary>
         /// sends response(s) via open connection
         /// </summary>

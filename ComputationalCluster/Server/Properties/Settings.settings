@@ -15,7 +15,7 @@
       <Value Profile="(Default)">8086</Value>
     </Setting>
     <Setting Name="Timeout" Type="System.UInt32" Scope="User">
-      <Value Profile="(Default)">20000</Value>
+      <Value Profile="(Default)">14000</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -34,7 +34,7 @@ namespace ComputationalNode.Core
         public Message ComputeSubtask(SolvePartialProblems solvePartialProblems)
         {
             log.DebugFormat("Computation started. ({0})", solvePartialProblems.Id);
-            Thread.Sleep(30000);
+            Thread.Sleep(20000);
             //implementation in second stage, now mocked (thread sleep)
             if (!SolvableProblems.Contains(solvePartialProblems.ProblemType))
                 return new Error()

@@ -22,5 +22,15 @@ namespace CommunicationsUtils.NetworkInterfaces.Mocks
         {
             return;
         }
+
+        public string ExtractSocketAddress()
+        {
+            return "";
+        }
+
+        public int ExtractSocketPort()
+        {
+            return -1;
+        }
     }
 }

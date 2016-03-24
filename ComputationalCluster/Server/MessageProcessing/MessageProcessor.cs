@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using CommunicationsUtils.Messages;
+using CommunicationsUtils.NetworkInterfaces;
 using log4net;
 using Server.Data;
 using Server.Interfaces;
@@ -29,10 +30,14 @@ namespace Server.MessageProcessing
 
         public List<Thread> StatusThreads { get; protected set; }
 
-        protected MessageProcessor(ConcurrentQueue<Message> synchronizationQueue,
+        protected IClusterListener ClusterListener;
+
+        protected MessageProcessor(IClusterListener clusterListener, 
+            ConcurrentQueue<Message> synchronizationQueue,
             IDictionary<int, ProblemDataSet> dataSets,
             IDictionary<int, ActiveComponent> activeComponents )
         {
+            ClusterListener = clusterListener;
             SynchronizationQueue = synchronizationQueue;
             StatusThreads = new List<Thread>();
             //run all status threads (needed if backup is getting primary status)
@@ -59,6 +64,11 @@ namespace Server.MessageProcessing
                 var elapsed = activeComponents[who].StatusWatch.ElapsedMilliseconds;
                 if (elapsed > Properties.Settings.Default.Timeout)
                 {
+                    //backup timeout
+                    if (activeComponents[who].ComponentType == ComponentType.CommunicationServer)
+                    {
+                        continue;
+                    }
                     Message deregister = new Register()
                     {
                         Deregister = true,
@@ -79,6 +89,9 @@ namespace Server.MessageProcessing
         protected void RunStatusThread(int who,
             IDictionary<int, ActiveComponent> activeComponents, IDictionary<int, ProblemDataSet> dataSets)
         {
+            //we assume that backups are malfunction-free (specification issue)
+            if (activeComponents[who].ComponentType == ComponentType.CommunicationServer)
+                return;
             if (!_doStatusWork) _doStatusWork = true;
             var t = new Thread(() => StatusThreadWork(who, activeComponents, dataSets));
             t.Start();

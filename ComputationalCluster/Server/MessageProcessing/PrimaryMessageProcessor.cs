@@ -70,6 +70,7 @@ namespace Server.MessageProcessing
         private void AddBackupAddressToBackupList(ICollection<BackupServerInfo> backups, ushort _port)
         {
             var _address = ClusterListener.ExtractSocketAddress();
+            Log.DebugFormat("adding new node with addres = {0}", _address);
             backups.Add(new BackupServerInfo()
             {
                 address = _address,

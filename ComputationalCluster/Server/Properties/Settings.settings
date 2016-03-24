@@ -9,7 +9,7 @@
       <Value Profile="(Default)">8086</Value>
     </Setting>
     <Setting Name="MasterAddress" Type="System.String" Scope="User">
-      <Value Profile="(Default)">192.168.0.33</Value>
+      <Value Profile="(Default)">192.168.56.1</Value>
     </Setting>
     <Setting Name="MasterPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">8086</Value>

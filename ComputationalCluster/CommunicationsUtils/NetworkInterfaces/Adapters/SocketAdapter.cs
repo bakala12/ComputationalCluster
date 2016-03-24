@@ -37,11 +37,5 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
             IPEndPoint endPoint = (IPEndPoint)wrappedSocket.RemoteEndPoint;
             return endPoint.Address.ToString();
         }
-
-        public int ExtractSocketPort()
-        {
-            IPEndPoint endPoint = (IPEndPoint)wrappedSocket.RemoteEndPoint;
-            return endPoint.Port;
-        }
     }
 }

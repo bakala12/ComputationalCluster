@@ -28,6 +28,7 @@ namespace Server.MessageProcessing
         {
             WriteResponseMessageControlInformation(message, MessageType.StatusMessage);
             var msgs = SynchronizationQueue.ToList();
+            Log.Debug("Responding status message as backup. Sending sync queue and backups list");
             //send nooperation with no information about this backup (server imitation)
             msgs.Add(new NoOperation()
             {

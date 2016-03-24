@@ -51,7 +51,7 @@ namespace Server.MessageProcessing
             message.DeregisterSpecified = false;
             SynchronizationQueue.Enqueue(message);
             if(message.Type.Value==ComponentType.CommunicationServer)
-                AddBackupAddressToBackupList(backups);
+                AddBackupAddressToBackupList(backups, message.Type.port);
             return new Message[]
             {
                 new RegisterResponse()
@@ -67,14 +67,13 @@ namespace Server.MessageProcessing
             };
         }
 
-        private void AddBackupAddressToBackupList(ICollection<BackupServerInfo> backups)
+        private void AddBackupAddressToBackupList(ICollection<BackupServerInfo> backups, ushort _port)
         {
             var _address = ClusterListener.ExtractSocketAddress();
-            var _port = ClusterListener.ExtractSocketPort();
             backups.Add(new BackupServerInfo()
             {
                 address = _address,
-                port = (ushort)_port
+                port = _port
             });
         }
 

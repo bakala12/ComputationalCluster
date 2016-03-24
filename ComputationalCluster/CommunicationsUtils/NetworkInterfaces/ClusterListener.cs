@@ -45,11 +45,6 @@ namespace CommunicationsUtils.NetworkInterfaces
             return currentSocket== null ?"": currentSocket.ExtractSocketAddress();
         }
 
-        public int ExtractSocketPort()
-        {
-            return currentSocket== null ? -1 : currentSocket.ExtractSocketPort();
-        }
-
         /// <summary>
         /// sends response(s) via open connection
         /// </summary>

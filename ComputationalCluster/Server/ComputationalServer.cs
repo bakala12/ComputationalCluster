@@ -157,15 +157,14 @@ namespace Server
         /// </summary>
         public virtual void RunAsPrimary()
         {
-            lock (_syncRoot)
-            {
+
                 _messageProcessor = new PrimaryMessageProcessor
                     (_clusterListener, _synchronizationQueue, _problemDataSets, _activeComponents);
-            }
+
             _backupClient = null;
             if (_clusterListener == null)
                 _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
-            _backups.Clear();
+            //_backups.Clear();
 
             Log.Debug("Starting listening mechanism.");
             _clusterListener.Start();
@@ -182,19 +181,17 @@ namespace Server
         /// </summary>
         public virtual void RunAsBackup()
         {
-            lock (_syncRoot)
-            {
                 _messageProcessor = new BackupMessageProcessor
                     (_clusterListener, _synchronizationQueue, _problemDataSets, _activeComponents);
-            }
+
             if (_backupClient == null)
                 _backupClient = ClusterClientFactory.Factory.Create(Properties.Settings.Default.MasterAddress,
                     Properties.Settings.Default.MasterPort);
             if (_clusterListener == null)
                 _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
             //AZBEST314
-            //Log.Debug("Starting backup listening mechanism.");
-            //_clusterListener.Start();
+            Log.Debug("Starting backup listening mechanism.");
+            _clusterListener.Start();
             _currentlyWorkingThreads.Clear();
             _isWorking = true;
             DoBackupWork();
@@ -220,13 +217,15 @@ namespace Server
             Log.Debug("Stopping threads.");
             _clusterListener.Stop();
             _isWorking = false;
-            foreach (var currentlyWorkingThread in _currentlyWorkingThreads)
-            {
-                if(currentlyWorkingThread != Thread.CurrentThread) //that's weird...
-                currentlyWorkingThread?.Join();
-            }
+            //foreach (var currentlyWorkingThread in _currentlyWorkingThreads)
+            //{
+            //    if (currentlyWorkingThread != Thread.CurrentThread) //that's weird...
+            //    {
+            //        currentlyWorkingThread?.Join();
+            //    }
+            //}
+            
             _currentlyWorkingThreads.Clear();
-
             _backupClient = null;
             //Stopping and joining messageprocessor threads 
             if (State == ServerState.Backup)
@@ -341,8 +340,8 @@ namespace Server
             Log.Debug("Starting new thread for dequeueing messages and updating additional sets.");
             ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
             //AZBEST314
-            //Log.Debug("Starting additonal listener on backup");
-            //ListenAndStoreMessagesAndSendResponses();
+            Log.Debug("Starting additonal listener on backup");
+            ListenAndStoreMessagesAndSendResponses();
         }
 
         /// <summary>
@@ -384,8 +383,9 @@ namespace Server
                         //if youre not first backup, switch listener params to higher
                         if (pos > 1)
                         {
+                            Log.DebugFormat("changing parameters to : {0}, {1}", _backups[pos - 1].address, _backups[pos - 1].port);
                             _backupClient.ChangeListenerParameters
-                                (_backups[pos - 1].address,_backups[pos - 1].port);
+                                (_backups[pos - 2].address,_backups[pos - 2].port);
                         }
                     }
                 }

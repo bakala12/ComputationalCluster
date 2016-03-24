@@ -32,8 +32,7 @@ namespace Server.MessageProcessing
             //send nooperation with no information about this backup (server imitation)
             msgs.Add(new NoOperation()
             {
-                //linq is awesome:
-                BackupServersInfo = backups.Skip(1).ToArray()
+                BackupServersInfo = backups.ToArray()
             });
             SynchronizationQueue = new ConcurrentQueue<Message>();
             return msgs.ToArray();

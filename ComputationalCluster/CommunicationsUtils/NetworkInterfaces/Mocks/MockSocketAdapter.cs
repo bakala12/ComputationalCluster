@@ -27,5 +27,10 @@ namespace CommunicationsUtils.NetworkInterfaces.Mocks
         {
             return "";
         }
+
+        public void KillSocket()
+        {
+            return;
+        }
     }
 }

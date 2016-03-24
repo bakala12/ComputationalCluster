@@ -34,7 +34,15 @@ namespace CommunicationsUtils.NetworkInterfaces
         /// <returns>messages passed to socket</returns>
         public Message[] WaitForRequest ()
         {
-            currentSocket = tcpListener.AcceptSocket();
+            try
+            {
+                currentSocket = tcpListener.AcceptSocket();
+            }
+            catch (Exception e)
+            {
+                tcpListener.Start();
+                currentSocket = tcpListener.AcceptSocket();
+            }
             byte[] requestBytes = new byte[Properties.Settings.Default.MaxBufferSize];
             int len = currentSocket.Receive(requestBytes, Properties.Settings.Default.MaxBufferSize);
             return converter.BytesToMessages(requestBytes, len);
@@ -65,6 +73,11 @@ namespace CommunicationsUtils.NetworkInterfaces
         public void Stop ()
         {
             tcpListener.Stop();
+        }
+
+        public void KillSocket()
+        {
+            currentSocket.KillSocket();
         }
     }
 }

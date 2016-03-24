@@ -14,5 +14,6 @@ namespace CommunicationsUtils.NetworkInterfaces
         string ExtractSocketAddress();
         void SendResponse(Message[] responses);
         void Stop();
+        void KillSocket();
     }
 }

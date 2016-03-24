@@ -37,5 +37,10 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
             IPEndPoint endPoint = (IPEndPoint)wrappedSocket.RemoteEndPoint;
             return endPoint.Address.ToString();
         }
+
+        public void KillSocket()
+        {
+            return;
+        }
     }
 }

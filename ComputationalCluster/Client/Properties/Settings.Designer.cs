@@ -61,7 +61,7 @@ namespace Client.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.33")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.56.1")]
         public string Address {
             get {
                 return ((string)(this["Address"]));

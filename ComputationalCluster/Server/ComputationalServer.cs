@@ -193,8 +193,8 @@ namespace Server
             if (_clusterListener == null)
                 _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
             //AZBEST314
-            //Log.Debug("Starting backup listening mechanism.");
-            //_clusterListener.Start();
+            Log.Debug("Starting backup listening mechanism.");
+            _clusterListener.Start();
             _currentlyWorkingThreads.Clear();
             _isWorking = true;
             DoBackupWork();
@@ -208,7 +208,7 @@ namespace Server
         {
             Stop();
             State = state;
-            Log.Debug("\n*** ASSUMING CONTROL ***\n");
+            Log.Debug("\n*** ASSUMING PRIMARY ROLE ***\n");
             Run();
         }
 
@@ -340,9 +340,8 @@ namespace Server
             ProcessInParallel(SendBackupStatusMessages);
             Log.Debug("Starting new thread for dequeueing messages and updating additional sets.");
             ProcessInParallel(DequeueMessagesAndUpdateProblemStructures);
-            //AZBEST314
-            //Log.Debug("Starting additonal listener on backup");
-            //ListenAndStoreMessagesAndSendResponses();
+            Log.Debug("Starting additonal listener on backup");
+            ListenAndStoreMessagesAndSendResponses();
         }
 
         /// <summary>
@@ -385,7 +384,7 @@ namespace Server
                         if (pos > 1)
                         {
                             _backupClient.ChangeListenerParameters
-                                (_backups[pos - 1].address,_backups[pos - 1].port);
+                                (_backups[pos - 2].address,_backups[pos - 2].port);
                         }
                     }
                 }

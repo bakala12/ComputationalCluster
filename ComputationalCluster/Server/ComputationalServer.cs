@@ -219,6 +219,7 @@ namespace Server
         {
             Log.Debug("Stopping threads.");
             _clusterListener.Stop();
+            _clusterListener = null;
             _isWorking = false;
             foreach (var currentlyWorkingThread in _currentlyWorkingThreads)
             {
@@ -270,7 +271,8 @@ namespace Server
                     catch (Exception)
                     {
                         Log.Debug("Communication accident. Connection has been broken down");
-                        throw;
+                        //throw;
+                        return;
                     }
                     if (requestsMessages==null) Log.Debug("No request messages detected.");
                     Log.Debug("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);

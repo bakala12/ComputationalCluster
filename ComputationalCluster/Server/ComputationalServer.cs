@@ -290,7 +290,7 @@ namespace Server
                         Log.DebugFormat("Enqueueing {0} message.", message.MessageType);
                         var responseMessages = _messageProcessor.CreateResponseMessages(message, _problemDataSets,
                             _activeComponents, _backups);
-                        _clusterListener.SendResponse(responseMessages);
+                        _clusterListener?.SendResponse(responseMessages);
                         Log.DebugFormat("Response for {0} message has been sent.", message.MessageType);
                     }
                 }

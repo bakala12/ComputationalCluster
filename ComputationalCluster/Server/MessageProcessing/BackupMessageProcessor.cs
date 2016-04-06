@@ -35,7 +35,7 @@ namespace Server.MessageProcessing
                 //linq is awesome:
                 BackupServersInfo = backups.Skip(1).ToArray()
             });
-            SynchronizationQueue = new ConcurrentQueue<Message>();
+            SynchronizationQueue.Clear();
             return msgs.ToArray();
         }
 
@@ -62,10 +62,12 @@ namespace Server.MessageProcessing
         {
             if (message.DeregisterSpecified)
             {
+                Log.Debug("Deregister acquired. Deregistering...");
                 activeComponents.Remove((int)message.Id);
             }
             else
             {
+                Log.Debug("Register acquired. Registering...");
                 activeComponents.Add((int)message.Id, new ActiveComponent()
                 {
                     ComponentType = message.Type.Value,

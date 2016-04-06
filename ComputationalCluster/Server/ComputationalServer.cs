@@ -422,10 +422,12 @@ namespace Server
                         {
                             _synchronizationQueue.Enqueue(message);
                             _messagesQueue.Enqueue(message);
+                            Log.Debug("Received message "+message.MessageType.ToString());
                             continue;
                         }
 
                         var nop = message.Cast<NoOperation>();
+                        Log.Debug("No operation message received");
                         _backups = nop.BackupServersInfo.ToList();
                     }
                 }

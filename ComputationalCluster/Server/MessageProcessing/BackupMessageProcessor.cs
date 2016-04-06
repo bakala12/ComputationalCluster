@@ -15,11 +15,11 @@ namespace Server.MessageProcessing
     /// </summary>
     public class BackupMessageProcessor : MessageProcessor
     {
-        public BackupMessageProcessor(IClusterListener clusterListener, 
+        public BackupMessageProcessor(IClusterListener clusterListener,
             ConcurrentQueue<Message> synchronizationQueue,
-            IDictionary<int, ProblemDataSet> dataSets, 
-            IDictionary<int, ActiveComponent> activeComponents) : 
-            base (clusterListener, synchronizationQueue, dataSets, activeComponents)
+            IDictionary<int, ProblemDataSet> dataSets,
+            IDictionary<int, ActiveComponent> activeComponents) :
+            base(clusterListener, synchronizationQueue, dataSets, activeComponents)
         { }
 
         protected override Message[] RespondStatusMessage(Status message,
@@ -62,11 +62,11 @@ namespace Server.MessageProcessing
         {
             if (message.DeregisterSpecified)
             {
-                activeComponents.Remove((int) message.Id);
+                activeComponents.Remove((int)message.Id);
             }
             else
             {
-                activeComponents.Add((int) message.Id, new ActiveComponent()
+                activeComponents.Add((int)message.Id, new ActiveComponent()
                 {
                     ComponentType = message.Type.Value,
                     SolvableProblems = message.SolvableProblems,
@@ -79,13 +79,25 @@ namespace Server.MessageProcessing
             IDictionary<int, ActiveComponent> activeComponents)
         {
             WriteControlInformation(message);
-            dataSets.Add((int) message.Id, new ProblemDataSet()
+            dataSets.Add((int)message.Id, new ProblemDataSet()
             {
                 CommonData = message.Data,
                 PartialSets = null,
                 ProblemType = message.ProblemType,
                 TaskManagerId = 0
             });
+        }
+    }
+
+    public static class ConcurentQueueExtender
+    {
+        public static void Clear<T>(this ConcurrentQueue<T> queue)
+        {
+            while (!queue.IsEmpty)
+            {
+                T obj;
+                queue.TryDequeue(out obj);
+            }
         }
     }
 }

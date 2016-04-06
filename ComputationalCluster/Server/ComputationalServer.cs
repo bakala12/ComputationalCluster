@@ -407,11 +407,11 @@ namespace Server
         {
             while (_isWorking)
             {
+                ulong id = BackupServerId ?? 0;
                 var status = new Status()
                 {
                     Threads = new StatusThread[1],
-                    Id= 1,
-                    
+                    Id= id
                 };
                 try
                 {
@@ -447,8 +447,8 @@ namespace Server
         /// <returns>True if the invoking backup is the first backup server, otherwise false.</returns>
         private bool BackupProblem()
         {
-            if(_backups == null || _backups.Count ==0)
-                throw new Exception("Backup has empty backup list!!!");
+            //if(_backups == null || _backups.Count ==0)
+                //throw new Exception("Backup has empty backup list!!!");
             //become main server - we assume backups' invulnerability
             if (true)
             return true;

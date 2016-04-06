@@ -165,7 +165,7 @@ namespace Server
             _backupClient = null;
             if (_clusterListener == null)
                 _clusterListener = ClusterListenerFactory.Factory.Create(IPAddress.Any, Properties.Settings.Default.Port);
-            _backups.Clear();
+            //_backups.Clear();
 
             Log.Debug("Starting listening mechanism.");
             _clusterListener.Start();

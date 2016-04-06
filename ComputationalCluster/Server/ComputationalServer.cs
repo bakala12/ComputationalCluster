@@ -208,6 +208,7 @@ namespace Server
         {
             Stop();
             State = state;
+            _backups.RemoveAt(0);
             Log.Debug("\n*** ASSUMING PRIMARY ROLE ***\n");
             Run();
         }
@@ -304,15 +305,12 @@ namespace Server
         {
             while (_isWorking)
             {
-                lock (_syncRoot)
-                {
-                    Message message;
-                    var result = _messagesQueue.TryDequeue(out message);
-                    if (!result) continue;
-                    Log.DebugFormat("Dequeueing {0} message.", message.MessageType);
-                    _messageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
-                    Log.DebugFormat("Message {0} has been proccessed.", message.MessageType);
-                }
+                Message message;
+                var result = _messagesQueue.TryDequeue(out message);
+                if (!result) continue;
+                Log.DebugFormat("Dequeueing {0} message.", message.MessageType);
+                _messageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
+                Log.DebugFormat("Message {0} has been proccessed.", message.MessageType);
             }
         }
 

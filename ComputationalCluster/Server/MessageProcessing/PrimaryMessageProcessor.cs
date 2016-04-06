@@ -144,9 +144,7 @@ namespace Server.MessageProcessing
                     return msgs.ToArray();
             }
 
-            var noop = (ClusterListener.ExtractSocketAddress() == backups[0].address)
-                ? new NoOperation() {BackupServersInfo = backups.Skip(1).ToArray()}
-                : new NoOperation() {BackupServersInfo = backups.ToArray()};
+            var noop = new NoOperation() {BackupServersInfo = backups.ToArray()};
 
             if (whatToDo == null)
             {

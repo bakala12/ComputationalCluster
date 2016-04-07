@@ -205,7 +205,8 @@ namespace Server
         {
             Stop();
             State = state;
-            Log.Debug("\n*** ASSUMING CONTROL ***\n");
+            _backups.RemoveAt(0);
+            Log.Debug("\n*** ASSUMING PRIMARY ROLE ***\n");
             Run();
         }
 
@@ -216,6 +217,7 @@ namespace Server
         {
             Log.Debug("Stopping threads.");
             _clusterListener.Stop();
+            _clusterListener = null;
             _isWorking = false;
             //foreach (var currentlyWorkingThread in _currentlyWorkingThreads)
             //{
@@ -269,7 +271,8 @@ namespace Server
                     catch (Exception)
                     {
                         Log.Debug("Communication accident. Connection has been broken down");
-                        throw;
+                        //throw;
+                        return;
                     }
                     if (requestsMessages==null) Log.Debug("No request messages detected.");
                     Log.Debug("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);
@@ -287,7 +290,7 @@ namespace Server
                         Log.DebugFormat("Enqueueing {0} message.", message.MessageType);
                         var responseMessages = _messageProcessor.CreateResponseMessages(message, _problemDataSets,
                             _activeComponents, _backups);
-                        _clusterListener.SendResponse(responseMessages);
+                        _clusterListener?.SendResponse(responseMessages);
                         Log.DebugFormat("Response for {0} message has been sent.", message.MessageType);
                     }
                 }
@@ -301,15 +304,12 @@ namespace Server
         {
             while (_isWorking)
             {
-                lock (_syncRoot)
-                {
-                    Message message;
-                    var result = _messagesQueue.TryDequeue(out message);
-                    if (!result) continue;
-                    Log.DebugFormat("Dequeueing {0} message.", message.MessageType);
-                    _messageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
-                    Log.DebugFormat("Message {0} has been proccessed.", message.MessageType);
-                }
+                Message message;
+                var result = _messagesQueue.TryDequeue(out message);
+                if (!result) continue;
+                Log.DebugFormat("Dequeueing {0} message.", message.MessageType);
+                _messageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
+                Log.DebugFormat("Message {0} has been proccessed.", message.MessageType);
             }
         }
 
@@ -406,11 +406,11 @@ namespace Server
         {
             while (_isWorking)
             {
+                ulong id = BackupServerId ?? 0;
                 var status = new Status()
                 {
                     Threads = new StatusThread[1],
-                    Id= 1,
-                    
+                    Id= id
                 };
                 try
                 {
@@ -421,10 +421,12 @@ namespace Server
                         {
                             _synchronizationQueue.Enqueue(message);
                             _messagesQueue.Enqueue(message);
+                            Log.Debug("Received message "+message.MessageType.ToString());
                             continue;
                         }
 
                         var nop = message.Cast<NoOperation>();
+                        Log.Debug("No operation message received");
                         _backups = nop.BackupServersInfo.ToList();
                     }
                 }
@@ -446,8 +448,8 @@ namespace Server
         /// <returns>True if the invoking backup is the first backup server, otherwise false.</returns>
         private bool BackupProblem()
         {
-            if(_backups == null || _backups.Count ==0)
-                throw new Exception("Backup has empty backup list!!!");
+            //if(_backups == null || _backups.Count ==0)
+                //throw new Exception("Backup has empty backup list!!!");
             //become main server - we assume backups' invulnerability
             if (true)
             return true;

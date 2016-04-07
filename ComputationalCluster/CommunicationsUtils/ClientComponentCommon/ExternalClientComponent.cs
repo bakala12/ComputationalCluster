@@ -63,6 +63,8 @@ namespace CommunicationsUtils.ClientComponentCommon
                 }
                 try
                 {
+                    Console.WriteLine("Server not responding. Changing to params {0}, {1}"
+                        , backups[0].address, backups[0].port);
                     client.ChangeListenerParameters(backups[0].address, backups[0].port);
                     Thread.Sleep(5000);
                     responses = client.SendRequests(requests);

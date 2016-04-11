@@ -1,0 +1,20 @@
+Opis, wycena i przydział zadań na etap computation (21, 28/04)
+
+0. Zadanie nieimplementacyjne - pełen algorytm łączenia, dzielenia, 
+	obliczania DVRP [8h] : wszyscy
+
+1. Implementacja task solverów TM i CN (czyli implementacja algorytmów) - 
+	niezależnie od architektury tych komponentów [5h] : Bąkała, Duszak
+	
+2. Problem kodowania/dekodowania binarnego częściowych problemów i całego problemu 
+	oraz częściowych rozwiązań.  [5h] : Bąkała, Duszak
+	
+3. Zmiany w architekturze CN i TM (usunięcie mocków, dodanie wsparcia 
+	dla task solverów) [5h] : Bondyra
+	
+4. Interfejs dla client node - wczytywanie problemów, 
+	odpowiednie wypisywanie. [5h] : Augustyniak
+
+5. Unit testy [12h] : wszyscy
+
+6. Ulepszenia algorytmów - wielowątkowość, etc. [6h] : wszyscy

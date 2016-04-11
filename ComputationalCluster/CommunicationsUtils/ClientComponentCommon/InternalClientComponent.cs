@@ -64,6 +64,7 @@ namespace CommunicationsUtils.ClientComponentCommon
         /// </summary>
         public abstract void RegisterComponent();
 
+
         /// <summary>
         /// responses handler
         /// starts new long running computations' threads, dequeues messages
@@ -143,6 +144,12 @@ namespace CommunicationsUtils.ClientComponentCommon
 
             componentId = registerResponse.Id;
             timeout = registerResponse.Timeout;
+        }
+
+        public override Message[] SendMessages(IClusterClient client, Message[] requests)
+        {
+            client.ChangeListenerParameters(currentAddress, currentPort);
+            return base.SendMessages(client, requests);
         }
         #endregion
     }

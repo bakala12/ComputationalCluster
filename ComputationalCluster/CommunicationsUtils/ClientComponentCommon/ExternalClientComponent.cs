@@ -19,10 +19,14 @@ namespace CommunicationsUtils.ClientComponentCommon
         protected IClusterClient clusterClient;
         //backup info table reference
         private BackupServerInfo[] backups;
+        protected string currentAddress;
+        protected int currentPort;
 
         protected ExternalClientComponent(IClusterClient _clusterClient)
         {
             clusterClient = _clusterClient;
+            currentAddress = clusterClient.Address;
+            currentPort = clusterClient.Port;
         }
 
         /// <summary>
@@ -63,7 +67,11 @@ namespace CommunicationsUtils.ClientComponentCommon
                 }
                 try
                 {
+                    Console.WriteLine("Server not responding. Changing to params {0}, {1}"
+                        , backups[0].address, backups[0].port);
                     client.ChangeListenerParameters(backups[0].address, backups[0].port);
+                    currentPort = backups[0].port;
+                    currentAddress = backups[0].address;
                     Thread.Sleep(5000);
                     responses = client.SendRequests(requests);
                 }

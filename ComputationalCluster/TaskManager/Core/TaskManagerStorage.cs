@@ -61,5 +61,16 @@ namespace TaskManager.Core
         {
             _currentProblems.Remove(id);
         }
+
+        public byte[][] GetIssueSolutionsBytes(ulong problemId)
+        {
+            return
+                _currentProblems[problemId].PartialSolutions.Select(solution => solution.Value.Data).ToArray();
+        }
+
+        public byte[] GetCommonData(ulong problemId)
+        {
+            return _currentProblems[problemId].CommonData;
+        }
     }
 }

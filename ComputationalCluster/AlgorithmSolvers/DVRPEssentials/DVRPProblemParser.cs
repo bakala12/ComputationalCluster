@@ -34,7 +34,7 @@ namespace AlgorithmSolvers.DVRPEssentials
                 if (line.Contains("NUM_VEHICLES"))
                     numVehicles = int.Parse(line.Split(':')[1]);
             }
-            while ((line = file.ReadLine()) != "EOF" && file.ReadLine() != null)
+            while ((line = file.ReadLine()) != "EOF" && line != null)
             {
                 if (line == "DEPOTS")
                     line = setDepots(file, numDepots, dvrp);
@@ -59,8 +59,8 @@ namespace AlgorithmSolvers.DVRPEssentials
 
         private string setDepots(StreamReader file, int numDepots, DVRPProblemInstance dvrp)
         {
-            string line;
-            while ((line = file.ReadLine()) != "DEMAND_SECTION")
+            string line = string.Empty;
+            while (numDepots-- > 0 && (line = file.ReadLine()) != null)
             {
                 dvrp.Depots.Add(new Depot() { Id = int.Parse(line) });
             }
@@ -69,8 +69,8 @@ namespace AlgorithmSolvers.DVRPEssentials
 
         private string setDemands(StreamReader file, int numVisits, DVRPProblemInstance dvrp)
         {
-            string line;
-            while ((line = file.ReadLine()) != "LOCATION_COORD_SECTION")
+            string line = string.Empty;
+            while (numVisits-- > 0 && (line = file.ReadLine()) != null)
             {
                 dvrp.Visits.Add(new Visit() { Id = int.Parse(line.Split(' ')[2]), Demand = int.Parse(line.Split(' ')[3]) });
             }
@@ -79,8 +79,8 @@ namespace AlgorithmSolvers.DVRPEssentials
 
         private string setLocations(StreamReader file, int numLocations, DVRPProblemInstance dvrp)
         {
-            string line;
-            while ((line = file.ReadLine()) != "DEPOT_LOCATION_SECTION")
+            string line = string.Empty;
+            while (numLocations-- > 0 && (line = file.ReadLine()) != null)
             {
                 dvrp.Locations.Add(new Location() { Id = int.Parse(line.Split(' ')[2]), X = int.Parse(line.Split(' ')[3]), Y = int.Parse(line.Split(' ')[4]) });
             }
@@ -89,8 +89,8 @@ namespace AlgorithmSolvers.DVRPEssentials
 
         private string setDepotLocations(StreamReader file, int numDepots, DVRPProblemInstance dvrp)
         {
-            string line;
-            while ((line = file.ReadLine()) != "VISIT_LOCATION_SECTION")
+            string line = string.Empty;
+            while (numDepots-- > 0 && (line = file.ReadLine()) != null)
             {
                 int ind = int.Parse(line.Split(' ')[2]);
                 dvrp.Depots.First(d => d.Id == ind).Location = dvrp.Locations[int.Parse(line.Split(' ')[3])];
@@ -100,8 +100,8 @@ namespace AlgorithmSolvers.DVRPEssentials
 
         private string setVisitLocations(StreamReader file, int numVisits, DVRPProblemInstance dvrp)
         {
-            string line;
-            while ((line = file.ReadLine()) != "DURATION_SECTION")
+            string line = string.Empty;
+            while (numVisits-- > 0 && (line = file.ReadLine()) != null)
             {
                 int ind = int.Parse(line.Split(' ')[2]);
                 int indL = int.Parse(line.Split(' ')[3]);

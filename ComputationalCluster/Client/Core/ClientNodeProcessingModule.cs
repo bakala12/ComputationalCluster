@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
+using AlgorithmSolvers.DVRPEssentials;
 
 namespace Client.Core
 {
@@ -51,6 +52,8 @@ namespace Client.Core
         /// <returns></returns>
         public void GetProblem()
         {
+            var problemParser = new DVRPProblemParser("../../../DVRPGenerator/io2_4_plain_a_D.vrp");
+            problemParser.Parse();
             data = new byte[] { 123 };
             type = "DVRP";
         }

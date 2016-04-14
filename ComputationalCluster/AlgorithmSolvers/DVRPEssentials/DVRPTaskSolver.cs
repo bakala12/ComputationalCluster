@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UCCTaskSolver;
 
-namespace AlgorithmSolvers
+namespace AlgorithmSolvers.DVRPEssentials
 {
     /// <summary>
     /// Task solver implementation for DVRP

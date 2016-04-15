@@ -32,7 +32,9 @@ namespace AlgorithmSolvers.DVRPEssentials
                 if (line.Contains("NUM_LOCATIONS"))
                     numLocations = int.Parse(line.Split(':')[1]);
                 if (line.Contains("NUM_VEHICLES"))
-                    numVehicles = int.Parse(line.Split(':')[1]);
+                    dvrp.VehicleNumber = int.Parse(line.Split(':')[1]);
+                if (line.Contains("CAPACITIES"))
+                    dvrp.VehicleCapacity = int.Parse(line.Split(':')[1]);
             }
             while ((line = file.ReadLine()) != "EOF" && line != null)
             {
@@ -112,8 +114,8 @@ namespace AlgorithmSolvers.DVRPEssentials
 
         private string setVisitDuration(StreamReader file, int numVisits, DVRPProblemInstance dvrp)
         {
-            string line;
-            while ((line = file.ReadLine()) != "DEPOT_TIME_WINDOW_SECTION")
+            string line = string.Empty;
+            while (numVisits-- > 0 && (line = file.ReadLine()) != null)
             {
                 int ind = int.Parse(line.Split(' ')[2]);
                 dvrp.Visits.First(v => v.Id == ind).Duration = int.Parse(line.Split(' ')[3]);
@@ -128,7 +130,7 @@ namespace AlgorithmSolvers.DVRPEssentials
             {
                 int ind = int.Parse(line.Split(' ')[2]);
                 dvrp.Depots.First(v => v.Id == ind).EarliestDepartureTime = int.Parse(line.Split(' ')[3]);
-                dvrp.Depots.First(v => v.Id == ind).EarliestDepartureTime = int.Parse(line.Split(' ')[4]);
+                dvrp.Depots.First(v => v.Id == ind).LatestReturnTime = int.Parse(line.Split(' ')[4]);
 
             }
             return line;

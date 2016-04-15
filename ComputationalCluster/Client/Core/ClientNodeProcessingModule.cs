@@ -52,7 +52,7 @@ namespace Client.Core
         /// <returns></returns>
         public void GetProblem()
         {
-            var problemParser = new DVRPProblemParser("../../../DVRPGenerator/io2_4_plain_a_D.vrp");
+            var problemParser = new DVRPProblemParser("../../../DVRPGenerator/io2_11_plain_a_D.vrp");
             problemParser.Parse();
             data = new byte[] { 123 };
             type = "DVRP";

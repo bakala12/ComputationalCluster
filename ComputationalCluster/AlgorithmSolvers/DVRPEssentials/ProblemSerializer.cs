@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using AlgorithmSolvers.DVRPEssentials;
-using CommunicationsUtils.Messages;
+using CommunicationsUtils.Serialization;
 
-namespace CommunicationsUtils.Serialization
+namespace AlgorithmSolvers.DVRPEssentials
 {
     public class ProblemSerializer
     {

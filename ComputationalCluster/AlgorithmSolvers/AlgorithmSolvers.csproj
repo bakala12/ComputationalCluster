@@ -53,11 +53,19 @@
     <Compile Include="DVRPEssentials\DVRPProblemParser.cs" />
     <Compile Include="DVRPEssentials\DVRPTaskSolver.cs" />
     <Compile Include="DVRPEssentials\Location.cs" />
+    <Compile Include="DVRPEssentials\ProblemSerializer.cs" />
+    <Compile Include="DVRPEssentials\ProblemToBytesConverter.cs" />
     <Compile Include="DVRPEssentials\Visit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommunicationsUtils\CommunicationsUtils.csproj">
+      <Project>{7aecef6e-5161-4182-9727-a947d1bea7ca}</Project>
+      <Name>CommunicationsUtils</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

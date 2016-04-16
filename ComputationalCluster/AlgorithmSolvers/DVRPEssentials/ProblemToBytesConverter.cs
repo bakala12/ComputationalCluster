@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AlgorithmSolvers.DVRPEssentials;
 
-namespace CommunicationsUtils.Serialization
+namespace AlgorithmSolvers.DVRPEssentials
 {
     public class ProblemToBytesConverter
     {

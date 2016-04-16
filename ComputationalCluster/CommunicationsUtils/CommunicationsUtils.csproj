@@ -98,8 +98,6 @@
     </Compile>
     <Compile Include="Serialization\MessagesSerializer.cs" />
     <Compile Include="Serialization\MessageToBytesConverter.cs" />
-    <Compile Include="Serialization\ProblemSerializer.cs" />
-    <Compile Include="Serialization\ProblemToBytesConverter.cs" />
     <Compile Include="Serialization\XmlStringSerializer.cs" />
     <Compile Include="Shared\StringExtensions.cs" />
   </ItemGroup>
@@ -112,12 +110,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AlgorithmSolvers\AlgorithmSolvers.csproj">
-      <Project>{DF1E5FA2-8428-4E37-B7C8-8A8ECED33E73}</Project>
-      <Name>AlgorithmSolvers</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

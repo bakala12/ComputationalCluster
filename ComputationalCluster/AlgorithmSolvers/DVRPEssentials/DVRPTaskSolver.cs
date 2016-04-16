@@ -68,7 +68,74 @@ namespace AlgorithmSolvers.DVRPEssentials
         private int minimizePermutation(DVRPProblemInstance instance, ref List<int> carVisits)
         {
             //generacja wszystkich permutacji i sprawdzanie kosztu (zlozonosc n!)
-            throw new NotImplementedException();
+            var newVisits = new List<int>();
+            var cost = -1;
+            minimizePermutationRec(instance, ref carVisits, 0, ref cost, newVisits);
+            return cost;
+        }
+
+        private void minimizePermutationRec(DVRPProblemInstance instance, ref List<int> carVisits, 
+            int currCost, ref int minCost, List<int> newVisits)
+        {
+            if (newVisits.Count == carVisits.Count)
+            {
+                if (routeImpossible (instance, newVisits))
+                    return;
+                if (currCost >= minCost && minCost != -1)
+                    return;
+                minCost = currCost;
+                carVisits = newVisits;
+                return;
+            }
+
+            for (var i = 0; i < carVisits.Count; i++)
+            {
+                var visitId = carVisits[i];
+
+                if (newVisits.Contains(visitId)) continue;
+
+                var from = newVisits.Count == 0
+                    ? instance.Depots.Single().Location
+                    : instance.Visits.Single(x => x.Id == newVisits.Last()).Location;
+
+                var to = instance.Visits.Single(x => x.Id == visitId).Location;
+                var lengthCost = computeCost(instance, from, to);
+                newVisits.Add(visitId);
+                minimizePermutationRec(instance, ref carVisits, currCost+lengthCost, ref minCost, newVisits);
+                newVisits.Remove(visitId);
+            }
+        }
+
+        private bool routeImpossible(DVRPProblemInstance instance, List<int> newVisits)
+        {
+            //sprawdzamy, czy dana droga samochodu ma w ogole jakis sens (w sensie czasu)
+            //sprawdzenie czy sie zdazy dojechac z depotu do pierwszej wizyty
+            var depot = instance.Depots.Single();
+            var firstVisit = instance.Visits.Single(x => x.Id == newVisits[0]);
+            var currTime = depot.EarliestDepartureTime + computeCost(instance, depot.Location, firstVisit.Location);
+
+            if (currTime < firstVisit.AvailabilityTime)
+                return true;
+            //sprawdzenie w pętli czy da się dojechać z i-1 wizyty do i-tej wizyty w dobrym czasie
+            for (int i = 0; i < newVisits.Count-1; i++)
+            {
+                var visit = instance.Visits.Single(x => x.Id == newVisits[i]);
+                var nextVisit = instance.Visits.Single(x => x.Id == newVisits[i + 1]);
+                currTime += visit.Duration + computeCost(instance, visit.Location, nextVisit.Location);
+                if (currTime < nextVisit.AvailabilityTime)
+                    return true;
+            }
+
+            //sprawdzenie, czy sie zdazy dojechac z ostatniej wizyty do depotu
+            var lastVisit = instance.Visits.Single(x => x.Id == newVisits.Last());
+            currTime += lastVisit.Duration + computeCost(instance, lastVisit.Location, depot.Location);
+            return currTime > depot.LatestReturnTime;
+        }
+
+        private int computeCost(DVRPProblemInstance instance, Location from, Location to)
+        {
+            //TODO: return cost for given vehicle speed and given locations
+            return 0;
         }
 
         private byte[] solutionImpossible()

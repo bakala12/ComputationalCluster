@@ -4,11 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using log4net;
 
 namespace AlgorithmSolvers.DVRPEssentials
 {
     public class DVRPProblemParser
     {
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public string ProblemPath { get; set; }
 
         public DVRPProblemParser(string path)
@@ -30,7 +32,8 @@ namespace AlgorithmSolvers.DVRPEssentials
             catch (Exception)
             {
                 var fileName = ProblemPath.Split('/', '\\').Last();
-                file = new StreamReader("../../../DVRPGenerator/" + fileName);
+                ProblemPath = "../../../DVRPGenerator/" + fileName;
+                file = new StreamReader(ProblemPath);
             }
             while ((line = file.ReadLine()) != "DATA_SECTION")
             {
@@ -65,6 +68,7 @@ namespace AlgorithmSolvers.DVRPEssentials
                     line = setVisitTimeAvailability(file, numVisits, dvrp);
             }
             file.Close();
+            log.DebugFormat("Client sent problem from path: {0}", ProblemPath);
             return dvrp;
         }
 

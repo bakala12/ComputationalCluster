@@ -12,19 +12,25 @@ namespace CommunicationsUtils.Serialization
 {
     public class ProblemSerializer
     {
-        public DVRPProblemInstance FromXmlString(string xml)
+        public IProblemInstance FromXmlString(string xml)
         {
             StringReader stream = new StringReader(xml);
             XmlReader reader = XmlReader.Create(stream);
             var node = reader.MoveToContent();
-            var serializer =new XmlStringSerializer<DVRPProblemInstance>();
-            return serializer.FromXmlString(xml);
+            string s = reader.LocalName;
+            var problemType = typeof(IProblemInstance).Assembly.GetType("AlgorithmSolvers.DVRPEssentials." + s);
+            var type = typeof(XmlStringSerializer<>).MakeGenericType(problemType);
+            var serializer = Activator.CreateInstance(type);
+            var method = type.GetMethod("FromXmlString");
+            return (IProblemInstance)method.Invoke(serializer, new object[] { xml });
         }
 
-        public string ToXmlString(DVRPProblemInstance problem)
+        public string ToXmlString(IProblemInstance problem)
         {
-            var serializer = new XmlStringSerializer<DVRPProblemInstance>();
-            return serializer.ToXmlString(problem);
+            var serializer = typeof(XmlStringSerializer<>).MakeGenericType(problem.GetType());
+            var method = serializer.GetMethod("ToXmlString");
+            var ser = Activator.CreateInstance(serializer);
+            return (string)method.Invoke(ser, new object[] { problem });
         }
     }
 }

@@ -64,7 +64,7 @@ namespace TaskManager.Core
                 };
             }
 
-            DVRPProblemInstance problem = _problemConverter.FromBytesArray(divideProblem.Data);
+            DVRPProblemInstance problem = (DVRPProblemInstance) _problemConverter.FromBytesArray(divideProblem.Data);
             var partialProblem = new SolvePartialProblemsPartialProblem()
             {
                 TaskId = 0,

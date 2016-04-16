@@ -11,12 +11,12 @@ namespace CommunicationsUtils.Serialization
     {
         private readonly ProblemSerializer _serializer = new ProblemSerializer();
 
-        public byte[] ToByteArray(DVRPProblemInstance problem)
+        public byte[] ToByteArray(IProblemInstance problem)
         {
             return Encoding.UTF8.GetBytes(_serializer.ToXmlString(problem));
         }
 
-        public DVRPProblemInstance FromBytesArray(byte[] bytes)
+        public IProblemInstance FromBytesArray(byte[] bytes)
         {
             return _serializer.FromXmlString(Encoding.UTF8.GetString(bytes));
         }

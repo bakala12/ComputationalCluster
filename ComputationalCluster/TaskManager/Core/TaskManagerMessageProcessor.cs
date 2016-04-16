@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AlgorithmSolvers.DVRPEssentials;
+using CommunicationsUtils.Serialization;
 using log4net;
 
 namespace TaskManager.Core
@@ -16,6 +18,7 @@ namespace TaskManager.Core
     public class TaskManagerMessageProcessor : ClientMessageProcessor
     {
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private ProblemToBytesConverter _problemConverter = new ProblemToBytesConverter();
 
         /// <summary>
         /// current problems in TM indexed by problem id in cluster (given by CS)
@@ -60,6 +63,8 @@ namespace TaskManager.Core
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
             }
+
+            DVRPProblemInstance problem = _problemConverter.FromBytesArray(divideProblem.Data);
             var partialProblem = new SolvePartialProblemsPartialProblem()
             {
                 TaskId = 0,

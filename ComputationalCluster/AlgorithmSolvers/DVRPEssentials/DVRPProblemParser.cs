@@ -19,10 +19,19 @@ namespace AlgorithmSolvers.DVRPEssentials
         // should return DVRPProblem object
         public DVRPProblemInstance Parse()
         {
+            StreamReader file;
             var dvrp = new DVRPProblemInstance();
             string line;
-            int numDepots=0, numVisits=0, numLocations=0, numVehicles=0;
-            StreamReader file = new StreamReader(ProblemPath);
+            int numDepots = 0, numVisits = 0, numLocations = 0;
+            try
+            {
+                file = new StreamReader(ProblemPath);
+            }
+            catch (Exception)
+            {
+                var fileName = ProblemPath.Split('/', '\\').Last();
+                file = new StreamReader("../../../DVRPGenerator/" + fileName);
+            }
             while ((line = file.ReadLine()) != "DATA_SECTION")
             {
                 if (line.Contains("NUM_DEPOTS"))

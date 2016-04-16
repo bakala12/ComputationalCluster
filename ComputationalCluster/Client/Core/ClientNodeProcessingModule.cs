@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 using AlgorithmSolvers.DVRPEssentials;
+using CommunicationsUtils.Serialization;
 
 namespace Client.Core
 {
@@ -16,6 +17,7 @@ namespace Client.Core
     {
         private byte[] data;
         private string type;
+        private ProblemToBytesConverter _problemConverter = new ProblemToBytesConverter();
 
         public string Type
         {
@@ -52,9 +54,11 @@ namespace Client.Core
         /// <returns></returns>
         public void GetProblem()
         {
-            var problemParser = new DVRPProblemParser("../../../DVRPGenerator/io2_11_plain_a_D.vrp");
-            problemParser.Parse();
-            data = new byte[] { 123 };
+            Console.WriteLine("Provide path to problem instance please..");
+            var problemPath = Console.ReadLine();
+            var problemParser = new DVRPProblemParser(problemPath);
+            var problem = problemParser.Parse();
+            data = _problemConverter.ToByteArray(problem);
             type = "DVRP";
         }
 

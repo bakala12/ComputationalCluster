@@ -38,7 +38,7 @@ namespace CommunicationsUtils.NetworkInterfaces
             {
                 currentSocket = tcpListener.AcceptSocket();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 tcpListener.Start();
                 currentSocket = tcpListener.AcceptSocket();

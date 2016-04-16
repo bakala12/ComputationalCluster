@@ -89,7 +89,11 @@ namespace AlgorithmSolvers.DVRPEssentials
                 if (currCost >= minCost && minCost > 0f)
                     return;
                 minCost = currCost;
-                carVisits = newVisits;
+                //deep copy
+                var cpy = new int[carVisits.Count];
+                newVisits.CopyTo(cpy);
+                carVisits = cpy.ToList();
+
                 return;
             }
 
@@ -239,8 +243,13 @@ namespace AlgorithmSolvers.DVRPEssentials
             //można dodać nowy problem
             if (i == visits.Count)
             {
-                //nie wiem czy to działa - nie znam się na C#:
-                problems.Add(currProblem);
+                //deep copy
+                var cpy = new DVRPPartialProblemInstance();
+                var arrCpy = new List<int>[vehicleNumber];
+                currProblem.VisitIds.CopyTo(arrCpy,0);
+                cpy.VisitIds = arrCpy;
+                problems.Add(cpy);
+
                 return;
             }
             else

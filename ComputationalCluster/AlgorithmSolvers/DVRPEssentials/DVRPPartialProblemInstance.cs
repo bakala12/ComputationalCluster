@@ -7,16 +7,24 @@ using System.Threading.Tasks;
 
 namespace AlgorithmSolvers.DVRPEssentials
 {
+    public enum SolutionResult
+    {
+        NotSolved,
+        Successful,
+        Impossible
+    }
+
     public class DVRPPartialProblemInstance : IProblemInstance
     {
-
-        [Description("Magazyny - w założeniu będzie 1")]
-        public List<Depot> Depots { get; set; }
-        public List<Location> Locations { get; set; }
         [Description("Miejsca do odwiedzenia - klienci")]
-        public List<Visit> Visits { get; set; }
-        public int VehicleCapacity { get; set; }
-        [Description("Wynik podproblemu - minimalna odległość ścieżki odwiedzającej wszystkich klientów")]
+        public List<List<int>> VisitIds { get; set; }
+        [Description("Wynik problemu - suma minimalnych odległości ścieżek odwiedzających wszystkich klientów")]
         public int PartialResult { get; set; }
+        public SolutionResult SolutionResult { get; set; } = SolutionResult.NotSolved;
+
+        public DVRPPartialProblemInstance()
+        {
+            VisitIds = new List<List<int>>();
+        }
     }
 }

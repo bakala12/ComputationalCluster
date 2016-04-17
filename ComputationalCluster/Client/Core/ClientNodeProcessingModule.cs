@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 using AlgorithmSolvers.DVRPEssentials;
 using CommunicationsUtils.Serialization;
+using log4net;
 
 namespace Client.Core
 {
@@ -18,6 +19,7 @@ namespace Client.Core
         private byte[] data;
         private string type;
         private ProblemToBytesConverter _problemConverter = new ProblemToBytesConverter();
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public string Type
         {
@@ -44,6 +46,8 @@ namespace Client.Core
         /// <param name="solution"></param>
         public void DoSomethingWithSolution(SolutionsSolution solution)
         {
+            DVRPPartialProblemInstance result = (DVRPPartialProblemInstance) _problemConverter.FromBytesArray(solution.Data);
+            log.DebugFormat("Result of the sent problem: cost = {0} ", result.PartialResult);
             return;
         }
 

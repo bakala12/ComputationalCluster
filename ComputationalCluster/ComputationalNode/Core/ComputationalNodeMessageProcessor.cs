@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using AlgorithmSolvers;
+using AlgorithmSolvers.DVRPEssentials;
 using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Messages;
 using log4net;
-using UCCTaskSolver;
 
 namespace ComputationalNode.Core
 {

@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AlgorithmSolvers;
 using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Messages;
 using log4net;
+using UCCTaskSolver;
 
 namespace ComputationalNode.Core
 {
@@ -17,7 +19,8 @@ namespace ComputationalNode.Core
     {
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public ComputationalNodeMessageProcessor(List<string> problems ): base (problems)
+        public ComputationalNodeMessageProcessor(List<string> problems)
+            : base (problems)
         {
             //enough for this stage:
             threads.Add(new StatusThread()
@@ -34,33 +37,38 @@ namespace ComputationalNode.Core
         public Message ComputeSubtask(SolvePartialProblems solvePartialProblems)
         {
             log.DebugFormat("Computation started. ({0})", solvePartialProblems.Id);
-            Thread.Sleep(20000);
-            //implementation in second stage, now mocked (thread sleep)
+
             if (!SolvableProblems.Contains(solvePartialProblems.ProblemType))
                 return new Error()
                 {
                     ErrorMessage = "Not supported problem type",
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
+            //task solver stuff:
+            var taskSolver = new DvrpTaskSolver(solvePartialProblems.CommonData);
+            var solutionsList = new List<SolutionsSolution>();
+
+            foreach (var partialProblem in solvePartialProblems.PartialProblems)
+            {
+                var newSolution = new SolutionsSolution()
+                {
+                    TaskId = partialProblem.TaskId,
+                    TaskIdSpecified = true,
+                    //TimeoutOccured = false,
+                    Type = SolutionsSolutionType.Partial,
+                    //ComputationsTime = 0
+                };
+                newSolution.Data = taskSolver.Solve(partialProblem.Data, TimeSpan.Zero);
+            }
 
             log.DebugFormat("Computation finished. ({0})", solvePartialProblems.Id);
 
             return new Solutions()
             {
-                CommonData = new byte[] {0},
+                CommonData = solvePartialProblems.CommonData,
                 Id = solvePartialProblems.Id,
                 ProblemType = solvePartialProblems.ProblemType,
-                SolutionsList = new[]
-                {
-                    new SolutionsSolution()
-                    {
-                        Data = null,
-                        ComputationsTime = 1,
-                        TaskIdSpecified = true,
-                        TaskId = solvePartialProblems.PartialProblems[0].TaskId,
-                        Type = SolutionsSolutionType.Partial
-                    }
-                }
+                SolutionsList = solutionsList.ToArray()
             };
         }
 

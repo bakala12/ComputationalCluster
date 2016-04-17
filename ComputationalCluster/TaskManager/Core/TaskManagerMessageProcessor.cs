@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using AlgorithmSolvers.DVRPEssentials;
 using CommunicationsUtils.Serialization;
 using log4net;
+using UCCTaskSolver;
 
 namespace TaskManager.Core
 {
@@ -53,7 +54,7 @@ namespace TaskManager.Core
         public Message DivideProblem(DivideProblem divideProblem)
         {
             log.DebugFormat("Division of problem has started. ({0})", divideProblem.Id);
-            //implementation in second stage
+
             if (!SolvableProblems.Contains(divideProblem.ProblemType))
             {
                 log.Debug("Not supported problem type.");
@@ -64,33 +65,36 @@ namespace TaskManager.Core
                 };
             }
 
-            DVRPProblemInstance problem = (DVRPProblemInstance) _problemConverter.FromBytesArray(divideProblem.Data);
-            var partialProblem = new SolvePartialProblemsPartialProblem()
-            {
-                TaskId = 0,
-                Data = new byte[] { 0 },
-                NodeID = componentId
-            };
-            var partialProblem2 = new SolvePartialProblemsPartialProblem()
-            {
-                TaskId = 1,
-                Data = new byte[] { 0 },
-                NodeID = componentId
-            };
+			
+            var commonData = divideProblem.Data;
+            var taskSolver = new DvrpTaskSolver(commonData);
+            var bytes = taskSolver.DivideProblem(0);
             //adding info about partial problems, their task ids, and partialProblem
             //some things can be temporary (partialProblems?)
             storage.AddIssue(divideProblem.Id, new ProblemInfo()
             {
-                ProblemsCount = 2,
+                ProblemsCount = bytes.GetLength(0),
                 ProblemType = divideProblem.ProblemType,
-                SolutionsCount = 0
+                SolutionsCount = 0,
+                CommonData = commonData
             });
 
-            storage.AddTaskToIssue(divideProblem.Id, partialProblem);
-            storage.AddTaskToIssue(divideProblem.Id, partialProblem2);
-            //end of implementation
-            //mock (thread sleep)
-            Thread.Sleep(30000);
+            var problemsList = new List<SolvePartialProblemsPartialProblem>();
+            //iterate through all partial problems and create proper messages
+            for (int i = 0; i < bytes.GetLength(0); i++)
+            {
+                var partialProblem = new SolvePartialProblemsPartialProblem()
+                {
+                    TaskId = (ulong) i,
+                    Data = bytes[i],
+                    NodeID = componentId
+                };
+
+                problemsList.Add( partialProblem );
+                //adding info about subtask to task manager memory
+                storage.AddTaskToIssue(divideProblem.Id, partialProblem);
+            }
+
             log.DebugFormat("Division finished. ({0})", divideProblem.Id);
             //creating msg
             SolvePartialProblems partialProblems = new SolvePartialProblems()
@@ -98,10 +102,7 @@ namespace TaskManager.Core
                 ProblemType = divideProblem.ProblemType,
                 Id = divideProblem.Id,
                 CommonData = divideProblem.Data,
-                PartialProblems = new SolvePartialProblemsPartialProblem[]
-                {
-                    partialProblem, partialProblem2
-                }
+                PartialProblems = problemsList.ToArray()
             };
             return partialProblems;
         }
@@ -142,22 +143,24 @@ namespace TaskManager.Core
         //task solver stuff
         public Solutions LinkSolutions(ulong problemId)
         {
-            //for issue in storage (by problemId) - get all tasks
-            //get SolutionsSolution from them and do something amazing
-            //mock (thread sleep)
-            Thread.Sleep(20000);
+            //link solutions (task solver stuff)
+            var commonData = storage.GetCommonData(problemId);
+            var taskSolver = new DvrpTaskSolver(commonData);
+            var solutionsBytes = storage.GetIssueSolutionsBytes(problemId);
+            var finalBytes = taskSolver.MergeSolution(solutionsBytes);
+
             log.DebugFormat("Solutions have been linked ({0})", problemId);
             //return final solution (this one is mocked)
             return new Solutions()
             {
-                CommonData = new byte[] { 0 },
+                CommonData = commonData,
                 Id = problemId,
                 ProblemType = storage.GetIssueType(problemId),
                 SolutionsList = new[]
                 {
                     new SolutionsSolution()
                     {
-                        Data = null,
+                        Data = finalBytes,
                         ComputationsTime = 1,
                         TaskIdSpecified = false,
                         Type = SolutionsSolutionType.Final

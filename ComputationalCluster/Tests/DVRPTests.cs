@@ -15,7 +15,7 @@ namespace Tests
             var loc2 = new Location() {Id = 2, X = 3, Y = 4};
             var visit1 = new Visit()
             {
-                AvailabilityTime = 2,
+                AvailabilityTime = 0,
                 Demand = 3,
                 Duration = 1,
                 Id = 1,
@@ -58,7 +58,12 @@ namespace Tests
             }
 
             Assert.AreEqual(2, partialProblems.Count);
-            //coś może więcej...
+            //solving
+            var solveProblem1 = taskSolver.Solve(divideProblem[0], TimeSpan.Zero);
+            var solveProblem2 = taskSolver.Solve(divideProblem[1], TimeSpan.Zero);
+
+            var sol1 = (DVRPPartialProblemInstance)converter.FromBytesArray(solveProblem1);
+            var sol2 = (DVRPPartialProblemInstance)converter.FromBytesArray(solveProblem2);
         }
     }
 }

@@ -44,6 +44,10 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="UCCTaskSolver, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\UCCTaskSolver.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -69,6 +73,8 @@
     <Compile Include="ComputationalClientProcessingTests.cs" />
     <Compile Include="ComputationalClientCommTests.cs" />
     <Compile Include="TaskManagerProcessingTests.cs" />
+    <Compile Include="ProblemParserTests.cs" />
+    <Compile Include="DVRPTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AlgorithmSolvers\AlgorithmSolvers.csproj">

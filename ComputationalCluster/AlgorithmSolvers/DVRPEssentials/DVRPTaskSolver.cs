@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -246,7 +247,20 @@ namespace AlgorithmSolvers.DVRPEssentials
                 //deep copy
                 var cpy = new DVRPPartialProblemInstance();
                 var arrCpy = new List<int>[vehicleNumber];
-                currProblem.VisitIds.CopyTo(arrCpy,0);
+                for (var k = 0; k < vehicleNumber; k++)
+                {
+                    if (currProblem.VisitIds[k] == null)
+                    {
+                        arrCpy[k] = new List<int>();
+                        continue;
+                    }
+
+                    arrCpy[k] = new List<int>();
+                    for (var s = 0; s < currProblem.VisitIds[k].Count; s++)
+                    {
+                        arrCpy[k].Add(currProblem.VisitIds[k][s]);
+                    }
+                }
                 cpy.VisitIds = arrCpy;
                 problems.Add(cpy);
 
@@ -259,6 +273,9 @@ namespace AlgorithmSolvers.DVRPEssentials
                 //algorytm z nawrotami
                 for (var j = 0; j < vehicleNumber; j++)
                 {
+                    if (currProblem.VisitIds[j] == null)
+                        currProblem.VisitIds[j] = new List<int>();
+
                     currProblem.VisitIds[j].Add(visits[i].Id);
                     divideProblemRec(ref problems, currProblem, visits, i+1, vehicleNumber);
                     currProblem.VisitIds[j].Remove(visits[i].Id);

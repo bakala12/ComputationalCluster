@@ -69,6 +69,8 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// </returns>
         private double minimizePermutation(DVRPProblemInstance instance, ref int[] carVisits)
         {
+            if (carVisits.Length == 0)
+                return 0f;
             //generacja wszystkich permutacji i sprawdzanie kosztu (zlozonosc n!)
             //permutacja generowana w rekursji
             var newVisits = new List<int>();
@@ -132,7 +134,7 @@ namespace AlgorithmSolvers.DVRPEssentials
             var firstVisit = instance.Visits.Single(x => x.Id == newVisits[0]);
             var currTime = depot.EarliestDepartureTime + 
                 getTimeCost(instance, depot.Location, firstVisit.Location);
-
+            //TODO: something needs to be changed. this is innatural:
             if (currTime < firstVisit.AvailabilityTime)
                 return true;
             //sprawdzenie w pętli czy da się dojechać z i-1 wizyty do i-tej wizyty w dobrym czasie

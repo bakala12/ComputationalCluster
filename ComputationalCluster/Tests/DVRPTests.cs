@@ -62,8 +62,9 @@ namespace Tests
             var solveProblem1 = taskSolver.Solve(divideProblem[0], TimeSpan.Zero);
             var solveProblem2 = taskSolver.Solve(divideProblem[1], TimeSpan.Zero);
 
-            var sol1 = (DVRPPartialProblemInstance)converter.FromBytesArray(solveProblem1);
-            var sol2 = (DVRPPartialProblemInstance)converter.FromBytesArray(solveProblem2);
+            var finalSol = taskSolver.MergeSolution(new[] {solveProblem1, solveProblem2});
+
+            //asercje necessary, jutro moze to zrobie
         }
     }
 }

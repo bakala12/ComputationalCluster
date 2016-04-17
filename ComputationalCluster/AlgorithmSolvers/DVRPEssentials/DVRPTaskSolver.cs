@@ -49,7 +49,6 @@ namespace AlgorithmSolvers.DVRPEssentials
                 {
                     return solutionImpossible();
                 }
-                
                 totalCost += currCost;
             }
             //udało się:
@@ -88,10 +87,13 @@ namespace AlgorithmSolvers.DVRPEssentials
             {
                 if (routeImpossible (instance, newVisits))
                     return;
+                //dodatkowo dodany koszt drogi powrotnej do depotu:
+                double realCost = currCost + getDistanceCost(instance.Depots.Single().Location,
+                    instance.Visits.Single(x => x.Id == newVisits.Last()).Location);
                 //żeby nadpisać ujemną liczbę coś takiego musi być:
-                if (currCost >= minCost && minCost > 0f)
+                if (realCost >= minCost && minCost > 0f)
                     return;
-                minCost = currCost;
+                minCost = realCost;
                 //deep copy
                 var cpy = new int[carVisits.Length];
                 newVisits.CopyTo(cpy);

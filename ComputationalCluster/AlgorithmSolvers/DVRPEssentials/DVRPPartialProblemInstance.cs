@@ -17,7 +17,7 @@ namespace AlgorithmSolvers.DVRPEssentials
     public class DVRPPartialProblemInstance : IProblemInstance
     {
         [Description("Miejsca do odwiedzenia - klienci")]
-        public List<int>[] VisitIds { get; set; }
+        public int[][] VisitIds { get; set; }
         [Description("Wynik problemu - suma minimalnych odległości ścieżek odwiedzających wszystkich klientów")]
         public int PartialResult { get; set; }
         public SolutionResult SolutionResult { get; set; } = SolutionResult.NotSolved;

@@ -30,10 +30,10 @@ namespace AlgorithmSolvers.DVRPEssentials
             var partialInstance = (DVRPPartialProblemInstance) converter.FromBytesArray(partialData);
             var instance = (DVRPProblemInstance) converter.FromBytesArray(_problemData);
             //dla każdego samochodu (listy klientów mu przypisanej) sprawdz poprawność kombinacji (w sensie żądań)
-            if (partialInstance.VisitIds.
-                Any(carVisits => !checkDemands(instance, carVisits, instance.VehicleCapacity)))
+            foreach (var carVisits in partialInstance.VisitIds)
             {
-                return solutionImpossible();
+                if (!checkDemands(instance, carVisits, instance.VehicleCapacity))
+                    return solutionImpossible();
             }
 
             //po wstepnej walidacji, czas na takie ustawienie id'ków dla każdego samochodu,
@@ -67,7 +67,7 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// <param name="carVisits">permutacje dla samochodu - do minimalizacji kosztu</param>
         /// <returns>koszt minimalnej permutacji, -1 w przypadku nieistniejacej permutacji (dla warunkow czasowych)
         /// </returns>
-        private double minimizePermutation(DVRPProblemInstance instance, ref List<int> carVisits)
+        private double minimizePermutation(DVRPProblemInstance instance, ref int[] carVisits)
         {
             //generacja wszystkich permutacji i sprawdzanie kosztu (zlozonosc n!)
             //permutacja generowana w rekursji
@@ -78,11 +78,11 @@ namespace AlgorithmSolvers.DVRPEssentials
         }
 
         //rekurencja z nawrotami
-        private void minimizePermutationRec(DVRPProblemInstance instance, ref List<int> carVisits, 
+        private void minimizePermutationRec(DVRPProblemInstance instance, ref int[] carVisits, 
             double currCost, ref double minCost, List<int> newVisits)
         {
             //zbudowalismy pewna permutacje, sprawdzenie czy jest dobra i ew. aktualizacja refów
-            if (newVisits.Count == carVisits.Count)
+            if (newVisits.Count == carVisits.Length)
             {
                 if (routeImpossible (instance, newVisits))
                     return;
@@ -91,15 +91,15 @@ namespace AlgorithmSolvers.DVRPEssentials
                     return;
                 minCost = currCost;
                 //deep copy
-                var cpy = new int[carVisits.Count];
+                var cpy = new int[carVisits.Length];
                 newVisits.CopyTo(cpy);
-                carVisits = cpy.ToList();
+                carVisits = cpy;
 
                 return;
             }
 
             //rekursywna generacja permutacji
-            for (var i = 0; i < carVisits.Count; i++)
+            for (var i = 0; i < carVisits.Length; i++)
             {
                 var visitId = carVisits[i];
 
@@ -197,7 +197,7 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// <param name="carVisits"></param>
         /// <param name="vehicleCapacity"></param>
         /// <returns></returns>
-        private bool checkDemands(DVRPProblemInstance instance, List<int> carVisits, int vehicleCapacity)
+        private bool checkDemands(DVRPProblemInstance instance, int[] carVisits, int vehicleCapacity)
         {
             var demands = carVisits.Sum(v => instance.Visits.Single(x => x.Id == v).Demand);
             return Math.Abs(demands) < vehicleCapacity;
@@ -218,12 +218,9 @@ namespace AlgorithmSolvers.DVRPEssentials
         private byte[][] divideProblem(DVRPProblemInstance instance, ProblemToBytesConverter converter)
         {
             var partialProblemInstances = new List<DVRPPartialProblemInstance>();
-            var currProblem = new DVRPPartialProblemInstance()
-            {
-                VisitIds = new List<int>[instance.VehicleNumber]
-            };
+            var currVisits = new List<int>[instance.VehicleNumber];
            
-            divideProblemRec(ref partialProblemInstances, currProblem, instance.Visits, 0,
+            divideProblemRec(ref partialProblemInstances, currVisits, instance.Visits, 0,
                 instance.VehicleNumber);
 
             return partialProblemInstances.Select(converter.ToByteArray).ToArray();
@@ -238,7 +235,7 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// <param name="i">obecny klient</param>
         /// <param name="vehicleNumber">niezbędna informacja</param>
         private void divideProblemRec(ref List<DVRPPartialProblemInstance> problems, 
-            DVRPPartialProblemInstance currProblem,
+            List<int>[] currVisits,
             IReadOnlyList<Visit> visits, int i, int vehicleNumber)
         {
             //można dodać nowy problem
@@ -249,19 +246,22 @@ namespace AlgorithmSolvers.DVRPEssentials
                 var arrCpy = new List<int>[vehicleNumber];
                 for (var k = 0; k < vehicleNumber; k++)
                 {
-                    if (currProblem.VisitIds[k] == null)
+                    if (currVisits[k] == null)
                     {
                         arrCpy[k] = new List<int>();
                         continue;
                     }
 
                     arrCpy[k] = new List<int>();
-                    for (var s = 0; s < currProblem.VisitIds[k].Count; s++)
+                    for (var s = 0; s < currVisits[k].Count; s++)
                     {
-                        arrCpy[k].Add(currProblem.VisitIds[k][s]);
+                        arrCpy[k].Add(currVisits[k][s]);
                     }
                 }
-                cpy.VisitIds = arrCpy;
+                cpy.VisitIds = new int[vehicleNumber][];
+                for (var j = 0; j < vehicleNumber; j++)
+                    cpy.VisitIds[j] = arrCpy[j].ToArray();
+
                 problems.Add(cpy);
 
                 return;
@@ -273,12 +273,12 @@ namespace AlgorithmSolvers.DVRPEssentials
                 //algorytm z nawrotami
                 for (var j = 0; j < vehicleNumber; j++)
                 {
-                    if (currProblem.VisitIds[j] == null)
-                        currProblem.VisitIds[j] = new List<int>();
+                    if (currVisits[j] == null)
+                        currVisits[j] = new List<int>();
 
-                    currProblem.VisitIds[j].Add(visits[i].Id);
-                    divideProblemRec(ref problems, currProblem, visits, i+1, vehicleNumber);
-                    currProblem.VisitIds[j].Remove(visits[i].Id);
+                    currVisits[j].Add(visits[i].Id);
+                    divideProblemRec(ref problems, currVisits, visits, i+1, vehicleNumber);
+                    currVisits[j].Remove(visits[i].Id);
                 }
             }
         }

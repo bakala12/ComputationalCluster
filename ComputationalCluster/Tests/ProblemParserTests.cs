@@ -85,13 +85,13 @@ namespace Tests
         [TestMethod]
         public void PartialProblemParsingTest()
         {
-            var visits = new List<int>[3];
-            visits[0] = new List<int>();
-            visits[0].Add(1);
-            visits[1] = new List<int>();
-            visits[1].Add(2);
-            visits[2] = new List<int>();
-            visits[2].Add(3);
+            var visits = new int [3][];
+            visits[0] = new int[1];
+            visits[0][0] = 1;
+            visits[1] = new int[1];
+            visits[1][0] = 2;
+            visits[2] = new int[1];
+            visits[2][0] = 3;
             var instance = new DVRPPartialProblemInstance()
             {
                 PartialResult = 0,
@@ -103,9 +103,9 @@ namespace Tests
             var ret = (DVRPPartialProblemInstance)converter.FromBytesArray(bytes);
             //assertions:
             Assert.AreEqual(visits.Length, ret.VisitIds.Length);
-            Assert.AreEqual(visits[0].Count, ret.VisitIds[0].Count);
-            Assert.AreEqual(visits[1].Count, ret.VisitIds[1].Count);
-            Assert.AreEqual(visits[2].Count, ret.VisitIds[2].Count);
+            Assert.AreEqual(visits[0].Length, ret.VisitIds[0].Length);
+            Assert.AreEqual(visits[1].Length, ret.VisitIds[1].Length);
+            Assert.AreEqual(visits[2].Length, ret.VisitIds[2].Length);
             Assert.AreEqual(visits[0][0], ret.VisitIds[0][0]);
             Assert.AreEqual(visits[1][0], ret.VisitIds[1][0]);
             Assert.AreEqual(visits[2][0], ret.VisitIds[2][0]);

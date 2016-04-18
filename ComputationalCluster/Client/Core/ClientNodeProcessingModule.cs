@@ -44,10 +44,25 @@ namespace Client.Core
         /// this will do something with final solution, e.g. printing it
         /// </summary>
         /// <param name="solution"></param>
-        public void DoSomethingWithSolution(SolutionsSolution solution)
+        public void PrintSolutionResult(SolutionsSolution solution)
         {
-            DVRPPartialProblemInstance result = (DVRPPartialProblemInstance) _problemConverter.FromBytesArray(solution.Data);
-            log.DebugFormat("Result of the sent problem: cost = {0} ", result.PartialResult);
+            if (solution.Data == null)
+            { 
+                log.DebugFormat("Result - solution received is null");
+                return;
+            }
+
+        DVRPPartialProblemInstance result = (DVRPPartialProblemInstance) _problemConverter.FromBytesArray(solution.Data);
+            if (result.SolutionResult == SolutionResult.Impossible)
+            {
+                log.DebugFormat("Result - solution unknown - problem impossible to solve");
+            }
+            else if (result.SolutionResult == SolutionResult.NotSolved)
+            {
+                log.DebugFormat("Error of cluster computations. Cluster sent solution with field NotSolved");
+            }
+            else
+                log.DebugFormat("Result - solution found, minimal cost = {0} ", result.PartialResult);
             return;
         }
 

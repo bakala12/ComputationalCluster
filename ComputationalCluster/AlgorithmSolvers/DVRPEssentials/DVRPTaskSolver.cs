@@ -25,6 +25,8 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// 
         public override byte[] Solve(byte[] partialData, TimeSpan timeout)
         {
+            if (partialData == null || partialData.Length == 0)
+                return null;
             //przerób bajty na PartialProblemInstance
             var converter = new ProblemToBytesConverter();
             var partialInstance = (DVRPPartialProblemInstance) converter.FromBytesArray(partialData);
@@ -53,8 +55,7 @@ namespace AlgorithmSolvers.DVRPEssentials
             }
             //udało się:
             partialInstance.SolutionResult = SolutionResult.Successful;
-            //TODO: total cost should be double!!
-            partialInstance.PartialResult = (int)totalCost;
+            partialInstance.PartialResult = totalCost;
             return converter.ToByteArray(partialInstance);
             //timeoutu nie rozpatruj, szkoda zdrowia
         }
@@ -136,11 +137,14 @@ namespace AlgorithmSolvers.DVRPEssentials
             var firstVisit = instance.Visits.Single(x => x.Id == newVisits[0]);
             var currTime = depot.EarliestDepartureTime + 
                 getTimeCost(instance, depot.Location, firstVisit.Location);
-            //TODO: something needs to be changed. this is innatural:
+
+            //przyjechaliśmy przed otwarciem depota. trzeba zaczekać na otwarcie
+            //interesuje nas nie minimalizacja czasu, ale drogi, więc może tak być:
             if (currTime < firstVisit.AvailabilityTime)
-                return true;
+                currTime = firstVisit.AvailabilityTime;
+
             //sprawdzenie w pętli czy da się dojechać z i-1 wizyty do i-tej wizyty w dobrym czasie
-            for (int i = 0; i < newVisits.Count-1; i++)
+            for (var i = 0; i < newVisits.Count-1; i++)
             {
                 var visit = instance.Visits.Single(x => x.Id == newVisits[i]);
                 var nextVisit = instance.Visits.Single(x => x.Id == newVisits[i + 1]);
@@ -164,10 +168,7 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// <returns></returns>
         private int getTimeCost(DVRPProblemInstance instance, Location from, Location to)
         {
-            //TODO: return cost for given vehicle speed and given locations
-            //TODO: (t = s/V)
-            //return getDistanceCost(from,to)/instance.VehicleSpeed;
-            return 0;
+            return (int)(getDistanceCost(from,to)/instance.VehicleSpeed);
         }
 
         /// <summary>
@@ -190,7 +191,9 @@ namespace AlgorithmSolvers.DVRPEssentials
             var converter = new ProblemToBytesConverter();
             return converter.ToByteArray(new DVRPPartialProblemInstance()
             {
-                SolutionResult = SolutionResult.Impossible
+                PartialResult = double.MaxValue,
+                SolutionResult = SolutionResult.Impossible,
+                VisitIds = null
             });
         }
 
@@ -214,6 +217,9 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// 
         public override byte[][] DivideProblem(int threadCount)
         {
+            if (_problemData == null || _problemData.Length == 0)
+                return null;
+
             var converter = new ProblemToBytesConverter();
             var instance = (DVRPProblemInstance)converter.FromBytesArray(_problemData);
             return divideProblem(instance, converter);
@@ -265,7 +271,7 @@ namespace AlgorithmSolvers.DVRPEssentials
                 cpy.VisitIds = new int[vehicleNumber][];
                 for (var j = 0; j < vehicleNumber; j++)
                     cpy.VisitIds[j] = arrCpy[j].ToArray();
-
+                cpy.SolutionResult = SolutionResult.NotSolved; 
                 problems.Add(cpy);
 
                 return;
@@ -293,6 +299,8 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// 
         public override byte[] MergeSolution(byte[][] solutions)
         {
+            if (solutions == null || solutions.GetLength(0) == 0)
+                return null;
             var converter = new ProblemToBytesConverter();
             var partialSolutions = solutions.Select
                 (solution => (DVRPPartialProblemInstance) converter.FromBytesArray(solution)).ToList();
@@ -304,6 +312,7 @@ namespace AlgorithmSolvers.DVRPEssentials
                 imin = i;
                 minCost = partialSolutions[i].PartialResult;
             }
+
             return solutions[imin];
         }
 

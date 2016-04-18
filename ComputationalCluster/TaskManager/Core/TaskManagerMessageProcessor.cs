@@ -65,16 +65,16 @@ namespace TaskManager.Core
                 };
             }
 
-			
             var commonData = divideProblem.Data;
             var taskSolver = new DvrpTaskSolver(commonData);
             var bytes = taskSolver.DivideProblem(0);
-            log.DebugFormat("Length of divide problem message: {0}", bytes.Sum(x=>x.Length));
+
+            log.DebugFormat("Length of divide problem message: {0}", bytes?.Sum(x=>x.Length));
             //adding info about partial problems, their task ids, and partialProblem
             //some things can be temporary (partialProblems?)
             storage.AddIssue(divideProblem.Id, new ProblemInfo()
             {
-                ProblemsCount = bytes.GetLength(0),
+                ProblemsCount = bytes?.GetLength(0) ?? 0,
                 ProblemType = divideProblem.ProblemType,
                 SolutionsCount = 0,
                 CommonData = commonData
@@ -82,7 +82,7 @@ namespace TaskManager.Core
 
             var problemsList = new List<SolvePartialProblemsPartialProblem>();
             //iterate through all partial problems and create proper messages
-            for (int i = 0; i < bytes.GetLength(0); i++)
+            for (var i = 0; i < (bytes?.GetLength(0) ?? 0) ; i++)
             {
                 var partialProblem = new SolvePartialProblemsPartialProblem()
                 {
@@ -98,7 +98,7 @@ namespace TaskManager.Core
 
             log.DebugFormat("Division finished. ({0})", divideProblem.Id);
             //creating msg
-            SolvePartialProblems partialProblems = new SolvePartialProblems()
+            var partialProblems = new SolvePartialProblems()
             {
                 ProblemType = divideProblem.ProblemType,
                 Id = divideProblem.Id,

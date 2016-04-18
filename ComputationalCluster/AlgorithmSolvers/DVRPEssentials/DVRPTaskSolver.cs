@@ -297,7 +297,7 @@ namespace AlgorithmSolvers.DVRPEssentials
             var partialSolutions = solutions.Select
                 (solution => (DVRPPartialProblemInstance) converter.FromBytesArray(solution)).ToList();
             var imin = 0;
-            var minCost = int.MaxValue;
+            var minCost = double.MaxValue;
             for (var i = 0; i < solutions.GetLength(0); i++)
             {
                 if (partialSolutions[i].PartialResult >= minCost) continue;

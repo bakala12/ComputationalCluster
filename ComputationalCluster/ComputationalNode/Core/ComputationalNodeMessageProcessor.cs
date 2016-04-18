@@ -58,8 +58,9 @@ namespace ComputationalNode.Core
                     //ComputationsTime = 0
                 };
                 newSolution.Data = taskSolver.Solve(partialProblem.Data, TimeSpan.Zero);
+                solutionsList.Add(newSolution);
             }
-
+            log.DebugFormat("Length of solution message: {0}", solutionsList.Sum(x=> x.Data.Length));
             log.DebugFormat("Computation finished. ({0})", solvePartialProblems.Id);
 
             return new Solutions()

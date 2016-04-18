@@ -271,8 +271,7 @@ namespace Server
                     catch (Exception)
                     {
                         Log.Debug("Communication accident. Connection has been broken down");
-                        //throw;
-                        return;
+                        throw;
                     }
                     if (requestsMessages==null) Log.Debug("No request messages detected.");
                     Log.Debug("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);

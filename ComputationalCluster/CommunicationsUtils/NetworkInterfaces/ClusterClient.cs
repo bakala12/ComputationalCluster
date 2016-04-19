@@ -18,6 +18,32 @@ namespace CommunicationsUtils.NetworkInterfaces
         private string _address;
         private int _port;
 
+        public string Address
+        {
+            get
+            {
+                return _address;
+            }
+
+            set
+            {
+                _address = value;
+            }
+        }
+
+        public int Port
+        {
+            get
+            {
+                return _port;
+            }
+
+            set
+            {
+                _port = value;
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -58,5 +84,6 @@ namespace CommunicationsUtils.NetworkInterfaces
             this._address = address;
             this._port = port;
         }
+
     }
 }

@@ -48,7 +48,6 @@ namespace Server.MessageProcessing
             //add register message to synchronization queue
             message.Id = (ulong)maxId;
             message.IdSpecified = true;
-            message.DeregisterSpecified = false;
             SynchronizationQueue.Enqueue(message);
             if(message.Type.Value==ComponentType.CommunicationServer)
                 AddBackupAddressToBackupList(backups, message.Type.port);
@@ -137,20 +136,24 @@ namespace Server.MessageProcessing
                     whatToDo = DataSetOps.GetMessageForTaskManager(activeComponents, who, dataSets);
                     break;
                 case ComponentType.CommunicationServer:
-                    var msgs = SynchronizationQueue.ToArray();
+                    var msgs = SynchronizationQueue.ToList();
                     SynchronizationQueue = new ConcurrentQueue<Message>();
-                    return msgs;
+                    msgs.Add(new NoOperation()
+                    {
+                        BackupServersInfo = backups.ToArray()
+                    });
+                    return msgs.ToArray();
             }
+
+            var noop = new NoOperation() {BackupServersInfo = backups.ToArray()};
+
             if (whatToDo == null)
             {
                 Log.DebugFormat("Nothing additional found for {0} (id={1})",
                     activeComponents[who].ComponentType, who);
                 return new Message[]
                 {
-                    new NoOperation()
-                    {
-                        BackupServersInfo = backups.ToArray()
-                    }
+                    noop
                 };
             }
             Log.DebugFormat("Found problem ({0}) for {1} (id={2})",
@@ -160,10 +163,7 @@ namespace Server.MessageProcessing
             return new[]
             {
                 whatToDo,
-                new NoOperation()
-                {
-                    BackupServersInfo = backups.ToArray()
-                }
+                noop
             };
         }
 

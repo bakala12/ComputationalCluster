@@ -412,7 +412,7 @@ namespace Tests
             {
                 new [] {3},
                 new int[] {},
-                new int[] {2,1,4},
+                new [] {2,1,4},
                 new int[] {},
             };
             for(var j=0; j< finalSolution.VisitIds.GetLength(0); j++)
@@ -556,6 +556,124 @@ namespace Tests
                     Assert.AreEqual(finalSolution.VisitIds[j][i], expected[j][i]);
                 }
             }
+        }
+        //http://pastebin.com/Xmjiz20Y well not pass
+        [TestMethod]
+        public void DvrpAlgorithmTest_ForAnotherProblem()
+        {
+            // 5 locations
+            var locationsArray = new[]
+            {
+                new Location
+                {
+                    Id = 0,
+                    X = 0,
+                    Y = 0
+                },
+                new Location
+                {
+                    Id = 1,
+                    X = -67,
+                    Y = 14
+                },
+                new Location
+                {
+                    Id = 2,
+                    X = 94,
+                    Y = 14
+                },
+                new Location
+                {
+                    Id = 3,
+                    X = -29,
+                    Y = -19
+                },
+                new Location
+                {
+                    Id = 4,
+                    X = 43,
+                    Y = 24
+                }
+            };
+            // 4 visits
+            var visitsArray = new[]
+            {
+                new Visit
+                {
+                    AvailabilityTime = 196,
+                    Demand = -48,
+                    Duration = 20,
+                    Id = 1,
+                    Location = locationsArray[1]
+                },
+                new Visit
+                {
+                    AvailabilityTime = 443,
+                    Demand = -16,
+                    Duration = 20,
+                    Id = 2,
+                    Location = locationsArray[2]
+                },
+                new Visit
+                {
+                    AvailabilityTime = 180,
+                    Demand = -35,
+                    Duration = 20,
+                    Id = 3,
+                    Location = locationsArray[3]
+                },
+                new Visit
+                {
+                    AvailabilityTime = 15,
+                    Demand = -37,
+                    Duration = 20,
+                    Id = 4,
+                    Location = locationsArray[4]
+                }
+            };
+            // 1 depot
+            var depot = new Depot
+            {
+                Id = 0,
+                Location = locationsArray[0],
+                EarliestDepartureTime = 0,
+                LatestReturnTime = 480
+            };
+
+            var depots = new List<Depot> { depot };
+            var locations = new List<Location>(locationsArray);
+            var visits = new List<Visit>(visitsArray);
+            const int vehicleCap = 100;
+            const int vehicleNumber = 4;
+
+
+            var problem = new DVRPProblemInstance
+            {
+                Depots = depots,
+                Locations = locations,
+                VehicleCapacity = vehicleCap,
+                VehicleNumber = vehicleNumber,
+                Visits = visits
+            };
+            var converter = new ProblemToBytesConverter();
+            var bytes = converter.ToByteArray(problem);
+            var taskSolver = new DvrpTaskSolver(bytes);
+            var divideProblem = taskSolver.DivideProblem(0);
+            var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
+
+            Assert.AreEqual(256, partialProblems.Count);
+            var solvePartialProblem = new ConcurrentQueue<byte[]>();
+            Parallel.ForEach(divideProblem, element =>
+            {
+                solvePartialProblem.Enqueue(taskSolver.Solve(element, TimeSpan.Zero));
+            });
+
+            var finalSolutionBytes = taskSolver.MergeSolution(solvePartialProblem.ToArray());
+
+            var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
+            Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Successful);
+            Assert.AreNotEqual(Round(finalSolution.PartialResult, 2), 349.70);
+            
 
         }
     }

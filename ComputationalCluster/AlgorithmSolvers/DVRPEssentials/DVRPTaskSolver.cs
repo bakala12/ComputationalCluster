@@ -81,7 +81,15 @@ namespace AlgorithmSolvers.DVRPEssentials
             return cost;
         }
 
-        //rekurencja z nawrotami
+        /// <summary>
+        /// algorytm z nawrotami
+        /// </summary>
+        /// <param name="instance">instancja problemu</param>
+        /// <param name="carVisits">minimalna permutacja klientów dla samochodu</param>
+        /// <param name="currCost">koszt obecnie budowanej permutacji (odległość)</param>
+        /// <param name="currCapacity">ile autku zostało w bagażniku towaru</param>
+        /// <param name="minCost">koszt carVisits (tzn. minimalny)</param>
+        /// <param name="newVisits">aktualnie budowana permutacja</param>
         private void minimizePermutationRec(DVRPProblemInstance instance, ref int[] carVisits, 
             double currCost, int currCapacity, ref double minCost, List<int> newVisits)
         {
@@ -112,7 +120,7 @@ namespace AlgorithmSolvers.DVRPEssentials
 
                 if (newVisits.Contains(visitId)) continue;
 
-                //ogólnie to paskudnie wygląda (bo visits to tylko inty do visitId)
+                //ogólnie to paskudnie wygląda (bo visits to tylko inty do visit.Id)
                 var visit = instance.Visits.Single(x => x.Id == visitId);
                 var depot = instance.Depots.Single();
 
@@ -126,7 +134,8 @@ namespace AlgorithmSolvers.DVRPEssentials
                 //autko nie ma towaru dla tego klienta
                 if (currCapacity < Math.Abs(visit.Demand))
                 {
-                    returnToDepotCost = getDistanceCost(depot.Location, 
+                    //w dwie strony:
+                    returnToDepotCost = 2*getDistanceCost(depot.Location, 
                         instance.Visits.Single(x => x.Id == newVisits.Last()).Location);
                     currCapacity = instance.VehicleCapacity;
                 }
@@ -166,10 +175,11 @@ namespace AlgorithmSolvers.DVRPEssentials
                 var visit = instance.Visits.Single(x => x.Id == newVisits[i]);
                 var nextVisit = instance.Visits.Single(x => x.Id == newVisits[i + 1]);
                 var returnToDepotTime = 0;
-                //autko nie ma już towaru, można wrócić do depot
+                //autko nie ma już towaru, trzeba wrócić do depot
                 if (instance.VehicleCapacity - currCapacity < Math.Abs(visit.Demand))
                 {
-                    returnToDepotTime = getTimeCost(instance, depot.Location, visit.Location);
+                    //bo w dwie strony:
+                    returnToDepotTime = 2*getTimeCost(instance, depot.Location, visit.Location);
                     currCapacity = instance.VehicleCapacity;
                 }
                 currTime += visit.Duration + returnToDepotTime + 

@@ -69,6 +69,7 @@ namespace Tests
 
             //asercje necessary, jutro moze to zrobie
         }
+        // najmniejsza z proponowanych przez O.
         [ExpectedException(typeof(OutOfMemoryException))] // so far
         [TestMethod]
         public void DvrpAlgorithmTest()
@@ -378,7 +379,7 @@ namespace Tests
             var locations = new List<Location>(locationsArray);
             var visits = new List<Visit>(visitsArray);
             const int vehicleCap = 100;
-            const int vehicleNumber = 12;
+            const int vehicleNumber = 4;
 
 
             var problem = new DVRPProblemInstance
@@ -395,7 +396,7 @@ namespace Tests
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
-            Assert.AreEqual(20736, partialProblems.Count);
+            Assert.AreEqual(256, partialProblems.Count);
             var solvePartialProblem = new ConcurrentQueue<byte[]>();
             Parallel.ForEach(divideProblem, element =>
             {
@@ -409,18 +410,10 @@ namespace Tests
             Assert.AreEqual(Round(finalSolution.PartialResult, 5), 422.0288);
             var expected = new[]
             {
-                new [] {2,1,4},
                 new [] {3},
                 new int[] {},
+                new int[] {2,1,4},
                 new int[] {},
-                new int[] {},
-                new int[] {},
-                new int[] {},
-                new int[] {},
-                new int[] {},
-                new int[] {},
-                new int[] {},
-                new int[] {}
             };
             for(var j=0; j< finalSolution.VisitIds.GetLength(0); j++)
             {

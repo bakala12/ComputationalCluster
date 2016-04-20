@@ -31,10 +31,11 @@ namespace AlgorithmSolvers.DVRPEssentials
             var converter = new ProblemToBytesConverter();
             var partialInstance = (DVRPPartialProblemInstance) converter.FromBytesArray(partialData);
             var instance = (DVRPProblemInstance) converter.FromBytesArray(_problemData);
-            //dla każdego samochodu (listy klientów mu przypisanej) sprawdz poprawność kombinacji (w sensie żądań)
+            //dla każdego samochodu (listy klientów mu przypisanej) sprawdz poprawność kombinacji 
+            //(w sensie żądań)
             foreach (var carVisits in partialInstance.VisitIds)
             {
-                if (!checkDemands(instance, carVisits, instance.VehicleCapacity))
+                if (!demandsValid(instance, carVisits))
                     return solutionImpossible();
             }
 
@@ -75,13 +76,14 @@ namespace AlgorithmSolvers.DVRPEssentials
             //permutacja generowana w rekursji
             var newVisits = new List<int>();
             var cost = double.MinValue;
-            minimizePermutationRec(instance, ref carVisits, 0, ref cost, newVisits);
+            minimizePermutationRec(instance, ref carVisits, 0, 
+                instance.VehicleCapacity, ref cost, newVisits);
             return cost;
         }
 
         //rekurencja z nawrotami
         private void minimizePermutationRec(DVRPProblemInstance instance, ref int[] carVisits, 
-            double currCost, ref double minCost, List<int> newVisits)
+            double currCost, int currCapacity, ref double minCost, List<int> newVisits)
         {
             //zbudowalismy pewna permutacje, sprawdzenie czy jest dobra i ew. aktualizacja refów
             if (newVisits.Count == carVisits.Length)
@@ -111,15 +113,28 @@ namespace AlgorithmSolvers.DVRPEssentials
                 if (newVisits.Contains(visitId)) continue;
 
                 //ogólnie to paskudnie wygląda (bo visits to tylko inty do visitId)
+                var visit = instance.Visits.Single(x => x.Id == visitId);
+                var depot = instance.Depots.Single();
+
                 var from = newVisits.Count == 0
-                    ? instance.Depots.Single().Location
+                    ? depot.Location
                     : instance.Visits.Single(x => x.Id == newVisits.Last()).Location;
 
-                var to = instance.Visits.Single(x => x.Id == visitId).Location;
+                var to = visit.Location;
                 //dodawanie kosztu (w sensie dystansu)
-                var lengthCost = getDistanceCost(from, to);
+                double returnToDepotCost = 0f;
+                //autko nie ma towaru dla tego klienta
+                if (currCapacity < Math.Abs(visit.Demand))
+                {
+                    returnToDepotCost = getDistanceCost(depot.Location, 
+                        instance.Visits.Single(x => x.Id == newVisits.Last()).Location);
+                    currCapacity = instance.VehicleCapacity;
+                }
+
+                var lengthCost = getDistanceCost(from, to) + returnToDepotCost;
                 newVisits.Add(visitId);
-                minimizePermutationRec(instance, ref carVisits, currCost+lengthCost, ref minCost, newVisits);
+                minimizePermutationRec(instance, ref carVisits, currCost+lengthCost,
+                    currCapacity - Math.Abs(visit.Demand), ref minCost, newVisits);
                 newVisits.Remove(visitId);
             }
         }
@@ -143,12 +158,22 @@ namespace AlgorithmSolvers.DVRPEssentials
             if (currTime < firstVisit.AvailabilityTime)
                 currTime = firstVisit.AvailabilityTime;
 
+            var currCapacity = instance.VehicleCapacity;
+
             //sprawdzenie w pętli czy da się dojechać z i-1 wizyty do i-tej wizyty w dobrym czasie
             for (var i = 0; i < newVisits.Count-1; i++)
             {
                 var visit = instance.Visits.Single(x => x.Id == newVisits[i]);
                 var nextVisit = instance.Visits.Single(x => x.Id == newVisits[i + 1]);
-                currTime += visit.Duration + getTimeCost(instance, visit.Location, nextVisit.Location);
+                var returnToDepotTime = 0;
+                //autko nie ma już towaru, można wrócić do depot
+                if (instance.VehicleCapacity - currCapacity < Math.Abs(visit.Demand))
+                {
+                    returnToDepotTime = getTimeCost(instance, depot.Location, visit.Location);
+                    currCapacity = instance.VehicleCapacity;
+                }
+                currTime += visit.Duration + returnToDepotTime + 
+                    getTimeCost(instance, visit.Location, nextVisit.Location);
                 //podobnie jak wyżej, poczekanie na otwarcie klienta
                 if (currTime < nextVisit.AvailabilityTime)
                     currTime = nextVisit.AvailabilityTime;
@@ -199,16 +224,16 @@ namespace AlgorithmSolvers.DVRPEssentials
         }
 
         /// <summary>
-        /// sprawdza, czy żądania danego zbioru klientów mogą być w ogóle spełnione przez jeden samochód
+        /// sprawdza czy klient nie ma zamówienia > vehicleCapacity (lepiej byłoby zrobić to w
+        /// divide, ale to jest zbyt trudne)
         /// </summary>
         /// <param name="instance"></param>
         /// <param name="carVisits"></param>
-        /// <param name="vehicleCapacity"></param>
-        /// <returns></returns>
-        private bool checkDemands(DVRPProblemInstance instance, int[] carVisits, int vehicleCapacity)
+        /// <returns>true jeżeli warunki są ok</returns>
+        private bool demandsValid(DVRPProblemInstance instance, int[] carVisits)
         {
-            var demands = carVisits.Sum(v => instance.Visits.Single(x => x.Id == v).Demand);
-            return Math.Abs(demands) < vehicleCapacity;
+            return !carVisits.Any
+                (x => Math.Abs(instance.Visits.Single(v => v.Id == x).Demand) > instance.VehicleCapacity);
         }
 
         ///

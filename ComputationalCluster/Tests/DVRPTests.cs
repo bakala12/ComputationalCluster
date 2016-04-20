@@ -407,12 +407,12 @@ namespace Tests
 
             var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
             Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Successful);
-            Assert.IsTrue(Round(finalSolution.PartialResult, 5)<= 422.0288);
+            Assert.IsTrue(Round(finalSolution.PartialResult, 2)<= 422.03);
             var expected = new[]
             {
-                new [] {3},
+                new [] {4,1,2,3},
                 new int[] {},
-                new [] {2,1,4},
+                new int[] {},
                 new int[] {},
             };
             for (int j = 0; j < finalSolution.VisitIds.GetLength(0); j++)
@@ -420,7 +420,7 @@ namespace Tests
                 Assert.IsTrue(
                     expected.Any(x =>
                     {
-                        if (x.Length != finalSolution.VisitIds.GetLength(0))
+                        if (x.Length != finalSolution.VisitIds[j].Length)
                             return false;
 
                         for (var i = 0; i < x.Length; i++)
@@ -554,7 +554,7 @@ namespace Tests
             Assert.IsTrue(Round(finalSolution.PartialResult, 5) < 531.78848);
             var expected = new[]
             {
-                new [] {2,1,4,3},
+                new [] {1,2,3,4},
                 new int[] {},
                 new int[] {},
                 new int[] {}
@@ -564,7 +564,7 @@ namespace Tests
                 Assert.IsTrue(
                     expected.Any(x =>
                     {
-                        if (x.Length != finalSolution.VisitIds.GetLength(0))
+                        if (x.Length != finalSolution.VisitIds[j].Length)
                             return false;
 
                         for (var i = 0; i < x.Length; i++)

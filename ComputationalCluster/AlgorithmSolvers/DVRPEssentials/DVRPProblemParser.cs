@@ -138,8 +138,8 @@ namespace AlgorithmSolvers.DVRPEssentials
 
         private string setDepotTimeAvailability(StreamReader file, int numDepots, DVRPProblemInstance dvrp)
         {
-            string line;
-            while ((line = file.ReadLine()) != "COMMENT: TIMESTEP: 7")
+            string line = string.Empty;
+            while (numDepots-- > 0 && (line = file.ReadLine()) != null)
             {
                 int ind = int.Parse(line.Split(' ')[2]);
                 dvrp.Depots.First(v => v.Id == ind).EarliestDepartureTime = int.Parse(line.Split(' ')[3]);
@@ -151,8 +151,8 @@ namespace AlgorithmSolvers.DVRPEssentials
 
         private string setVisitTimeAvailability(StreamReader file, int numVisits, DVRPProblemInstance dvrp)
         {
-            string line;
-            while ((line = file.ReadLine()) != "EOF")
+            string line = string.Empty;
+            while (numVisits-- > 0 && (line = file.ReadLine()) != "EOF")
             {
                 int ind = int.Parse(line.Split(' ')[2]);
                 dvrp.Visits.First(v => v.Id == ind).AvailabilityTime = int.Parse(line.Split(' ')[3]);

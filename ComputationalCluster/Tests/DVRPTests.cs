@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlgorithmSolvers.DVRPEssentials;
-using CommunicationsUtils.Messages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static System.Math;
 namespace Tests
 {
     [TestClass]
-    public class DVRPTests
+    public class DvrpTests
     {
         [TestMethod]
         public void DvrpSimpleProblemTest()
@@ -285,6 +284,7 @@ namespace Tests
             var bytes = converter.ToByteArray(problem);
             var taskSolver = new DvrpTaskSolver(bytes);
             var divideProblem = taskSolver.DivideProblem(0);
+            // ReSharper disable once UnusedVariable
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance) converter.FromBytesArray(partialProblem)).ToList();
 
             // TODO
@@ -423,6 +423,140 @@ namespace Tests
                 new int[] {}
             };
             for(var j=0; j< finalSolution.VisitIds.GetLength(0); j++)
+            {
+                for (var i = 0; i < finalSolution.VisitIds[j].Length; i++)
+                {
+                    Assert.AreEqual(finalSolution.VisitIds[j][i], expected[j][i]);
+                }
+            }
+
+        }
+
+        // http://pastebin.com/LqVe84pE
+        // executes for about 15 sec
+        [TestMethod]
+        public void DvrpAlgorithmTest_ForAnotherProblemSample()
+        {
+            // 5 locations
+            var locationsArray = new[]
+            {
+                new Location
+                {
+                    Id = 0,
+                    X = 0,
+                    Y = 0
+                },
+                new Location
+                {
+                    Id = 1,
+                    X = 57,
+                    Y = 82
+                },
+                new Location
+                {
+                    Id = 2,
+                    X = -95,
+                    Y = 36
+                },
+                new Location
+                {
+                    Id = 3,
+                    X = -20,
+                    Y = -78
+                },
+                new Location
+                {
+                    Id = 4,
+                    X = 40,
+                    Y = -32
+                }
+            };
+            // 4 visits
+            var visitsArray = new[]
+            {
+                new Visit
+                {
+                    AvailabilityTime = 37,
+                    Demand = -39,
+                    Duration = 20,
+                    Id = 1,
+                    Location = locationsArray[1]
+                },
+                new Visit
+                {
+                    AvailabilityTime = 192,
+                    Demand = -17,
+                    Duration = 20,
+                    Id = 2,
+                    Location = locationsArray[2]
+                },
+                new Visit
+                {
+                    AvailabilityTime = 243,
+                    Demand = -18,
+                    Duration = 20,
+                    Id = 3,
+                    Location = locationsArray[3]
+                },
+                new Visit
+                {
+                    AvailabilityTime = 151,
+                    Demand = -20,
+                    Duration = 20,
+                    Id = 4,
+                    Location = locationsArray[4]
+                }
+            };
+            // 1 depot
+            var depot = new Depot
+            {
+                Id = 0,
+                Location = locationsArray[0],
+                EarliestDepartureTime = 0,
+                LatestReturnTime = 480
+            };
+
+            var depots = new List<Depot> { depot };
+            var locations = new List<Location>(locationsArray);
+            var visits = new List<Visit>(visitsArray);
+            const int vehicleCap = 100;
+            const int vehicleNumber = 4;
+
+
+            var problem = new DVRPProblemInstance
+            {
+                Depots = depots,
+                Locations = locations,
+                VehicleCapacity = vehicleCap,
+                VehicleNumber = vehicleNumber,
+                Visits = visits
+            };
+            var converter = new ProblemToBytesConverter();
+            var bytes = converter.ToByteArray(problem);
+            var taskSolver = new DvrpTaskSolver(bytes);
+            var divideProblem = taskSolver.DivideProblem(0);
+            var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
+
+            Assert.AreEqual(256, partialProblems.Count);
+            var solvePartialProblem = new ConcurrentQueue<byte[]>();
+            Parallel.ForEach(divideProblem, element =>
+            {
+                solvePartialProblem.Enqueue(taskSolver.Solve(element, TimeSpan.Zero));
+            });
+
+            var finalSolutionBytes = taskSolver.MergeSolution(solvePartialProblem.ToArray());
+
+            var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
+            Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Successful);
+            Assert.AreEqual(Round(finalSolution.PartialResult, 5), 531.78848);
+            var expected = new[]
+            {
+                new [] {2,1,4,3},
+                new int[] {},
+                new int[] {},
+                new int[] {}
+            };
+            for (var j = 0; j < finalSolution.VisitIds.GetLength(0); j++)
             {
                 for (var i = 0; i < finalSolution.VisitIds[j].Length; i++)
                 {

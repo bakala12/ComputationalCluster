@@ -65,6 +65,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ComputationalNodeProcessingTests.cs" />
+    <Compile Include="DVRPTests2.cs" />
     <Compile Include="MessageProcessingTests.cs" />
     <Compile Include="MessageSerializationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

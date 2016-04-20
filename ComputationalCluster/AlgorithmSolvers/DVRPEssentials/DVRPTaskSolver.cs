@@ -149,8 +149,9 @@ namespace AlgorithmSolvers.DVRPEssentials
                 var visit = instance.Visits.Single(x => x.Id == newVisits[i]);
                 var nextVisit = instance.Visits.Single(x => x.Id == newVisits[i + 1]);
                 currTime += visit.Duration + getTimeCost(instance, visit.Location, nextVisit.Location);
+                //podobnie jak wyżej, poczekanie na otwarcie klienta
                 if (currTime < nextVisit.AvailabilityTime)
-                    return true;
+                    currTime = nextVisit.AvailabilityTime;
             }
 
             //sprawdzenie, czy sie zdazy dojechac z ostatniej wizyty do depotu

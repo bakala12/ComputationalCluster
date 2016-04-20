@@ -17,7 +17,7 @@ namespace AlgorithmSolvers.DVRPEssentials
         public List<Location> Locations { get; set; }
         [Description("Miejsca do odwiedzenia - klienci")]
         public List<Visit> Visits { get; set; }
-
+        //zahardcodowane
         public int VehicleSpeed { get; set; } = 7;
         public int VehicleCapacity { get; set; }
         public int VehicleNumber { get; set; }

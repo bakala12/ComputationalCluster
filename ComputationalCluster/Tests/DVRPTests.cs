@@ -697,5 +697,273 @@ namespace Tests
             
 
         }
+
+        [TestMethod]
+        public void DvrpDistantGroupsOfVisits()
+        {
+            var locationsArray = new[]
+            {
+                new Location
+                {
+                    Id = 0,
+                    X = 0,
+                    Y = 0
+                },
+                new Location
+                {
+                    Id = 1,
+                    X = 100,
+                    Y = 100
+                },
+                new Location
+                {
+                    Id = 2,
+                    X = 120,
+                    Y = 120
+                },
+                new Location
+                {
+                    Id = 3,
+                    X = -100,
+                    Y = -100
+                },
+                new Location
+                {
+                    Id = 4,
+                    X = -50,
+                    Y = -50
+                }
+            };
+            var visitsArray = new[]
+           {
+                new Visit
+                {
+                    AvailabilityTime = 100,
+                    Demand = -10,
+                    Duration = 20,
+                    Id = 1,
+                    Location = locationsArray[1]
+                },
+                new Visit
+                {
+                    AvailabilityTime = 100,
+                    Demand = -10,
+                    Duration = 20,
+                    Id = 2,
+                    Location = locationsArray[2]
+                },
+                new Visit
+                {
+                    AvailabilityTime = 100,
+                    Demand = -10,
+                    Duration = 20,
+                    Id = 3,
+                    Location = locationsArray[3]
+                },
+                new Visit
+                {
+                    AvailabilityTime = 100,
+                    Demand = -10,
+                    Duration = 20,
+                    Id = 4,
+                    Location = locationsArray[4]
+                }
+            };
+
+            var depot = new Depot
+            {
+                Id = 0,
+                Location = locationsArray[0],
+                EarliestDepartureTime = 0,
+                LatestReturnTime = 9999
+            };
+
+            var depots = new List<Depot> { depot };
+            var locations = new List<Location>(locationsArray);
+            var visits = new List<Visit>(visitsArray);
+            const int vehicleCap = 100;
+            const int vehicleNumber = 2;
+
+
+            var problem = new DVRPProblemInstance
+            {
+                Depots = depots,
+                Locations = locations,
+                VehicleCapacity = vehicleCap,
+                VehicleNumber = vehicleNumber,
+                Visits = visits
+            };
+
+            var converter = new ProblemToBytesConverter();
+            var bytes = converter.ToByteArray(problem);
+            var taskSolver = new DvrpTaskSolver(bytes);
+            var divideProblem = taskSolver.DivideProblem(0);
+            var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
+
+            Assert.AreEqual(16, partialProblems.Count);
+            var solvePartialProblem = new ConcurrentQueue<byte[]>();
+            Parallel.ForEach(divideProblem, element =>
+            {
+                solvePartialProblem.Enqueue(taskSolver.Solve(element, TimeSpan.Zero));
+            });
+
+            var finalSolutionBytes = taskSolver.MergeSolution(solvePartialProblem.ToArray());
+
+            var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
+            Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Successful);
+            Assert.AreEqual(2, finalSolution.VisitIds.Count(x => x.Length > 0));
+            Assert.IsTrue(finalSolution.VisitIds.Any(x=> x.Contains(3) && x.Contains(4)));
+        }
+
+        [TestMethod]
+        public void DvrpTooBigDemandsTest()
+        {
+            var locationsArray = new[]
+            {
+                new Location
+                {
+                    Id = 0,
+                    X = 0,
+                    Y = 0
+                },
+                new Location
+                {
+                    Id = 1,
+                    X = 3,
+                    Y = 3
+                }
+            };
+
+            var depot = new Depot
+            {
+                Id = 0,
+                Location = locationsArray[0],
+                EarliestDepartureTime = 0,
+                LatestReturnTime = 9999
+            };
+
+            var visitsArray = new[]
+            {
+                new Visit
+                {
+                    AvailabilityTime = 0,
+                    Demand = -101,
+                    Duration = 20,
+                    Id = 1,
+                    Location = locationsArray[1]
+                }
+            };
+
+            var depots = new List<Depot> { depot };
+            var locations = new List<Location>(locationsArray);
+            var visits = new List<Visit>(visitsArray);
+            const int vehicleCap = 100;
+            const int vehicleNumber = 1;
+
+
+            var problem = new DVRPProblemInstance
+            {
+                Depots = depots,
+                Locations = locations,
+                VehicleCapacity = vehicleCap,
+                VehicleNumber = vehicleNumber,
+                Visits = visits
+            };
+
+            var converter = new ProblemToBytesConverter();
+            var bytes = converter.ToByteArray(problem);
+            var taskSolver = new DvrpTaskSolver(bytes);
+            var divideProblem = taskSolver.DivideProblem(0);
+            var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
+
+            Assert.AreEqual(1, partialProblems.Count);
+            var solvePartialProblem = new ConcurrentQueue<byte[]>();
+            Parallel.ForEach(divideProblem, element =>
+            {
+                solvePartialProblem.Enqueue(taskSolver.Solve(element, TimeSpan.Zero));
+            });
+
+            var finalSolutionBytes = taskSolver.MergeSolution(solvePartialProblem.ToArray());
+
+            var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
+            Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Impossible);
+
+        }
+
+        [TestMethod]
+        public void DvrpTooFarAwayTest()
+        {
+            var locationsArray = new[]
+           {
+                new Location
+                {
+                    Id = 0,
+                    X = 0,
+                    Y = 0
+                },
+                new Location
+                {
+                    Id = 1,
+                    X = 8,
+                    Y = 6
+                }
+            };
+
+            var depot = new Depot
+            {
+                Id = 0,
+                Location = locationsArray[0],
+                EarliestDepartureTime = 0,
+                LatestReturnTime = 20
+            };
+
+            var visitsArray = new[]
+            {
+                new Visit
+                {
+                    AvailabilityTime = 0,
+                    Demand = -10,
+                    Duration = 10,
+                    Id = 1,
+                    Location = locationsArray[1]
+                }
+            };
+
+            var depots = new List<Depot> { depot };
+            var locations = new List<Location>(locationsArray);
+            var visits = new List<Visit>(visitsArray);
+            const int vehicleCap = 100;
+            const int vehicleNumber = 1;
+            const int vehicleSpeed = 1;
+
+
+            var problem = new DVRPProblemInstance
+            {
+                Depots = depots,
+                Locations = locations,
+                VehicleCapacity = vehicleCap,
+                VehicleNumber = vehicleNumber,
+                Visits = visits,
+                VehicleSpeed = vehicleSpeed
+            };
+
+            var converter = new ProblemToBytesConverter();
+            var bytes = converter.ToByteArray(problem);
+            var taskSolver = new DvrpTaskSolver(bytes);
+            var divideProblem = taskSolver.DivideProblem(0);
+            var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
+
+            Assert.AreEqual(1, partialProblems.Count);
+            var solvePartialProblem = new ConcurrentQueue<byte[]>();
+            Parallel.ForEach(divideProblem, element =>
+            {
+                solvePartialProblem.Enqueue(taskSolver.Solve(element, TimeSpan.Zero));
+            });
+
+            var finalSolutionBytes = taskSolver.MergeSolution(solvePartialProblem.ToArray());
+
+            var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
+            Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Impossible);
+        }
     }
 }

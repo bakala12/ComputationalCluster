@@ -407,7 +407,7 @@ namespace Tests
 
             var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
             Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Successful);
-            Assert.IsTrue(Round(finalSolution.PartialResult, 5)<= 422.0288);
+            Assert.IsTrue(Round(finalSolution.PartialResult, 2)<= 422.03);
             var expected = new[]
             {
                 new [] {3},
@@ -415,7 +415,7 @@ namespace Tests
                 new [] {2,1,4},
                 new int[] {},
             };
-            for (int j = 0; j < finalSolution.VisitIds.GetLength(0); j++)
+            for (var j = 0; j < finalSolution.VisitIds.GetLength(0); j++)
             {
                 Assert.IsTrue(
                     expected.Any(x =>
@@ -578,7 +578,7 @@ namespace Tests
             }
 
         }
-        //http://pastebin.com/Xmjiz20Y well not pass
+        //http://pastebin.com/Xmjiz20Y
         [TestMethod]
         public void DvrpAlgorithmTest_ForAnotherProblem()
         {

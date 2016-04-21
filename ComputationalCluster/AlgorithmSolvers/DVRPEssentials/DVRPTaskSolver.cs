@@ -130,17 +130,20 @@ namespace AlgorithmSolvers.DVRPEssentials
 
                 var to = visit.Location;
                 //dodawanie kosztu (w sensie dystansu)
-                double returnToDepotCost = 0f;
-                //autko nie ma towaru dla tego klienta
-                if (currCapacity < Math.Abs(visit.Demand))
+                double lengthCost = 0f;
+                //autko nie ma towaru dla tego klienta, trzeba nawrócić do depota
+                if (newVisits.Count > 0  && currCapacity + visit.Demand < 0)
                 {
+                    var lastVisit = instance.Visits.Single(x => x.Id == newVisits.Last());
                     //w dwie strony:
-                    returnToDepotCost = 2*getDistanceCost(depot.Location, 
-                        instance.Visits.Single(x => x.Id == newVisits.Last()).Location);
+                    lengthCost += getDistanceCost(depot.Location, lastVisit.Location);
+                    lengthCost += getDistanceCost(depot.Location, visit.Location);
                     currCapacity = instance.VehicleCapacity;
                 }
-
-                var lengthCost = getDistanceCost(from, to) + returnToDepotCost;
+                else
+                {
+                    lengthCost = getDistanceCost(from, to);
+                }
                 newVisits.Add(visitId);
                 minimizePermutationRec(instance, ref carVisits, currCost+lengthCost,
                     currCapacity - Math.Abs(visit.Demand), ref minCost, newVisits);
@@ -174,16 +177,18 @@ namespace AlgorithmSolvers.DVRPEssentials
             {
                 var visit = instance.Visits.Single(x => x.Id == newVisits[i]);
                 var nextVisit = instance.Visits.Single(x => x.Id == newVisits[i + 1]);
-                var returnToDepotTime = 0;
-                //autko nie ma już towaru, trzeba wrócić do depot
-                if (instance.VehicleCapacity - currCapacity < Math.Abs(visit.Demand))
+
+                //autko nie ma już towaru, trzeba wrócić do depot:
+                if (currCapacity + nextVisit?.Demand < 0)
                 {
-                    //bo w dwie strony:
-                    returnToDepotTime = 2*getTimeCost(instance, depot.Location, visit.Location);
+                    currTime+= getTimeCost(instance, depot.Location, visit.Location);
+                    currTime += getTimeCost(instance, depot.Location, nextVisit.Location);
                     currCapacity = instance.VehicleCapacity;
                 }
-                currTime += visit.Duration + returnToDepotTime + 
-                    getTimeCost(instance, visit.Location, nextVisit.Location);
+                else
+                {
+                    currTime += getTimeCost(instance, visit.Location, nextVisit.Location);
+                }
                 //podobnie jak wyżej, poczekanie na otwarcie klienta
                 if (currTime < nextVisit.AvailabilityTime)
                     currTime = nextVisit.AvailabilityTime;

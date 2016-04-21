@@ -45,6 +45,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="UCCTaskSolver">
+      <HintPath>..\UCCTaskSolver.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgumentParserExtensionsForTaskManager.cs" />
@@ -70,6 +73,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AlgorithmSolvers\AlgorithmSolvers.csproj">
+      <Project>{DF1E5FA2-8428-4E37-B7C8-8A8ECED33E73}</Project>
+      <Name>AlgorithmSolvers</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CommunicationsUtils\CommunicationsUtils.csproj">
       <Project>{7aecef6e-5161-4182-9727-a947d1bea7ca}</Project>
       <Name>CommunicationsUtils</Name>

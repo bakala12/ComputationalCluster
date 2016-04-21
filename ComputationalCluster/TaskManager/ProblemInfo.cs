@@ -11,6 +11,7 @@ namespace TaskManager
     {
         public int ProblemsCount = 0;
         public int SolutionsCount = 0;
+        public byte[] CommonData = null;
         public string ProblemType;
         /// <summary>
         /// partial problems indexed by task id (given by TM)

@@ -67,7 +67,7 @@ namespace Client
                     log.DebugFormat("\n*** SOLUTION FOUND ({0}) ***\n", problemId);
                 }
 
-                core.DoSomethingWithSolution(solution);
+                core.PrintSolutionResult(solution);
             }
         }
 

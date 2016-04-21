@@ -1,0 +1,1 @@
+DVRPGenerator.exe MINN=4 MAXN=6

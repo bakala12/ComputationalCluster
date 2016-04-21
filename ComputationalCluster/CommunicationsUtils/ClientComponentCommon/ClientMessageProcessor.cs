@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
+using UCCTaskSolver;
 
 namespace CommunicationsUtils.ClientComponentCommon
 {
@@ -19,7 +20,8 @@ namespace CommunicationsUtils.ClientComponentCommon
         protected ulong threadCount = 0;
 
         public List<string> SolvableProblems;
-        public ClientMessageProcessor(List<string> problems)
+
+        protected ClientMessageProcessor(List<string> problems)
         {
             SolvableProblems = problems;
             threads = new List<StatusThread>();

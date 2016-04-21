@@ -10,7 +10,7 @@ namespace CommunicationsUtils.Serialization
 {
     public class XmlStringSerializer<T> where T : class
     {
-        private readonly XmlSerializer _serializer = new XmlSerializer(typeof(T));
+        private XmlSerializer _serializer = new XmlSerializer(typeof(T));
 
         public virtual string ToXmlString(T message)
         {

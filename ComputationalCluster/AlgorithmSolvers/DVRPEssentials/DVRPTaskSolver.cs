@@ -116,6 +116,9 @@ namespace AlgorithmSolvers.DVRPEssentials
             //rekursywna generacja permutacji
             for (var i = 0; i < carVisits.Length; i++)
             {
+                if (currCapacity < 0)
+                    return;
+
                 var visitId = carVisits[i];
 
                 if (newVisits.Contains(visitId)) continue;
@@ -130,23 +133,19 @@ namespace AlgorithmSolvers.DVRPEssentials
 
                 var to = visit.Location;
                 //dodawanie kosztu (w sensie dystansu)
-                double lengthCost = 0f;
                 //autko nie ma towaru dla tego klienta, trzeba nawrócić do depota
-                if (newVisits.Count > 0  && currCapacity + visit.Demand < 0)
-                {
-                    var lastVisit = instance.Visits.Single(x => x.Id == newVisits.Last());
-                    //w dwie strony:
-                    lengthCost += getDistanceCost(depot.Location, lastVisit.Location);
-                    lengthCost += getDistanceCost(depot.Location, visit.Location);
-                    currCapacity = instance.VehicleCapacity;
-                }
-                else
-                {
-                    lengthCost = getDistanceCost(from, to);
-                }
+                
+                var lengthCost = getDistanceCost(from, to);
                 newVisits.Add(visitId);
                 minimizePermutationRec(instance, ref carVisits, currCost+lengthCost,
                     currCapacity - Math.Abs(visit.Demand), ref minCost, newVisits);
+                //uwzględnianie powrotu do depota
+                if (from != depot.Location && currCapacity < instance.VehicleCapacity)
+                {
+                    minimizePermutationRec(instance, ref carVisits, currCost +
+                        getDistanceCost(from, depot.Location)+getDistanceCost(depot.Location, to),
+                        instance.VehicleCapacity-Math.Abs(visit.Demand), ref minCost, newVisits);
+                }
                 newVisits.Remove(visitId);
             }
         }

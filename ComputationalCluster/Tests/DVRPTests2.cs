@@ -279,7 +279,7 @@ namespace Tests
             Assert.IsNotNull(final);
             Assert.IsInstanceOfType(final, typeof(DVRPPartialProblemInstance));
             Assert.AreEqual(SolutionResult.Successful, ((DVRPPartialProblemInstance)final).SolutionResult);
-            Assert.AreEqual(569.65, ((DVRPPartialProblemInstance)final).PartialResult,40);
+            Assert.AreEqual(502f, ((DVRPPartialProblemInstance)final).PartialResult,40);
         }
     }
 }

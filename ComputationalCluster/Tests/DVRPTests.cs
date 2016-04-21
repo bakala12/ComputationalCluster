@@ -410,7 +410,7 @@ namespace Tests
             Assert.IsTrue(Round(finalSolution.PartialResult, 2)<= 422.03);
             var expected = new[]
             {
-                new [] {4,1,2,3},
+                new [] {2,1,4,3},
                 new int[] {},
                 new int[] {},
                 new int[] {},
@@ -693,7 +693,7 @@ namespace Tests
 
             var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
             Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Successful);
-            Assert.AreEqual(Round(finalSolution.PartialResult, 2), 349.70);
+            Assert.AreEqual(Round(finalSolution.PartialResult, 2), 349.70, 2.5f);
             
 
         }
@@ -712,8 +712,8 @@ namespace Tests
                 new Location
                 {
                     Id = 1,
-                    X = 100,
-                    Y = 100
+                    X = 115,
+                    Y = 115
                 },
                 new Location
                 {
@@ -730,15 +730,15 @@ namespace Tests
                 new Location
                 {
                     Id = 4,
-                    X = -50,
-                    Y = -50
+                    X = -101,
+                    Y = -101
                 }
             };
             var visitsArray = new[]
            {
                 new Visit
                 {
-                    AvailabilityTime = 100,
+                    AvailabilityTime = 0,
                     Demand = -10,
                     Duration = 20,
                     Id = 1,
@@ -746,7 +746,7 @@ namespace Tests
                 },
                 new Visit
                 {
-                    AvailabilityTime = 100,
+                    AvailabilityTime = 0,
                     Demand = -10,
                     Duration = 20,
                     Id = 2,
@@ -754,7 +754,7 @@ namespace Tests
                 },
                 new Visit
                 {
-                    AvailabilityTime = 100,
+                    AvailabilityTime = 0,
                     Demand = -10,
                     Duration = 20,
                     Id = 3,
@@ -762,7 +762,7 @@ namespace Tests
                 },
                 new Visit
                 {
-                    AvailabilityTime = 100,
+                    AvailabilityTime = 0,
                     Demand = -10,
                     Duration = 20,
                     Id = 4,
@@ -775,7 +775,7 @@ namespace Tests
                 Id = 0,
                 Location = locationsArray[0],
                 EarliestDepartureTime = 0,
-                LatestReturnTime = 9999
+                LatestReturnTime = 390
             };
 
             var depots = new List<Depot> { depot };
@@ -783,6 +783,7 @@ namespace Tests
             var visits = new List<Visit>(visitsArray);
             const int vehicleCap = 100;
             const int vehicleNumber = 2;
+            const int vehicleSpeed = 1;
 
 
             var problem = new DVRPProblemInstance
@@ -791,6 +792,7 @@ namespace Tests
                 Locations = locations,
                 VehicleCapacity = vehicleCap,
                 VehicleNumber = vehicleNumber,
+                VehicleSpeed = vehicleSpeed,
                 Visits = visits
             };
 
@@ -812,6 +814,7 @@ namespace Tests
             var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
             Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Successful);
             Assert.AreEqual(2, finalSolution.VisitIds.Count(x => x.Length > 0));
+            Assert.AreEqual(625.08, Round(finalSolution.PartialResult,2));
             Assert.IsTrue(finalSolution.VisitIds.Any(x=> x.Contains(3) && x.Contains(4)));
         }
 
@@ -964,6 +967,97 @@ namespace Tests
 
             var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
             Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Impossible);
+        }
+
+        [TestMethod]
+        public void DvrpReturnToDepotTest()
+        {
+            var locationsArray = new[]
+           {
+                new Location
+                {
+                    Id = 0,
+                    X = 0,
+                    Y = 0
+                },
+                new Location
+                {
+                    Id = 1,
+                    X = 8,
+                    Y = 6
+                },
+                new Location
+                {
+                    Id = 2,
+                    X = -8,
+                    Y = -6
+                }
+            };
+
+            var depot = new Depot
+            {
+                Id = 0,
+                Location = locationsArray[0],
+                EarliestDepartureTime = 0,
+                LatestReturnTime = 9999
+            };
+
+            var visitsArray = new[]
+            {
+                new Visit
+                {
+                    AvailabilityTime = 0,
+                    Demand = -99,
+                    Duration = 10,
+                    Id = 1,
+                    Location = locationsArray[1]
+                },
+                new Visit
+                {
+                    AvailabilityTime = 0,
+                    Demand = -99,
+                    Duration = 10,
+                    Id = 2,
+                    Location = locationsArray[2]
+                }
+            };
+
+            var depots = new List<Depot> { depot };
+            var locations = new List<Location>(locationsArray);
+            var visits = new List<Visit>(visitsArray);
+            const int vehicleCap = 100;
+            const int vehicleNumber = 1;
+            const int vehicleSpeed = 100;
+
+
+            var problem = new DVRPProblemInstance
+            {
+                Depots = depots,
+                Locations = locations,
+                VehicleCapacity = vehicleCap,
+                VehicleNumber = vehicleNumber,
+                Visits = visits,
+                VehicleSpeed = vehicleSpeed
+            };
+
+            var converter = new ProblemToBytesConverter();
+            var bytes = converter.ToByteArray(problem);
+            var taskSolver = new DvrpTaskSolver(bytes);
+            var divideProblem = taskSolver.DivideProblem(0);
+            var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
+
+            Assert.AreEqual(1, partialProblems.Count);
+            var solvePartialProblem = new ConcurrentQueue<byte[]>();
+            Parallel.ForEach(divideProblem, element =>
+            {
+                solvePartialProblem.Enqueue(taskSolver.Solve(element, TimeSpan.Zero));
+            });
+
+            var finalSolutionBytes = taskSolver.MergeSolution(solvePartialProblem.ToArray());
+
+            var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
+            Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Successful);
+            Assert.AreEqual(40, finalSolution.PartialResult, 0.2f);
         }
     }
 }

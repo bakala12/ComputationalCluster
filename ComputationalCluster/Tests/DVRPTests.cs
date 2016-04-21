@@ -388,6 +388,7 @@ namespace Tests
                 Locations = locations,
                 VehicleCapacity = vehicleCap,
                 VehicleNumber = vehicleNumber,
+                VehicleSpeed = 3,
                 Visits = visits
             };
             var converter = new ProblemToBytesConverter();
@@ -407,10 +408,10 @@ namespace Tests
 
             var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
             Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Successful);
-            Assert.IsTrue(Round(finalSolution.PartialResult, 2)<= 422.03);
+            Assert.AreEqual(Round(finalSolution.PartialResult, 2), 422.03, 1f);
             var expected = new[]
             {
-                new [] {2,1,4,3},
+                new [] {4,1,2,3},
                 new int[] {},
                 new int[] {},
                 new int[] {},
@@ -551,11 +552,11 @@ namespace Tests
 
             var finalSolution = (DVRPPartialProblemInstance)converter.FromBytesArray(finalSolutionBytes);
             Assert.AreEqual(finalSolution.SolutionResult, SolutionResult.Successful);
-            Assert.IsTrue(Round(finalSolution.PartialResult, 5) < 531.78848);
+            Assert.AreEqual(567.62, Round(finalSolution.PartialResult, 2), 3.5f);
             var expected = new[]
             {
-                new [] {1,2,3,4},
-                new int[] {},
+                new [] {1,2},
+                new int[] {3,4},
                 new int[] {},
                 new int[] {}
             };
@@ -674,6 +675,7 @@ namespace Tests
                 Locations = locations,
                 VehicleCapacity = vehicleCap,
                 VehicleNumber = vehicleNumber,
+                VehicleSpeed = 7,
                 Visits = visits
             };
             var converter = new ProblemToBytesConverter();

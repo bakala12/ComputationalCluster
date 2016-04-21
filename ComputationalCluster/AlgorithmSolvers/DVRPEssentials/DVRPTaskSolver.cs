@@ -162,13 +162,13 @@ namespace AlgorithmSolvers.DVRPEssentials
             //sprawdzenie czy sie zdazy dojechac z depotu do pierwszej wizyty
             var depot = instance.Depots.Single();
             var firstVisit = instance.Visits.Single(x => x.Id == newVisits[0]);
-            var currTime = depot.EarliestDepartureTime + 
+            var currTime = (double)depot.EarliestDepartureTime + 
                 getTimeCost(instance, depot.Location, firstVisit.Location);
 
             //przyjechaliśmy przed otwarciem depota. trzeba zaczekać na otwarcie
             //interesuje nas nie minimalizacja czasu, ale drogi, więc może tak być:
             if (currTime < firstVisit.AvailabilityTime)
-                currTime = firstVisit.AvailabilityTime;
+                currTime = (double)firstVisit.AvailabilityTime;
 
             var currCapacity = instance.VehicleCapacity;
 
@@ -176,6 +176,7 @@ namespace AlgorithmSolvers.DVRPEssentials
             for (var i = 0; i < newVisits.Count-1; i++)
             {
                 var visit = instance.Visits.Single(x => x.Id == newVisits[i]);
+                currTime += visit.Duration;
                 var nextVisit = instance.Visits.Single(x => x.Id == newVisits[i + 1]);
 
                 //autko nie ma już towaru, trzeba wrócić do depot:
@@ -191,7 +192,7 @@ namespace AlgorithmSolvers.DVRPEssentials
                 }
                 //podobnie jak wyżej, poczekanie na otwarcie klienta
                 if (currTime < nextVisit.AvailabilityTime)
-                    currTime = nextVisit.AvailabilityTime;
+                    currTime = (double)nextVisit.AvailabilityTime;
             }
 
             //sprawdzenie, czy sie zdazy dojechac z ostatniej wizyty do depotu
@@ -207,9 +208,9 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        private int getTimeCost(DVRPProblemInstance instance, Location from, Location to)
+        private double getTimeCost(DVRPProblemInstance instance, Location from, Location to)
         {
-            return (int)(getDistanceCost(from,to)/instance.VehicleSpeed);
+            return (getDistanceCost(from,to)/(double)instance.VehicleSpeed);
         }
 
         /// <summary>

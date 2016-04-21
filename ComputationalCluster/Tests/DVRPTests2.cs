@@ -217,6 +217,7 @@ namespace Tests
                 },
                 VehicleCapacity = 100,
                 VehicleNumber = 6,
+                VehicleSpeed = 3,
                 Visits = new List<Visit>()
                 {
                     new Visit()

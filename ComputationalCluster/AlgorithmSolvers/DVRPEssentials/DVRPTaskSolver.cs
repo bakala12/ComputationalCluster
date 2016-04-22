@@ -31,34 +31,193 @@ namespace AlgorithmSolvers.DVRPEssentials
             var converter = new ProblemToBytesConverter();
             var partialInstance = (DVRPPartialProblemInstance) converter.FromBytesArray(partialData);
             var instance = (DVRPProblemInstance) converter.FromBytesArray(_problemData);
+
             //dla każdego samochodu (listy klientów mu przypisanej) sprawdz poprawność kombinacji 
             //(w sensie żądań)
-            foreach (var carVisits in partialInstance.VisitIds)
-            {
-                if (!demandsValid(instance, carVisits))
-                    return solutionImpossible();
-            }
+            if (!demandsValid(instance))
+                return converter.ToByteArray(solutionImpossible());
 
-            //po wstepnej walidacji, czas na takie ustawienie id'ków dla każdego samochodu,
-            //aby koszt był najmniejszy
-            double totalCost = 0;
+            var n = instance.Visits.Count;
+            var s = instance.VehicleNumber;
+            var i = partialInstance.MinimalSetCount;
 
-            //permutowanie każdego zbioru dla samochodów
-            for (var i = 0; i<partialInstance.VisitIds.Length; i++)
-            { 
-                //jeżeli permutacja jest niemożliwa, cały podproblem jest niemożliwy, więc zwróć Impossible
-                var currCost = minimizePermutation(instance, ref partialInstance.VisitIds[i]);
-                if (currCost < 0)
-                {
-                    return solutionImpossible();
-                }
-                totalCost += currCost;
-            }
-            //udało się:
-            partialInstance.SolutionResult = SolutionResult.Successful;
-            partialInstance.PartialResult = totalCost;
+            if (s*i>n)
+                return converter.ToByteArray(solutionImpossible());
+
+            var solution = solvePossibleMinCountSets(instance, i);
+				
+				//	3.1.1.2.1 uruchom minimalizePermutation dla wszystkich samochodów tego zbioru
+    //                3.1.1.2.2 jeżeli uzyskałeś permutację tańszą niż obecna w ref, to ją zaktualizuj
+
+    //    3.2 uzyskasz minimalny koszt i minimalną wariację przydziałów - zwróć ją, lub błąd (np.koszt double.MinValue) -zwróć impossible
+
             return converter.ToByteArray(partialInstance);
             //timeoutu nie rozpatruj, szkoda zdrowia
+        }
+
+        /// <summary>
+        /// wyznacz wszystkie możliwe przydziały i klientów do wszystkich s samochodów(rekurencja)
+        /// </summary>
+        /// <param name="instance">problem instance</param>
+        /// <param name="i">minimal set count</param>
+        /// <returns></returns>
+        private DVRPPartialProblemInstance solvePossibleMinCountSets(DVRPProblemInstance instance, int i)
+        {
+            var solution = new DVRPPartialProblemInstance();
+            solution.PartialResult = double.MinValue;
+            solution.SolutionResult = SolutionResult.Impossible;
+            var visits = new int[instance.VehicleNumber][];
+            var currVisits = new List<int>[instance.VehicleNumber];
+            for (var j = 0; j < instance.VehicleNumber; j++)
+            {
+                currVisits[j] = new List<int>();
+            }
+
+            solvePossibleMinCountSetsRec(instance, i, 0, 0, ref solution, currVisits);
+            return solution;
+        }
+
+        private void solvePossibleMinCountSetsRec(DVRPProblemInstance instance, int i, int set, int j,
+            ref DVRPPartialProblemInstance solution, List<int>[] currVisits)
+        {
+            if (j > i)
+                throw new Exception("Something went wrong");
+            if (j == i)
+            {
+                if (set < instance.VehicleNumber - 1)
+                    solvePossibleMinCountSetsRec(instance, i, set + 1, 0, ref solution, currVisits);
+                else
+                {
+                    //uzyskaliśmy podział, możemy rozróżniać zbiory y~
+                    distinguishSubsets(instance, i, ref solution, currVisits);
+                    return;
+                }
+            }
+
+            for (var k = 0; k < instance.Visits.Count; k++)
+            {
+                if (!currVisits.Any(x=> x.Contains(instance.Visits[k].Id)))
+                {
+                    if (!(set == 0 && j == 0) && (instance.Visits[k].Id < currVisits[0][0] 
+                        || (currVisits[set].Count>0 && currVisits[set].Last() > instance.Visits[k].Id)))
+                        continue;
+                    currVisits[set].Add(instance.Visits[k].Id);
+                    solvePossibleMinCountSetsRec(instance, i, set, j+1, ref solution, currVisits);
+                    currVisits[set].Remove(instance.Visits[k].Id);
+                }
+            }
+        }
+
+        /// <summary>
+        /// dla każdego z s zbiorów wyróżnij zbiory y1,...,yk takie, że 
+        /// ignoruje się je w przydziale pozostałych klientów (uwaga na warunki)
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="i"></param>
+        /// <param name="solution"></param>
+        /// <param name="totalCost"></param>
+        /// <param name="currVisits"></param>
+        private void distinguishSubsets(DVRPProblemInstance instance, int i, ref DVRPPartialProblemInstance solution, 
+            List<int>[] currVisits)
+        {
+            var ignoredSubsets = new List<int>();
+            //klienci pozostali (liczba)
+            var t = instance.Visits.Count - i*instance.VehicleNumber;
+            var s = instance.VehicleNumber;
+            var minInd = 1;
+            //ile zbiorów można zignorować - od minInd do s-1
+            if (t < s)
+                minInd = s - t;
+            else if (t == s)
+                minInd = 1;
+            else
+                minInd = 1;
+
+            //rozpatrujemy zignorowanie j zbiorów
+            for (var j = minInd; j < s; j++)
+            {
+                distinguishSubsetsRec (instance, i, j, 0, ref solution, currVisits, ignoredSubsets);
+            }
+        }
+
+        private void distinguishSubsetsRec(DVRPProblemInstance instance, int i, int j, int cur, 
+            ref DVRPPartialProblemInstance solution, 
+            List<int>[] currVisits, List<int> y)
+        {
+            if (cur == j)
+            {
+                //wygenerowales takie podzbiory y, mozna wchodzic dalej wglab
+                generateSets(instance, i, ref solution, currVisits, y);
+                return;
+            }
+            for (var k = 0; k < instance.VehicleNumber; k++)
+            {
+                if (y.Count != 0 && (y.Contains(k) || y.Last() > k))
+                    continue;
+                y.Add(k);
+                distinguishSubsetsRec(instance, i, j, cur+1, ref solution, currVisits, y);
+                y.Remove(k);
+            }
+        }
+
+        private void generateSets(DVRPProblemInstance instance, int i, ref DVRPPartialProblemInstance solution, 
+            List<int>[] currVisits, List<int> y)
+        {
+            //dodawaj klientów z nawrotami do zbiorów currVisits takich, że nie należą do y-greków
+            //uważaj na powtórzenia
+            int clast = instance.Visits.Count - i*instance.VehicleNumber;
+
+            generateSetsRec(instance, i, ref solution, currVisits, y, clast);
+
+        }
+
+        private void generateSetsRec(DVRPProblemInstance instance, int i, ref DVRPPartialProblemInstance solution, 
+            List<int>[] currVisits, List<int> y, int clast)
+        {
+            if (clast == 0)
+            {
+                double newCost = 0f;
+                var newSolution = new List<int>[instance.VehicleNumber];
+                for (var j = 0; j < instance.VehicleNumber; j++)
+                {
+                    newSolution[j] = new List<int>();
+                    for (int e=0;e<currVisits[j].Count;e++)
+                        newSolution[j].Add(currVisits[j][e]);
+
+                    var cvref = newSolution[j].ToArray();
+                    var currCost = minimizePermutation(instance, ref cvref);
+                    if (currCost < 0f)
+                    {
+                        return;
+                    }
+                    newCost += currCost;
+                }
+                if (solution.PartialResult < 0f || (solution.PartialResult > 0f && newCost < solution.PartialResult))
+                {
+                    solution.VisitIds = new int[instance.VehicleNumber][];
+                    for (int u = 0; i < instance.VehicleNumber; u++)
+                        solution.VisitIds[u] = newSolution[u].ToArray();
+                    solution.PartialResult = newCost;
+                    solution.SolutionResult = SolutionResult.Successful;
+                    return;
+                }
+            }
+            for (var k = 0; k < instance.VehicleNumber; k++)
+            {
+                if (y.Contains(k))
+                    continue;
+
+                foreach (Visit v in instance.Visits)
+                {
+                    var id = v.Id;
+                    if (currVisits.Any(x => x.Contains(id)))
+                        continue;
+                    if (currVisits[k].Count > i && currVisits[k].Last() > id)
+                        continue;
+                    currVisits[k].Add(id);
+                    generateSetsRec(instance, i, ref solution, currVisits, y, clast-1);
+                }
+            }
         }
 
         /// <summary>
@@ -156,7 +315,7 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// <param name="instance"></param>
         /// <param name="newVisits"></param>
         /// <returns>true jeżeli droga jest chujowa</returns>
-        private bool routeImpossible(DVRPProblemInstance instance, List<int> newVisits)
+        private bool routeImpossible(DVRPProblemInstance instance, IReadOnlyList<int> newVisits)
         {
             //sprawdzenie czy sie zdazy dojechac z depotu do pierwszej wizyty
             var depot = instance.Depots.Single();
@@ -227,15 +386,15 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// templatka do zwracania enuma z Impossible
         /// </summary>
         /// <returns></returns>
-        private byte[] solutionImpossible()
+        private DVRPPartialProblemInstance solutionImpossible()
         {
             var converter = new ProblemToBytesConverter();
-            return converter.ToByteArray(new DVRPPartialProblemInstance()
+            return new DVRPPartialProblemInstance()
             {
                 PartialResult = double.MaxValue,
                 SolutionResult = SolutionResult.Impossible,
                 VisitIds = null
-            });
+            };
         }
 
         /// <summary>
@@ -243,12 +402,11 @@ namespace AlgorithmSolvers.DVRPEssentials
         /// divide, ale to jest zbyt trudne)
         /// </summary>
         /// <param name="instance"></param>
-        /// <param name="carVisits"></param>
         /// <returns>true jeżeli warunki są ok</returns>
-        private bool demandsValid(DVRPProblemInstance instance, int[] carVisits)
+        private bool demandsValid(DVRPProblemInstance instance)
         {
-            return !carVisits.Any
-                (x => Math.Abs(instance.Visits.Single(v => v.Id == x).Demand) > instance.VehicleCapacity);
+            return !instance.Visits.Any
+                (x => x.Demand + instance.VehicleCapacity < 0);
         }
 
         ///
@@ -269,70 +427,20 @@ namespace AlgorithmSolvers.DVRPEssentials
         private byte[][] divideProblem(DVRPProblemInstance instance, ProblemToBytesConverter converter)
         {
             var partialProblemInstances = new List<DVRPPartialProblemInstance>();
-            var currVisits = new List<int>[instance.VehicleNumber];
-           
-            divideProblemRec(ref partialProblemInstances, currVisits, instance.Visits, 0,
-                instance.VehicleNumber);
+
+            for (var i = 0; i < instance.Visits.Count/instance.VehicleNumber; i++)
+            {
+                partialProblemInstances.Add(new DVRPPartialProblemInstance()
+                {
+                    MinimalSetCount = i,
+                    PartialResult = double.MinValue,
+                    SolutionResult = SolutionResult.NotSolved
+                });  
+            }
 
             return partialProblemInstances.Select(converter.ToByteArray).ToArray();
         }
 
-        /// <summary>
-        /// rekursja do dzielenia
-        /// </summary>
-        /// <param name="problems">referencja by dodawać problemy</param>
-        /// <param name="currProblem">obecnie konstruowany problem (zmienna automatyczna)</param>
-        /// <param name="visits">id'ki do powpisywania gdzieś</param>
-        /// <param name="i">obecny klient</param>
-        /// <param name="vehicleNumber">niezbędna informacja</param>
-        private void divideProblemRec(ref List<DVRPPartialProblemInstance> problems, 
-            List<int>[] currVisits,
-            IReadOnlyList<Visit> visits, int i, int vehicleNumber)
-        {
-            //można dodać nowy problem
-            if (i == visits.Count)
-            {
-                //deep copy
-                var cpy = new DVRPPartialProblemInstance();
-                var arrCpy = new List<int>[vehicleNumber];
-                for (var k = 0; k < vehicleNumber; k++)
-                {
-                    if (currVisits[k] == null)
-                    {
-                        arrCpy[k] = new List<int>();
-                        continue;
-                    }
-
-                    arrCpy[k] = new List<int>();
-                    for (var s = 0; s < currVisits[k].Count; s++)
-                    {
-                        arrCpy[k].Add(currVisits[k][s]);
-                    }
-                }
-                cpy.VisitIds = new int[vehicleNumber][];
-                for (var j = 0; j < vehicleNumber; j++)
-                    cpy.VisitIds[j] = arrCpy[j].ToArray();
-                cpy.SolutionResult = SolutionResult.NotSolved; 
-                problems.Add(cpy);
-
-                return;
-            }
-            else
-            {
-                //klienta i przypisujemy do j samochodu, wchodzimy w rekursję dla i+1 klienta,
-                //cofamy się - i-tego klienta przypisujemy do j+1 samochodu, itd...
-                //algorytm z nawrotami
-                for (var j = 0; j < vehicleNumber; j++)
-                {
-                    if (currVisits[j] == null)
-                        currVisits[j] = new List<int>();
-
-                    currVisits[j].Add(visits[i].Id);
-                    divideProblemRec(ref problems, currVisits, visits, i+1, vehicleNumber);
-                    currVisits[j].Remove(visits[i].Id);
-                }
-            }
-        }
         ///
         ///
         ///MERGE SOLUTION

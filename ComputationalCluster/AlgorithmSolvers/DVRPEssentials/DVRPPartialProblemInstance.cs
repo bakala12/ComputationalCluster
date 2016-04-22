@@ -20,6 +20,8 @@ namespace AlgorithmSolvers.DVRPEssentials
         public int[][] VisitIds { get; set; }
         [Description("Wynik problemu - suma minimalnych odległości ścieżek odwiedzających wszystkich klientów")]
         public double PartialResult { get; set; }
+        [Description("Wiadomość dla comp. node - minimalny przydział klientów do samochodu")]
+        public int MinimalSetCount { get; set; }
         public SolutionResult SolutionResult { get; set; } = SolutionResult.NotSolved;
 
         public DVRPPartialProblemInstance()

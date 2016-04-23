@@ -67,7 +67,7 @@ namespace Tests
         [TestMethod]
         public void DvrpAlgorithmTest()
         {
-            var parser = new DVRPProblemParser("io2_8_plain_a_D.vrp");
+            var parser = new DVRPProblemParser("io2_10_plain_a_D.vrp");
             var problem = parser.Parse();
             var converter = new ProblemToBytesConverter();
             var data = converter.ToByteArray(problem);
@@ -77,7 +77,7 @@ namespace Tests
             var solutions = divides.Select(x => solver.Solve(x, TimeSpan.Zero)).ToArray();
             var final = solver.MergeSolution(solutions);
             var finalObj = (DVRPPartialProblemInstance) converter.FromBytesArray(final);
-            Assert.AreEqual(723.39, Round(finalObj.PartialResult, 2), 2f );
+            Assert.AreEqual(744.23, Round(finalObj.PartialResult, 2), 2f );
         }
 
         // http://pastebin.com/LfnBUJVi
@@ -314,6 +314,7 @@ namespace Tests
             var visits = new List<Visit>(visitsArray);
             const int vehicleCap = 100;
             const int vehicleNumber = 4;
+            const int vehicleSpeed = 1;
 
 
             var problem = new DVRPProblemInstance
@@ -322,6 +323,7 @@ namespace Tests
                 Locations = locations,
                 VehicleCapacity = vehicleCap,
                 VehicleNumber = vehicleNumber,
+                VehicleSpeed = vehicleSpeed,
                 Visits = visits
             };
             var converter = new ProblemToBytesConverter();

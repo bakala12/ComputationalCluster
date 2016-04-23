@@ -74,8 +74,12 @@ namespace Tests
             var solver = new DvrpTaskSolver(data);
 
             var divides = solver.DivideProblem(0);
-            var solutions = divides.Select(x => solver.Solve(x, TimeSpan.Zero)).ToArray();
-            var final = solver.MergeSolution(solutions);
+            var solvePartialProblem = new ConcurrentQueue<byte[]>();
+            Parallel.ForEach(divides, element =>
+            {
+                solvePartialProblem.Enqueue(solver.Solve(element, TimeSpan.Zero));
+            });
+            var final = solver.MergeSolution(solvePartialProblem.ToArray());
             var finalObj = (DVRPPartialProblemInstance) converter.FromBytesArray(final);
             Assert.AreEqual(744.23, Round(finalObj.PartialResult, 2), 2f );
         }

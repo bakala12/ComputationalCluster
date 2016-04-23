@@ -469,8 +469,9 @@ namespace AlgorithmSolvers.DVRPEssentials
                     else
                     {
                         newPartial.MinimalIgnoredSets = j;
+                        newPartial.MaximumIgnoredSets = j + 2 < instance.VehicleNumber ? j + 2 : j + 1;
                         newPartial.MaximumIgnoredSets = j + 1 < instance.VehicleNumber ? j + 1 : j;
-                        j++;
+                        j += 2;
                     }
                     partialProblemInstances.Add(newPartial);
                     j++;

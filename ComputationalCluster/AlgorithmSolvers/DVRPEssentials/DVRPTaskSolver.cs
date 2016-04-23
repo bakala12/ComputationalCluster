@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunicationsUtils.Messages;
 using UCCTaskSolver;
@@ -50,46 +52,48 @@ namespace AlgorithmSolvers.DVRPEssentials
             var maxSets = partialInstance.MaximumIgnoredSets;
             partialInstance.PartialResult = double.MaxValue;
 
-            var currVisits = new List<int>[instance.VehicleNumber];
-            for (int j = 0; j < instance.VehicleNumber; j++)
-            {
-                currVisits[j] = new List<int>();
-                for (int k=0;k<partialInstance.VisitIds[j].Length;k++)
-                    currVisits[j].Add(partialInstance.VisitIds[j][k]);
-            }
-
-            solveInParallel(instance, ref partialInstance, currVisits, double.MaxValue, i, minSets, maxSets);
+            solveInParallel(instance, ref partialInstance, double.MaxValue, i, minSets, maxSets);
 
             return converter.ToByteArray(partialInstance);
             //timeoutu nie rozpatruj, szkoda zdrowia
         }
 
         private void solveInParallel(DVRPProblemInstance instance, ref DVRPPartialProblemInstance finalSolution,
-            List<int>[] currVisits, double currCost, int i, int minSets, int maxSets)
+            double currCost, int i, int minSets, int maxSets)
         {
-            var lastIds = new int[instance.Visits.Count];
-            for (var j = 0; j < instance.Visits.Count; j++)
-            {
-                if (currVisits.Any(x => x.Contains(instance.Visits[j].Id)))
-                    lastIds[j] = -1;
-                else
-                    lastIds[j] = instance.Visits[j].Id;
-            }
-            var currSolution = new DVRPPartialProblemInstance();
-
+            var solQueue = new ConcurrentQueue<DVRPPartialProblemInstance>();
+            List<Thread> threads = new List<Thread>();
             for (var j = minSets; j <= maxSets; j++)
             {
-                currSolution = new DVRPPartialProblemInstance();
+                var currSolution = new DVRPPartialProblemInstance();
+                solutionCopyTo(finalSolution, ref currSolution);
                 currSolution.MinimalIgnoredSets = j;
                 currSolution.MaximumIgnoredSets = j;
-                currSolution.PartialResult = double.MaxValue;
-                currSolution.SolutionResult = SolutionResult.NotSolved;
-                generateSets(instance, i, ref currSolution, currVisits, lastIds, j);
-                if (currSolution.PartialResult < finalSolution.PartialResult)
-                {
-                    solutionCopyTo(currSolution, ref finalSolution);
-                }
+                var thread =
+                    new Thread(t =>
+                    {
+                        generateSets(instance, i, ref currSolution, j);
+                        solQueue.Enqueue(currSolution);
+                    });
+
+                threads.Add(thread);
+                thread.Start();
             }
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+            int k = 0;
+            int min = 0;
+            foreach (var sol in solQueue)
+            {
+                if (sol.PartialResult < finalSolution.PartialResult)
+                {
+                    min = k;
+                }
+                k++;
+            }
+            solutionCopyTo(solQueue.ElementAt(min), ref finalSolution);
         }
 
         private void solutionCopyTo(DVRPPartialProblemInstance a, ref DVRPPartialProblemInstance b)
@@ -107,13 +111,28 @@ namespace AlgorithmSolvers.DVRPEssentials
             }
         }
 
-        private void generateSets(DVRPProblemInstance instance, int i, ref DVRPPartialProblemInstance solution,
-            List<int>[] currVisits, int[] lastIds, int ignoredCount)
+        private void generateSets(DVRPProblemInstance instance, int i, ref DVRPPartialProblemInstance solution, int ignoredCount)
         {
             //dodawaj klientów z nawrotami do zbiorów currVisits takich, że nie należą do y-greków
             //uważaj na powtórzenia
             var clast = instance.Visits.Count - i * instance.VehicleNumber;
             var cval = instance.VehicleNumber;
+
+            var currVisits = new List<int>[instance.VehicleNumber];
+            for (int e = 0; e < instance.VehicleNumber; e++)
+            {
+                currVisits[e] = new List<int>();
+                for (int f = 0; f < solution.VisitIds[e].Length; f++)
+                    currVisits[e].Add(solution.VisitIds[e][f]);
+            }
+            var lastIds = new int[instance.Visits.Count];
+            for (var s = 0; s < instance.Visits.Count; s++)
+            {
+                if (currVisits.Any(x => x.Contains(instance.Visits[s].Id)))
+                    lastIds[s] = -1;
+                else
+                    lastIds[s] = instance.Visits[s].Id;
+            }
 
             generateSetsRec(instance, i, ref solution, currVisits, ignoredCount, clast, cval, lastIds, 0);
 

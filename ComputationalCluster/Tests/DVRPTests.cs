@@ -186,7 +186,7 @@ namespace Tests
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
-            Assert.AreEqual(2, partialProblems.Count);
+            Assert.AreEqual(5, partialProblems.Count);
             var solvePartialProblem = new ConcurrentQueue<byte[]>();
             Parallel.ForEach(divideProblem, element =>
             {
@@ -332,7 +332,7 @@ namespace Tests
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
-            Assert.AreEqual(2, partialProblems.Count);
+            Assert.AreEqual(5, partialProblems.Count);
             var solvePartialProblem = new ConcurrentQueue<byte[]>();
             Parallel.ForEach(divideProblem, element =>
             {
@@ -475,7 +475,7 @@ namespace Tests
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
-            Assert.AreEqual(2, partialProblems.Count);
+            Assert.AreEqual(5, partialProblems.Count);
             var solvePartialProblem = new ConcurrentQueue<byte[]>();
             Parallel.ForEach(divideProblem, element =>
             {
@@ -595,7 +595,7 @@ namespace Tests
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
-            Assert.AreEqual(3, partialProblems.Count);
+            Assert.AreEqual(8, partialProblems.Count);
             var solvePartialProblem = new ConcurrentQueue<byte[]>();
             Parallel.ForEach(divideProblem, element =>
             {
@@ -672,7 +672,7 @@ namespace Tests
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
-            Assert.AreEqual(2, partialProblems.Count);
+            Assert.AreEqual(1, partialProblems.Count);
             var solvePartialProblem = new ConcurrentQueue<byte[]>();
             Parallel.ForEach(divideProblem, element =>
             {
@@ -749,7 +749,7 @@ namespace Tests
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
-            Assert.AreEqual(2, partialProblems.Count);
+            Assert.AreEqual(1, partialProblems.Count);
             var solvePartialProblem = new ConcurrentQueue<byte[]>();
             Parallel.ForEach(divideProblem, element =>
             {
@@ -839,7 +839,7 @@ namespace Tests
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
-            Assert.AreEqual(3, partialProblems.Count);
+            Assert.AreEqual(1, partialProblems.Count);
             var solvePartialProblem = new ConcurrentQueue<byte[]>();
             Parallel.ForEach(divideProblem, element =>
             {

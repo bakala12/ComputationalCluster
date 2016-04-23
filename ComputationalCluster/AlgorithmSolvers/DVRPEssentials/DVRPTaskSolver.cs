@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using CommunicationsUtils.Messages;
 using UCCTaskSolver;
 
 namespace AlgorithmSolvers.DVRPEssentials
@@ -45,101 +46,84 @@ namespace AlgorithmSolvers.DVRPEssentials
             if (s * i > n)
                 return converter.ToByteArray(solutionImpossible());
 
-            var solution = solvePossibleMinCountSets(instance, i);
+            var minSets = partialInstance.MinimalIgnoredSets;
+            var maxSets = partialInstance.MaximumIgnoredSets;
+            partialInstance.PartialResult = double.MaxValue;
 
-            //	3.1.1.2.1 uruchom minimalizePermutation dla wszystkich samochodów tego zbioru
-            //                3.1.1.2.2 jeżeli uzyskałeś permutację tańszą niż obecna w ref, to ją zaktualizuj
+            var currVisits = new List<int>[instance.VehicleNumber];
+            for (int j = 0; j < instance.VehicleNumber; j++)
+            {
+                currVisits[j] = new List<int>();
+                for (int k=0;k<partialInstance.VisitIds[j].Length;k++)
+                    currVisits[j].Add(partialInstance.VisitIds[j][k]);
+            }
 
-            //    3.2 uzyskasz minimalny koszt i minimalną wariację przydziałów - zwróć ją, lub błąd (np.koszt double.MinValue) -zwróć impossible
+            solveInParallel(instance, ref partialInstance, currVisits, double.MaxValue, i, minSets, maxSets);
 
-            return converter.ToByteArray(solution);
+            return converter.ToByteArray(partialInstance);
             //timeoutu nie rozpatruj, szkoda zdrowia
         }
 
-        /// <summary>
-        /// wyznacz wszystkie możliwe przydziały i klientów do wszystkich s samochodów(rekurencja)
-        /// </summary>
-        /// <param name="instance">problem instance</param>
-        /// <param name="i">minimal set count</param>
-        /// <returns></returns>
-        private DVRPPartialProblemInstance solvePossibleMinCountSets(DVRPProblemInstance instance, int i)
+        private void solveInParallel(DVRPProblemInstance instance, ref DVRPPartialProblemInstance finalSolution,
+            List<int>[] currVisits, double currCost, int i, int minSets, int maxSets)
         {
-            var solution = new DVRPPartialProblemInstance();
-            solution.PartialResult = double.MaxValue;
-            solution.SolutionResult = SolutionResult.Impossible;
-            solution.MinimalSetCount = i;
-            var visits = new int[instance.VehicleNumber][];
-            var currVisits = new List<int>[instance.VehicleNumber];
-            for (var j = 0; j < instance.VehicleNumber; j++)
-            {
-                currVisits[j] = new List<int>();
-            }
             var lastIds = new int[instance.Visits.Count];
-            int ind = 0;
-            foreach (var v in instance.Visits)
-                lastIds[ind++] = v.Id;
-            solvePossibleMinCountSetsRec(instance, i, 0, 0, ref solution, currVisits, lastIds);
-            return solution;
+            for (var j = 0; j < instance.Visits.Count; j++)
+            {
+                if (currVisits.Any(x => x.Contains(instance.Visits[j].Id)))
+                    lastIds[j] = -1;
+                else
+                    lastIds[j] = instance.Visits[j].Id;
+            }
+            var currSolution = new DVRPPartialProblemInstance();
+
+            for (var j = minSets; j <= maxSets; j++)
+            {
+                currSolution = new DVRPPartialProblemInstance();
+                currSolution.MinimalIgnoredSets = j;
+                currSolution.MaximumIgnoredSets = j;
+                currSolution.PartialResult = double.MaxValue;
+                currSolution.SolutionResult = SolutionResult.NotSolved;
+                generateSets(instance, i, ref currSolution, currVisits, lastIds, j);
+                if (currSolution.PartialResult < finalSolution.PartialResult)
+                {
+                    solutionCopyTo(currSolution, ref finalSolution);
+                }
+            }
         }
 
-        private void solvePossibleMinCountSetsRec(DVRPProblemInstance instance, int i, int set, int j,
-            ref DVRPPartialProblemInstance solution, List<int>[] currVisits, int[] lastIds)
+        private void solutionCopyTo(DVRPPartialProblemInstance a, ref DVRPPartialProblemInstance b)
         {
-            if (j > i)
-                throw new Exception("Something went wrong");
-            if (j == i)
+            b.MaximumIgnoredSets = a.MaximumIgnoredSets;
+            b.MinimalIgnoredSets = a.MinimalIgnoredSets;
+            b.MinimalSetCount = a.MinimalSetCount;
+            b.SolutionResult = a.SolutionResult;
+            b.PartialResult = a.PartialResult;
+            b.VisitIds = new int[a.VisitIds.GetLength(0)][];
+            for (int i = 0; i < a.VisitIds.GetLength(0); i++)
             {
-                if (set < instance.VehicleNumber - 1)
-                {
-                    solvePossibleMinCountSetsRec(instance, i, set + 1, 0, ref solution, currVisits, lastIds);
-                    return;
-                }
-                else
-                {
-                    //uzyskaliśmy podział, możemy generować podzbiory
-                    if (instance.Visits.Count == i * instance.VehicleNumber)
-                    {
-                        generateSetsRec(instance, i, ref solution, currVisits, 0, 2, lastIds,0);
-                        return;
-                    }
-                    generateSets(instance, i, ref solution, currVisits, lastIds);
-                    return;
-                }
-            }
-
-            for (var k = 0; k < lastIds.Length; k++)
-            {
-                if (lastIds[k] != -1)
-                {
-                    if (!(set == 0 && j == 0) && (instance.Visits[k].Id < currVisits[0][0]
-                        || (currVisits[set].Count > 0 && currVisits[set].Last() > instance.Visits[k].Id)
-                        || (currVisits[0].Count > 0 && currVisits[0][0] > instance.Visits[k].Id)))
-                        continue;
-                    var id = lastIds[k];
-                    currVisits[set].Add(id);
-                    lastIds[k] = -1;
-                    solvePossibleMinCountSetsRec(instance, i, set, j + 1, ref solution, currVisits, lastIds);
-                    lastIds[k] = id;
-                    currVisits[set].Remove(id);
-                }
+                b.VisitIds[i] = new int[a.VisitIds[i].Length];
+                a.VisitIds[i].CopyTo(b.VisitIds[i], 0);
             }
         }
 
         private void generateSets(DVRPProblemInstance instance, int i, ref DVRPPartialProblemInstance solution,
-            List<int>[] currVisits, int[] lastIds)
+            List<int>[] currVisits, int[] lastIds, int ignoredCount)
         {
             //dodawaj klientów z nawrotami do zbiorów currVisits takich, że nie należą do y-greków
             //uważaj na powtórzenia
-            int clast = instance.Visits.Count - i * instance.VehicleNumber;
-            int cval = instance.VehicleNumber;
+            var clast = instance.Visits.Count - i * instance.VehicleNumber;
+            var cval = instance.VehicleNumber;
 
-            generateSetsRec(instance, i, ref solution, currVisits, clast, cval, lastIds, 0);
+            generateSetsRec(instance, i, ref solution, currVisits, ignoredCount, clast, cval, lastIds, 0);
 
         }
 
         private void generateSetsRec(DVRPProblemInstance instance, int i, ref DVRPPartialProblemInstance solution,
-            List<int>[] currVisits, int clast, int cval, int[] lastIds, int minSet)
+            List<int>[] currVisits, int ignoredCount, int clast, int cval, int[] lastIds, int minSet)
         {
+            if (clast == 0 && ignoredCount != 0 && cval > ignoredCount)
+                return;
             if (clast == 0)
             {
                 double newCost = 0f;
@@ -171,12 +155,12 @@ namespace AlgorithmSolvers.DVRPEssentials
 
             for (var k = minSet; k < instance.VehicleNumber; k++)
             {
-                if (currVisits[k].Count == i && cval == 1)
+                if (currVisits[k].Count == i && cval == ignoredCount)
                     continue;
                 if (k > 0 && currVisits[k - 1].Count == i)
                     return;
 
-                for (int t = 0; t < lastIds.Length; t++)
+                for (var t = 0; t < lastIds.Length; t++)
                 {
                     if (lastIds[t] == -1)
                         continue;
@@ -188,7 +172,8 @@ namespace AlgorithmSolvers.DVRPEssentials
                     currVisits[k].Add(lastIds[t]);
                     var tmp = lastIds[t];
                     lastIds[t] = -1;
-                    generateSetsRec(instance, i, ref solution, currVisits, clast - 1, cval - add, lastIds,k);
+                    generateSetsRec(instance, i, ref solution, currVisits, ignoredCount, 
+                        clast - 1, cval - add, lastIds,k);
                     lastIds[t] = tmp;
                     currVisits[k].Remove(lastIds[t]);
                 }
@@ -437,15 +422,115 @@ namespace AlgorithmSolvers.DVRPEssentials
 
             for (var i = 0; i <= instance.Visits.Count / instance.VehicleNumber; i++)
             {
-                partialProblemInstances.Add(new DVRPPartialProblemInstance()
-                {
-                    MinimalSetCount = i,
-                    PartialResult = double.MaxValue,
-                    SolutionResult = SolutionResult.NotSolved
-                });
+                //generacja permutacji dla i
+                //generacja partial problemów - minimalingored, maximumignored
+                generatePartialProblems(instance, i, ref partialProblemInstances);
             }
 
             return partialProblemInstances.ToArray();
+        }
+
+        private void generatePartialProblems(DVRPProblemInstance instance, int i, 
+            ref List<DVRPPartialProblemInstance> partialProblemInstances)
+        {
+            var schemas = solvePossibleMinCountSets(instance, i);
+            
+            foreach (var schema in schemas)
+            {
+                var j = instance.Visits.Count - i * instance.VehicleNumber == 0 ? 0 : 1;
+                while (j < instance.VehicleNumber)
+                {
+                    var newPartial = new DVRPPartialProblemInstance();
+                    solutionCopyTo(schema, ref newPartial);
+                    if (i == 0 && j < 3)
+                    {
+                        newPartial.MinimalIgnoredSets = j;
+                        newPartial.MaximumIgnoredSets = j;
+                    }
+                    else
+                    {
+                        newPartial.MinimalIgnoredSets = j;
+                        newPartial.MaximumIgnoredSets = j + 1 < instance.VehicleNumber ? j + 1 : j;
+                        j++;
+                    }
+                    partialProblemInstances.Add(newPartial);
+                    j++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// wyznacz wszystkie możliwe przydziały i klientów do wszystkich s samochodów(rekurencja)
+        /// </summary>
+        /// <param name="instance">problem instance</param>
+        /// <param name="i">minimal set count</param>
+        /// <returns></returns>
+        private List<DVRPPartialProblemInstance> solvePossibleMinCountSets(DVRPProblemInstance instance, int i)
+        {
+            var solution = new List<DVRPPartialProblemInstance>();
+
+            var currVisits = new List<int>[instance.VehicleNumber];
+            for (var j = 0; j < instance.VehicleNumber; j++)
+            {
+                currVisits[j] = new List<int>();
+            }
+            var lastIds = new int[instance.Visits.Count];
+            int ind = 0;
+
+            foreach (var v in instance.Visits)
+                lastIds[ind++] = v.Id;
+            solvePossibleMinCountSetsRec(instance, i, 0, 0, ref solution, currVisits, lastIds);
+            return solution;
+        }
+
+        private void solvePossibleMinCountSetsRec(DVRPProblemInstance instance, int i, int set, int j,
+            ref List<DVRPPartialProblemInstance> solutions, List<int>[] currVisits, int[] lastIds)
+        {
+            if (j > i)
+                throw new Exception("Something went wrong");
+            if (j == i)
+            {
+                if (set < instance.VehicleNumber - 1)
+                {
+                    solvePossibleMinCountSetsRec(instance, i, set + 1, 0, ref solutions, currVisits, lastIds);
+                    return;
+                }
+                else
+                {
+                    var newSol = new DVRPPartialProblemInstance();
+                    newSol.PartialResult = double.MaxValue;
+                    newSol.SolutionResult = SolutionResult.Impossible;
+                    newSol.MinimalSetCount = i;
+                    //uzyskaliśmy podział, przepisanie do szkieletu zadania
+                    newSol.VisitIds = new int[currVisits.Length][];
+                    for (var k = 0; k < currVisits.Length; k++)
+                    {
+                        newSol.VisitIds[k] = new int[currVisits[k].Count];
+                        for (var s = 0; s < currVisits[k].Count; s++)
+                            newSol.VisitIds[k][s] = currVisits[k][s];
+                    }
+                    solutions.Add(newSol);
+                    return;
+                }
+            }
+
+            for (var k = 0; k < lastIds.Length; k++)
+            {
+                if (lastIds[k] != -1)
+                {
+                    if ((set>0 && j==0 && currVisits[set-1].Last() > lastIds[k]) || 
+                        (!(set == 0 && j == 0) && (instance.Visits[k].Id < currVisits[0][0]
+                        || (currVisits[set].Count > 0 && currVisits[set].Last() > instance.Visits[k].Id)
+                        || (currVisits[0].Count > 0 && currVisits[0][0] > instance.Visits[k].Id))))
+                        continue;
+                    var id = lastIds[k];
+                    currVisits[set].Add(id);
+                    lastIds[k] = -1;
+                    solvePossibleMinCountSetsRec(instance, i, set, j + 1, ref solutions, currVisits, lastIds);
+                    lastIds[k] = id;
+                    currVisits[set].Remove(id);
+                }
+            }
         }
 
         ///

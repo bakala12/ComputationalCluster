@@ -39,15 +39,14 @@ namespace CommunicationsUtils.Shared
 
         /// <summary>
         /// Returns specified instance of task solver.
-        /// It is required to pass base type for the class, some substring of class name and constuctor parameters.
+        /// It is required to pass substring of class name and constuctor parameters.
         /// </summary>
-        /// <param name="type">Base type for specified class</param>
         /// <param name="startsWith">Substring of class name</param>
         /// <param name="data">Array of bytes transferred to constructor</param>
         /// <returns></returns>
-        public TaskSolver GetInstanceByBaseTypeName(Type type, string startsWith, byte[] data)
+        public TaskSolver GetInstanceByBaseTypeName(string startsWith, byte[] data)
         {
-            foreach (var searchType in ResolveLibrariesAssemblies.SelectMany(assembly => assembly.GetExportedTypes().Where(searchType => searchType.IsSubclassOf(type) && searchType.ToString().Contains(startsWith))))
+            foreach (var searchType in ResolveLibrariesAssemblies.SelectMany(assembly => assembly.GetExportedTypes().Where(searchType => searchType.IsSubclassOf(typeof(TaskSolver)) && searchType.ToString().Contains(startsWith))))
             {
                 return (TaskSolver)Activator.CreateInstance(searchType, data);
             }
@@ -61,6 +60,6 @@ namespace CommunicationsUtils.Shared
     internal interface IAssemblyResolver
     {
         IEnumerable<Assembly> ResolveLibrariesAssemblies { get; }
-        TaskSolver GetInstanceByBaseTypeName(Type type, string startsWith, byte[] data);
+        TaskSolver GetInstanceByBaseTypeName(string startsWith, byte[] data);
     }
 }

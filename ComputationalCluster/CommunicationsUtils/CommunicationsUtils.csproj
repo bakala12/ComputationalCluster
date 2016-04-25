@@ -102,6 +102,7 @@
     <Compile Include="Serialization\MessagesSerializer.cs" />
     <Compile Include="Serialization\MessageToBytesConverter.cs" />
     <Compile Include="Serialization\XmlStringSerializer.cs" />
+    <Compile Include="Shared\AssemblyResolver.cs" />
     <Compile Include="Shared\StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

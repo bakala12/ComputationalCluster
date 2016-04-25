@@ -13,7 +13,7 @@ namespace CommunicationsUtils.Shared
     public class AssemblyResolver : IAssemblyResolver
     {
         /// <summary>
-        /// Returns absolute path to current working directory.
+        /// Returns absolute path to solution working directory.
         /// </summary>
         private static string solutionFolderPath
         {
@@ -35,7 +35,7 @@ namespace CommunicationsUtils.Shared
         /// <summary>
         /// Returns collection of resolved libraries assemblies.
         /// </summary>
-        public IEnumerable<Assembly> ResolveLibrariesAssemblies => Directory.GetFiles(librariesDirectory, "*.dll").Select(Assembly.LoadFile);
+        public IEnumerable<Assembly> ResolvedLibrariesAssemblies => Directory.GetFiles(librariesDirectory, "*.dll").Select(Assembly.LoadFile);
 
         /// <summary>
         /// Returns specified instance of task solver.
@@ -46,11 +46,24 @@ namespace CommunicationsUtils.Shared
         /// <returns></returns>
         public TaskSolver GetInstanceByBaseTypeName(string startsWith, byte[] data)
         {
-            foreach (var searchType in ResolveLibrariesAssemblies.SelectMany(assembly => assembly.GetExportedTypes().Where(searchType => searchType.IsSubclassOf(typeof(TaskSolver)) && searchType.ToString().Contains(startsWith))))
+            foreach (var searchType in ResolvedLibrariesAssemblies.SelectMany(assembly => assembly.GetExportedTypes().Where(searchType => searchType.IsSubclassOf(typeof(TaskSolver)) && searchType.ToString().Contains(startsWith))))
             {
                 return (TaskSolver)Activator.CreateInstance(searchType, data);
             }
             throw new MissingMemberException();
+        }
+
+        /// <summary>
+        /// Returns all avaliable problems (names) possible to solve with external libraries.
+        /// </summary>
+        public IEnumerable<string> GetProblemNamesPossibleToSolve()
+        {
+            foreach (var searchType in ResolvedLibrariesAssemblies.SelectMany(assembly => assembly.GetExportedTypes().Where(searchType => searchType.IsSubclassOf(typeof(TaskSolver)))))
+            {
+                var nameMembers = searchType.ToString().Split('.');
+                var solverName = nameMembers.Last().TrimEnd("TaskSolver".ToCharArray());
+                yield return solverName;
+            }
         }
     }
 
@@ -59,7 +72,7 @@ namespace CommunicationsUtils.Shared
     /// </summary>
     internal interface IAssemblyResolver
     {
-        IEnumerable<Assembly> ResolveLibrariesAssemblies { get; }
+        IEnumerable<Assembly> ResolvedLibrariesAssemblies { get; }
         TaskSolver GetInstanceByBaseTypeName(string startsWith, byte[] data);
     }
 }

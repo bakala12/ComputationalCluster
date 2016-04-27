@@ -16,9 +16,9 @@ namespace AlgorithmSolvers.DVRPEssentials
     /// <summary>
     /// Task solver implementation for DVRP
     /// </summary>
-    public class DvrpTaskSolver : TaskSolver
+    public class DVRPTaskSolver : TaskSolver
     {
-        public DvrpTaskSolver(byte[] problemData) : base(problemData)
+        public DVRPTaskSolver(byte[] problemData) : base(problemData)
         {
         }
 

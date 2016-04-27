@@ -88,7 +88,7 @@ namespace Tests
             };
             #endregion
             byte[] bytes = _converter.ToByteArray(instance);
-            TaskSolver solver = new DvrpTaskSolver(bytes);
+            TaskSolver solver = new DVRPTaskSolver(bytes);
             var divideProblem = solver.DivideProblem(1);
             List<byte[]> results = divideProblem.Select(b => solver.Solve(b, TimeSpan.Zero)).ToList();
             var final = _converter.FromBytesArray(solver.MergeSolution(results.ToArray()));
@@ -176,7 +176,7 @@ namespace Tests
             };
             #endregion
             byte[] bytes = _converter.ToByteArray(instance);
-            TaskSolver solver = new DvrpTaskSolver(bytes);
+            TaskSolver solver = new DVRPTaskSolver(bytes);
             var divideProblem = solver.DivideProblem(1);
             List<byte[]> results = divideProblem.Select(b => solver.Solve(b, TimeSpan.Zero)).ToList();
             var final = _converter.FromBytesArray(solver.MergeSolution(results.ToArray()));
@@ -272,7 +272,7 @@ namespace Tests
             };
             #endregion
             byte[] bytes = _converter.ToByteArray(instance);
-            TaskSolver solver = new DvrpTaskSolver(bytes);
+            TaskSolver solver = new DVRPTaskSolver(bytes);
             var divideProblem = solver.DivideProblem(1);
             List<byte[]> results = divideProblem.Select(b => solver.Solve(b, TimeSpan.Zero)).ToList();
             var final = _converter.FromBytesArray(solver.MergeSolution(results.ToArray()));

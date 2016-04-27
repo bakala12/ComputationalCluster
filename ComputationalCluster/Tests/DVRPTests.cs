@@ -52,7 +52,7 @@ namespace Tests
             };
             var converter = new ProblemToBytesConverter();
             var bytes = converter.ToByteArray(instance);
-            var taskSolver = new DvrpTaskSolver(bytes);
+            var taskSolver = new DVRPTaskSolver(bytes);
             var divideProblem = taskSolver.DivideProblem(0);
 
             Assert.AreEqual(1, divideProblem.Length);
@@ -71,7 +71,7 @@ namespace Tests
             var problem = parser.Parse();
             var converter = new ProblemToBytesConverter();
             var data = converter.ToByteArray(problem);
-            var solver = new DvrpTaskSolver(data);
+            var solver = new DVRPTaskSolver(data);
 
             var divides = solver.DivideProblem(0);
             var solvePartialProblem = new ConcurrentQueue<byte[]>();
@@ -186,7 +186,7 @@ namespace Tests
             };
             var converter = new ProblemToBytesConverter();
             var bytes = converter.ToByteArray(problem);
-            var taskSolver = new DvrpTaskSolver(bytes);
+            var taskSolver = new DVRPTaskSolver(bytes);
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
@@ -332,7 +332,7 @@ namespace Tests
             };
             var converter = new ProblemToBytesConverter();
             var bytes = converter.ToByteArray(problem);
-            var taskSolver = new DvrpTaskSolver(bytes);
+            var taskSolver = new DVRPTaskSolver(bytes);
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
@@ -475,7 +475,7 @@ namespace Tests
             };
             var converter = new ProblemToBytesConverter();
             var bytes = converter.ToByteArray(problem);
-            var taskSolver = new DvrpTaskSolver(bytes);
+            var taskSolver = new DVRPTaskSolver(bytes);
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
@@ -595,7 +595,7 @@ namespace Tests
 
             var converter = new ProblemToBytesConverter();
             var bytes = converter.ToByteArray(problem);
-            var taskSolver = new DvrpTaskSolver(bytes);
+            var taskSolver = new DVRPTaskSolver(bytes);
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
@@ -672,7 +672,7 @@ namespace Tests
 
             var converter = new ProblemToBytesConverter();
             var bytes = converter.ToByteArray(problem);
-            var taskSolver = new DvrpTaskSolver(bytes);
+            var taskSolver = new DVRPTaskSolver(bytes);
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
@@ -749,7 +749,7 @@ namespace Tests
 
             var converter = new ProblemToBytesConverter();
             var bytes = converter.ToByteArray(problem);
-            var taskSolver = new DvrpTaskSolver(bytes);
+            var taskSolver = new DVRPTaskSolver(bytes);
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 
@@ -839,7 +839,7 @@ namespace Tests
 
             var converter = new ProblemToBytesConverter();
             var bytes = converter.ToByteArray(problem);
-            var taskSolver = new DvrpTaskSolver(bytes);
+            var taskSolver = new DVRPTaskSolver(bytes);
             var divideProblem = taskSolver.DivideProblem(0);
             var partialProblems = divideProblem.Select(partialProblem => (DVRPPartialProblemInstance)converter.FromBytesArray(partialProblem)).ToList();
 

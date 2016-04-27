@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AlgorithmSolvers.DVRPEssentials;
 using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.Messages;
+using CommunicationsUtils.Shared;
 using log4net;
 
 namespace ComputationalNode.Core
@@ -16,6 +17,7 @@ namespace ComputationalNode.Core
     /// </summary>
     public class ComputationalNodeMessageProcessor: ClientMessageProcessor
     {
+        private readonly IAssemblyResolver _resolver= new AssemblyResolver();
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public ComputationalNodeMessageProcessor(List<string> problems)
@@ -44,7 +46,7 @@ namespace ComputationalNode.Core
                     ErrorType = ErrorErrorType.InvalidOperation
                 };
             //task solver stuff:
-            var taskSolver = new DvrpTaskSolver(solvePartialProblems.CommonData);
+            var taskSolver = _resolver.GetInstanceByBaseTypeName(solvePartialProblems.ProblemType,solvePartialProblems.CommonData);
             var solutionsList = new List<SolutionsSolution>();
 
             foreach (var partialProblem in solvePartialProblems.PartialProblems)

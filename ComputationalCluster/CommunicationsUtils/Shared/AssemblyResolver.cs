@@ -70,9 +70,10 @@ namespace CommunicationsUtils.Shared
     /// <summary>
     /// Assembly resolver interface.
     /// </summary>
-    internal interface IAssemblyResolver
+    public interface IAssemblyResolver
     {
         IEnumerable<Assembly> ResolvedLibrariesAssemblies { get; }
         TaskSolver GetInstanceByBaseTypeName(string startsWith, byte[] data);
+        IEnumerable<string> GetProblemNamesPossibleToSolve();
     }
 }

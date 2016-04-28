@@ -78,6 +78,7 @@ namespace Client.Core
             var problemParser = new DVRPProblemParser(problemPath);
             var problem = problemParser.Parse();
             data = _problemConverter.ToByteArray(problem);
+            log.DebugFormat("length of problem: {0}", data.Length);
             type = "DVRP";
         }
 

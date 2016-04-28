@@ -24,12 +24,20 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
 
         public int Receive(byte[] requestBytes, int count)
         {
-            return wrappedSocket.Receive(requestBytes, 0, count, SocketFlags.None);
+            int len = 0;
+            using (var stream = new NetworkStream(wrappedSocket))
+            {
+                len = stream.Read(requestBytes, 0, count);
+            }
+            return len;
         }
 
         public void Send(byte[] v, int count)
         {
-            wrappedSocket.Send(v, count, SocketFlags.None);
+            using (var stream = new NetworkStream(wrappedSocket))
+            {
+                stream.Write(v, 0, count);
+            }
         }
 
         public string ExtractSocketAddress()

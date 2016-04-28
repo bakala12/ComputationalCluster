@@ -261,5 +261,62 @@ namespace Tests
             Assert.AreEqual(1, msg.CommonData[0]);
             Assert.AreEqual(2, dict[1].PartialSets[0].NodeId);
         }
+        [TestMethod]
+        public void DataSetMultipleProblemsTest()
+        {
+            var comps = new Dictionary<int, ActiveComponent>();
+            comps.Add(1, new ActiveComponent()
+            {
+                ComponentType = ComponentType.ComputationalNode,
+                SolvableProblems = new[] { "abc" }
+            });
+            comps.Add(2, new ActiveComponent()
+            {
+                ComponentType = ComponentType.ComputationalNode,
+                SolvableProblems = new[] { "abc" }
+            });
+
+            var dict = new Dictionary<int, ProblemDataSet>();
+            var bytes = new byte[1] { 1 };
+            dict.Add(1,
+                new ProblemDataSet()
+                {
+                    CommonData = bytes,
+                    TaskManagerId = 1,
+                    ProblemType = "abc",
+                    PartialSets = new[]
+                    {
+                        new PartialSet()
+                        {
+                            PartialProblem = new SolvePartialProblemsPartialProblem(),
+                            PartialSolution = null,
+                            Status = PartialSetStatus.Fresh
+                        }
+                    }
+                });
+            dict.Add(2,
+                new ProblemDataSet()
+                {
+                    CommonData = bytes,
+                    TaskManagerId = 1,
+                    ProblemType = "abc",
+                    PartialSets = new[]
+                    {
+                        new PartialSet()
+                        {
+                            PartialProblem = new SolvePartialProblemsPartialProblem(),
+                            PartialSolution = null,
+                            Status = PartialSetStatus.Fresh
+                        }
+                    }
+                });
+            var ret = DataSetOps.GetMessageForCompNode(comps, 1, dict);
+            Assert.AreEqual(typeof(SolvePartialProblems), ret.GetType());
+            Assert.AreEqual(1, dict[1].PartialSets[0].NodeId);
+
+            var ret2 = DataSetOps.GetMessageForCompNode(comps, 2, dict);
+            Assert.AreEqual(typeof(SolvePartialProblems), ret2.GetType());
+            Assert.AreEqual(2, dict[2].PartialSets[0].NodeId);
+        }
     }
 }

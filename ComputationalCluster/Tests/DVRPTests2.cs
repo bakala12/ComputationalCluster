@@ -88,7 +88,7 @@ namespace Tests
             };
             #endregion
             byte[] bytes = _converter.ToByteArray(instance);
-            TaskSolver solver = new DvrpTaskSolver(bytes);
+            TaskSolver solver = new DVRPTaskSolver(bytes);
             var divideProblem = solver.DivideProblem(1);
             List<byte[]> results = divideProblem.Select(b => solver.Solve(b, TimeSpan.Zero)).ToList();
             var final = _converter.FromBytesArray(solver.MergeSolution(results.ToArray()));
@@ -176,14 +176,14 @@ namespace Tests
             };
             #endregion
             byte[] bytes = _converter.ToByteArray(instance);
-            TaskSolver solver = new DvrpTaskSolver(bytes);
+            TaskSolver solver = new DVRPTaskSolver(bytes);
             var divideProblem = solver.DivideProblem(1);
             List<byte[]> results = divideProblem.Select(b => solver.Solve(b, TimeSpan.Zero)).ToList();
             var final = _converter.FromBytesArray(solver.MergeSolution(results.ToArray()));
             Assert.IsNotNull(final);
             Assert.IsInstanceOfType(final, typeof(DVRPPartialProblemInstance));
             Assert.AreEqual(SolutionResult.Successful, ((DVRPPartialProblemInstance)final).SolutionResult);
-            Assert.AreEqual(536.20, ((DVRPPartialProblemInstance)final).PartialResult, 2.5);
+            Assert.AreEqual(536.20, ((DVRPPartialProblemInstance)final).PartialResult,2.5);
         }
 
         /// <summary>
@@ -217,6 +217,7 @@ namespace Tests
                 },
                 VehicleCapacity = 100,
                 VehicleNumber = 6,
+                VehicleSpeed = 3,
                 Visits = new List<Visit>()
                 {
                     new Visit()
@@ -271,14 +272,14 @@ namespace Tests
             };
             #endregion
             byte[] bytes = _converter.ToByteArray(instance);
-            TaskSolver solver = new DvrpTaskSolver(bytes);
+            TaskSolver solver = new DVRPTaskSolver(bytes);
             var divideProblem = solver.DivideProblem(1);
             List<byte[]> results = divideProblem.Select(b => solver.Solve(b, TimeSpan.Zero)).ToList();
             var final = _converter.FromBytesArray(solver.MergeSolution(results.ToArray()));
             Assert.IsNotNull(final);
             Assert.IsInstanceOfType(final, typeof(DVRPPartialProblemInstance));
             Assert.AreEqual(SolutionResult.Successful, ((DVRPPartialProblemInstance)final).SolutionResult);
-            Assert.AreEqual(569.65, ((DVRPPartialProblemInstance)final).PartialResult,40);
+            Assert.AreEqual(545f, ((DVRPPartialProblemInstance)final).PartialResult,1);
         }
     }
 }

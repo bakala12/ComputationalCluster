@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AlgorithmSolvers;
 using CommunicationsUtils.Argument_parser;
+using CommunicationsUtils.Shared;
 using log4net;
 using TaskManager.Core;
 
@@ -33,8 +34,10 @@ namespace TaskManager
             IClusterClient problemClient = ClusterClientFactory.Factory.Create(
                 Properties.Settings.Default.Address, Properties.Settings.Default.Port);
 
+            IAssemblyResolver resolver = new AssemblyResolver();
+             
             var newCore = TaskManagerMessageProcessorFactory.Factory.Create
-                (new List<string> { "DVRP" });
+                (resolver.GetProblemNamesPossibleToSolve().ToList());
 
             var creator = new MessageArrayCreator();
 

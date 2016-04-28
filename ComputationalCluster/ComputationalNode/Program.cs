@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using AlgorithmSolvers;
 using CommunicationsUtils.Argument_parser;
 using CommunicationsUtils.ClientComponentCommon;
 using CommunicationsUtils.NetworkInterfaces;
 using CommunicationsUtils.NetworkInterfaces.Factories;
+using CommunicationsUtils.Shared;
 using ComputationalNode.Core;
 using log4net;
 
@@ -28,8 +30,10 @@ namespace ComputationalNode
             IClusterClient problemClient = ClusterClientFactory.Factory.Create(
                 Properties.Settings.Default.Address, Properties.Settings.Default.Port);
 
+            IAssemblyResolver resolver = new AssemblyResolver();
+
             var newCore = ComputationalNodeProcessingModuleFactory.Factory.Create
-                (new List<string> { "DVRP" });
+                (resolver.GetProblemNamesPossibleToSolve().ToList());
 
             var creator = new MessageArrayCreator();
 

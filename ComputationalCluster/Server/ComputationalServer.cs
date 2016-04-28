@@ -26,11 +26,11 @@ namespace Server
         /// Indicating whether server threads work.
         /// </summary>
         private volatile bool _isWorking;
-        
+
         /// <summary>
         /// A list of currently running threads at server.
         /// </summary>
-        private readonly List<Thread> _currentlyWorkingThreads = new List<Thread>(); 
+        private readonly List<Thread> _currentlyWorkingThreads = new List<Thread>();
 
         /// <summary>
         /// An object for multithread synchronization.
@@ -132,9 +132,9 @@ namespace Server
         /// </summary>
         /// <param name="backupClient"> A client used as BS request sender.</param>
         /// /// <param name="backupListener"> A listener used as BS request receiver.</param>
-        public ComputationalServer(IClusterClient backupClient, IClusterListener backupListener) :this(ServerState.Backup)
+        public ComputationalServer(IClusterClient backupClient, IClusterListener backupListener) : this(ServerState.Backup)
         {
-            if(backupClient == null) throw new ArgumentNullException(nameof(backupClient));
+            if (backupClient == null) throw new ArgumentNullException(nameof(backupClient));
             _backupClient = backupClient;
             _clusterListener = backupListener;
             Log.Debug("New instance of Backup ComputationalServer has been created.");
@@ -158,8 +158,8 @@ namespace Server
         public virtual void RunAsPrimary()
         {
 
-                _messageProcessor = new PrimaryMessageProcessor
-                    (_clusterListener, _synchronizationQueue, _problemDataSets, _activeComponents);
+            _messageProcessor = new PrimaryMessageProcessor
+                (_clusterListener, _synchronizationQueue, _problemDataSets, _activeComponents);
 
             _backupClient = null;
             if (_clusterListener == null)
@@ -181,8 +181,8 @@ namespace Server
         /// </summary>
         public virtual void RunAsBackup()
         {
-                _messageProcessor = new BackupMessageProcessor
-                    (_clusterListener, _synchronizationQueue, _problemDataSets, _activeComponents);
+            _messageProcessor = new BackupMessageProcessor
+                (_clusterListener, _synchronizationQueue, _problemDataSets, _activeComponents);
 
             if (_backupClient == null)
                 _backupClient = ClusterClientFactory.Factory.Create(Properties.Settings.Default.MasterAddress,
@@ -216,8 +216,8 @@ namespace Server
         public void Stop()
         {
             Log.Debug("Stopping threads.");
-            _clusterListener.Stop();
-            _clusterListener = null;
+            //_clusterListener.Stop();
+            //_clusterListener = null;
             _isWorking = false;
             //foreach (var currentlyWorkingThread in _currentlyWorkingThreads)
             //{
@@ -226,7 +226,7 @@ namespace Server
             //        currentlyWorkingThread?.Join();
             //    }
             //}
-            
+
             _currentlyWorkingThreads.Clear();
             _backupClient = null;
             //Stopping and joining messageprocessor threads 
@@ -248,7 +248,7 @@ namespace Server
         /// <param name="delegatFunc">Function to be invoked in a separate thread</param>
         private void ProcessInParallel(Action delegatFunc)
         {
-            var thread = new Thread(()=>delegatFunc());
+            var thread = new Thread(() => delegatFunc());
             _currentlyWorkingThreads.Add(thread);
             thread.Start();
         }
@@ -273,7 +273,7 @@ namespace Server
                         Log.Debug("Communication accident. Connection has been broken down");
                         throw;
                     }
-                    if (requestsMessages==null) Log.Debug("No request messages detected.");
+                    if (requestsMessages == null) Log.Debug("No request messages detected.");
                     Log.Debug("Request messages has been awaited. Numer of request messages: " + requestsMessages.Length);
                     foreach (var message in requestsMessages)
                     {
@@ -355,14 +355,14 @@ namespace Server
                     port = (ushort)Properties.Settings.Default.Port,
                     portSpecified = true
                 },
-                SolvableProblems = new[] {"DVRP"},
+                SolvableProblems = new[] { "DVRP" },
                 ParallelThreads = 1,
                 Deregister = false,
                 DeregisterSpecified = false
             };
             try
             {
-                var response = _backupClient.SendRequests(new Message[] {register});
+                var response = _backupClient.SendRequests(new Message[] { register });
                 foreach (var message in response)
                 {
                     _messageProcessor.ProcessMessage(message, _problemDataSets, _activeComponents);
@@ -383,7 +383,7 @@ namespace Server
                         {
                             Log.DebugFormat("changing parameters to : {0}, {1}", _backups[pos - 1].address, _backups[pos - 1].port);
                             _backupClient.ChangeListenerParameters
-                                (_backups[pos - 2].address,_backups[pos - 2].port);
+                                (_backups[pos - 2].address, _backups[pos - 2].port);
                         }
                     }
                 }
@@ -408,18 +408,18 @@ namespace Server
                 var status = new Status()
                 {
                     Threads = new StatusThread[1],
-                    Id= id
+                    Id = id
                 };
                 try
                 {
-                    var response = _backupClient.SendRequests(new Message[] {status});
+                    var response = _backupClient.SendRequests(new Message[] { status });
                     foreach (var message in response)
                     {
                         if (message.MessageType != MessageType.NoOperationMessage)
                         {
                             _synchronizationQueue.Enqueue(message);
                             _messagesQueue.Enqueue(message);
-                            Log.Debug("Received message "+message.MessageType.ToString());
+                            Log.Debug("Received message " + message.MessageType.ToString());
                             continue;
                         }
 
@@ -435,7 +435,7 @@ namespace Server
                         ChangeState(ServerState.Primary);
                     }
                 }
-                Thread.Sleep((int)(BackupServerStatusInterval!= null ? BackupServerStatusInterval/4 : 0));
+                Thread.Sleep((int)(BackupServerStatusInterval != null ? BackupServerStatusInterval / 4 : 0));
             }
         }
 
@@ -447,10 +447,10 @@ namespace Server
         private bool BackupProblem()
         {
             //if(_backups == null || _backups.Count ==0)
-                //throw new Exception("Backup has empty backup list!!!");
+            //throw new Exception("Backup has empty backup list!!!");
             //become main server - we assume backups' invulnerability
             if (true)
-            return true;
+                return true;
         }
     }
 }

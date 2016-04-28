@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AlgorithmSolvers.DVRPEssentials;
 using CommunicationsUtils.Serialization;
+using CommunicationsUtils.Shared;
 using log4net;
 using UCCTaskSolver;
 
@@ -18,6 +19,7 @@ namespace TaskManager.Core
     /// </summary>
     public class TaskManagerMessageProcessor : ClientMessageProcessor
     {
+        private readonly IAssemblyResolver _resolver = new AssemblyResolver();
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private ProblemToBytesConverter _problemConverter = new ProblemToBytesConverter();
 
@@ -66,10 +68,10 @@ namespace TaskManager.Core
             }
 
             var commonData = divideProblem.Data;
-            var taskSolver = new DvrpTaskSolver(commonData);
+            var taskSolver = _resolver.GetInstanceByBaseTypeName(divideProblem.ProblemType, commonData);
             var bytes = taskSolver.DivideProblem(0);
 
-            log.DebugFormat("Length of divide problem message: {0}", bytes?.Sum(x=>x.Length));
+            log.DebugFormat("Length of divide problem message: {0}", bytes?.Sum(x => x.Length));
             //adding info about partial problems, their task ids, and partialProblem
             //some things can be temporary (partialProblems?)
             storage.AddIssue(divideProblem.Id, new ProblemInfo()
@@ -82,16 +84,16 @@ namespace TaskManager.Core
 
             var problemsList = new List<SolvePartialProblemsPartialProblem>();
             //iterate through all partial problems and create proper messages
-            for (var i = 0; i < (bytes?.GetLength(0) ?? 0) ; i++)
+            for (var i = 0; i < (bytes?.GetLength(0) ?? 0); i++)
             {
                 var partialProblem = new SolvePartialProblemsPartialProblem()
                 {
-                    TaskId = (ulong) i,
+                    TaskId = (ulong)i,
                     Data = bytes[i],
                     NodeID = componentId
                 };
 
-                problemsList.Add( partialProblem );
+                problemsList.Add(partialProblem);
                 //adding info about subtask to task manager memory
                 storage.AddTaskToIssue(divideProblem.Id, partialProblem);
             }
@@ -133,7 +135,7 @@ namespace TaskManager.Core
             if (storage.IssueCanBeLinked(solutions.Id))
             {
                 log.DebugFormat("Linking solutions (id:{0})", solutions.Id);
-                Solutions finalSolution = LinkSolutions(solutions.Id);
+                Solutions finalSolution = LinkSolutions(solutions.Id, solutions.ProblemType);
                 storage.RemoveIssue(solutions.Id);
                 return finalSolution;
             }
@@ -142,11 +144,11 @@ namespace TaskManager.Core
         }
 
         //task solver stuff
-        public Solutions LinkSolutions(ulong problemId)
+        public Solutions LinkSolutions(ulong problemId, string problemType)
         {
             //link solutions (task solver stuff)
             var commonData = storage.GetCommonData(problemId);
-            var taskSolver = new DvrpTaskSolver(commonData);
+            var taskSolver = _resolver.GetInstanceByBaseTypeName(problemType, commonData);
             var solutionsBytes = storage.GetIssueSolutionsBytes(problemId);
             var finalBytes = taskSolver.MergeSolution(solutionsBytes);
 

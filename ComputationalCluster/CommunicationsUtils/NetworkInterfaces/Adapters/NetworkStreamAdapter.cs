@@ -29,12 +29,15 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
 
         public int Read(byte[] buf, int count)
         {
-            return wrappedStream.Read(buf, 0, count);
+            int len = wrappedStream.Read(buf, 0, count);
+            wrappedStream.Flush();
+            return len;
         }
 
         public void Write(byte[] buf, int count)
         {
             wrappedStream.Write (buf, 0, count);
+            wrappedStream.Flush();
         }
     }
 }

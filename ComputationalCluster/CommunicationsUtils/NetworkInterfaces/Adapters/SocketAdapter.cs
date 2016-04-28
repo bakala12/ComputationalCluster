@@ -28,6 +28,7 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
             using (var stream = new NetworkStream(wrappedSocket))
             {
                 len = stream.Read(requestBytes, 0, count);
+                stream.Flush();
             }
             return len;
         }
@@ -37,7 +38,9 @@ namespace CommunicationsUtils.NetworkInterfaces.Adapters
             using (var stream = new NetworkStream(wrappedSocket))
             {
                 stream.Write(v, 0, count);
+                stream.Flush();
             }
+            
         }
 
         public string ExtractSocketAddress()

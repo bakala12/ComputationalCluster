@@ -22,10 +22,8 @@ namespace AlgorithmSolvers.DVRPEssentials
         public double PartialResult { get; set; }
         [Description("Wiadomość dla comp. node - minimalny przydział klientów do samochodu")]
         public int MinimalSetCount { get; set; }
-        [Description("Minimalna ilość zbiorów do zignorowania")]
-        public int MinimalIgnoredSets { get; set; }
-        [Description("Maksymalna ilość zbiorów do zignorowania")]
-        public int MaximumIgnoredSets { get; set; }
+        [Description("Zbiór liczności zbiorów do zignorowania")]
+        public int [] IgnoredSets { get; set; }
         public SolutionResult SolutionResult { get; set; } = SolutionResult.NotSolved;
 
         public DVRPPartialProblemInstance()
